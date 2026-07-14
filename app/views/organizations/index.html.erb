@@ -1,0 +1,62 @@
+<div class="flex-box">
+  <div class="desk-marg-user">
+    <div class="col-xs-12 center max-w-85 margin-auto org-admin-page" data-controller="org-list-filter">
+      <div class="org-admin-header">
+        <div>
+          <h2 class="org-admin-title theme-text">Organizations</h2>
+          <p class="org-admin-subtitle theme-text">Platform tenants — modules, members, and isolation.</p>
+        </div>
+        <%= link_to "New Organization", new_organization_path, class: "btn btn-warning btn-sm org-admin-new-btn" %>
+      </div>
+
+      <div class="org-admin-toolbar">
+        <div class="org-admin-toolbar-search">
+          <%= label_tag :org_filter, "Search", class: "org-admin-toolbar-sort-label theme-text" %>
+          <%= search_field_tag :org_filter, nil,
+                placeholder: "Filter by company name or slug…",
+                class: "form-control theme-field org-admin-search-input",
+                autocomplete: "off",
+                data: {
+                  org_list_filter_target: "query",
+                  action: "input->org-list-filter#filter"
+                } %>
+        </div>
+
+        <%= form_tag organizations_path, method: :get, class: "org-admin-toolbar-sort-form" do %>
+          <div class="org-admin-toolbar-sort">
+            <%= label_tag :sort, "Sort", class: "org-admin-toolbar-sort-label theme-text" %>
+            <%= select_tag :sort,
+                  options_for_select(
+                    [["Alphabetical", "name"], ["Most recent", "recent"], ["QuickBooks first", "quickbooks"]],
+                    @sort
+                  ),
+                  class: "form-control theme-field org-admin-sort-select",
+                  onchange: "this.form.submit();" %>
+          </div>
+        <% end %>
+
+        <% if @sort != Organization::INDEX_SORT_DEFAULT %>
+          <div class="org-admin-toolbar-actions">
+            <%= link_to "Reset sort", organizations_path, class: "btn btn-dark btn-sm org-admin-toolbar-btn" %>
+          </div>
+        <% end %>
+      </div>
+
+      <p class="org-admin-results-meta theme-text" data-org-list-filter-target="noResults" hidden>
+        No organizations match your filter.
+      </p>
+
+      <% if @organizations.any? %>
+        <div class="org-admin-grid">
+          <% @organizations.each do |org| %>
+            <%= render "organization_card", organization: org %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="org-admin-card org-admin-empty theme-card-simple round">
+          <p class="theme-text">No organizations yet. Create one to get started.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

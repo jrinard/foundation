@@ -1,0 +1,13 @@
+<div class="flex-box">
+  <div class="desk-marg-user">
+    <div class="col-xs-12 center max-w-85 margin-auto org-admin-page">
+      <%= link_to "← All Organizations", organizations_path, class: "org-admin-back theme-text" %>
+
+      <div class="white-box-off round theme-card-simple org-admin-form-panel">
+        <h2 class="h2-white theme-text">New Organization</h2>
+        <p class="org-admin-subtitle theme-text">Creates pipeline stages, offerings template, and settings automatically.</p>
+        <%= render "form", organization: @organization %>
+      </div>
+    </div>
+  </div>
+</div>

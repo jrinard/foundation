@@ -1,0 +1,27 @@
+<div class="flex-box">
+  <div class="black-box col-xs-12 col-sm-10 col-md-8 col-lg-4 col-centered center">
+
+    <%= link_to 'Back', :back, :class => "btn btn-warning btn-wide pull-right"%>
+
+    <div class="white-box-loc">
+
+      <h3><%= @customer.name %></h3>
+      <h4><%= @customer.domain %> <%= @customer.email %></h4>
+      <li><%= @customer.phone %></li><br>
+
+
+
+
+      <span><%= link_to 'Edit Customer', edit_customer_path(@customer), :class => "btn btn-sm btn-default" %></span>
+
+      <!-- <hr>
+      
+      <%# @customer_clients.each do |message| %>
+      <span class="h5-title"></span>
+      <li>Sent to <%#= message.to %> on <%#= message.created_at.strftime("%b %d") %> at <%#= message.created_at.strftime(" %I:%M %P") %></li>
+      <textarea class="form-control center" cols="40" rows="5" disabled="true"><%#= message.body %></textarea>
+      <%# end %> -->
+
+    </div>
+  </div>
+</div>

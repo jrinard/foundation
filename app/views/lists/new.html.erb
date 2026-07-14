@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="modal draggable-modal" id="draggable-modal">
+     <h3 class="h3-white">New List</h3>
+    <%= render "form", list: @list %>
+  </div>
+<% end %>

@@ -1,0 +1,33 @@
+<!-- New Customer Button -->
+<!-- <li> -->
+<%#= link_to 'New Customer', new_custom_lead_path, class: "btn btn-long-home-nav btn-text-mobile-nav btn btn-md btn-warning btn btn-dark", data: { turbo_frame: "modal" } %>
+<!-- </li> -->
+
+<!-- Existing Customer Button -->
+<!-- <li> -->
+<%#= link_to 'Existing Customer', new_proposal_path, class: "btn btn-long-home-nav btn-text-mobile-nav  btn btn-md btn-warning btn-dark", data: { turbo_frame: "modal" } %>
+<!-- </li> -->
+
+<div class="col-sm-4">
+  <div class="black-card-lead-form">
+    <div class="center">
+      <br>
+      <div id="searchModal" data-controller="search">
+        <form data-action="submit->search#search">
+          <input type="text" placeholder="Search" class="form-control form-control-large" data-target="search.formInput" /><br>
+          <button type="submit" class="btn btn-dark" style="display: none;">Search for Customer</button>
+        </form>
+        <br>
+        <div data-target="search.results"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<br><br><br>
+
+<div class="actions field">
+<%= link_to "Cancel", "#", data: { controller: "modals", action: "modals#close" }, class: "btn btn-sm btn-dark pull-right cancel-button", style: "margin-top: 20px;" %>
+
+</div>

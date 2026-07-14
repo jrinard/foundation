@@ -1,0 +1,40 @@
+<div class="login-page-title-row">
+  <h2 class="h2-white login-page-title">Sign in</h2>
+</div>
+
+<div class="form white-well login-form-panel">
+  <% if flash[:alert] %>
+    <div class="alert alert-danger theme-text-error">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="field">
+      <%= f.email_field :email, autofocus: true, class: "form-control input-lg", placeholder: "Email" %>
+    </div>
+
+    <div class="field">
+      <%= f.password_field :password, autocomplete: "current-password", class: "form-control input-lg", placeholder: "Password" %>
+    </div>
+
+    <% if devise_mapping.rememberable? %>
+      <div class="field login-remember-row">
+        <%= f.check_box :remember_me, class: "checkbox-big" %>
+        <%= f.label :remember_me, class: "login-remember-label" %>
+      </div>
+    <% end %>
+
+    <div class="actions">
+      <%= f.submit "Sign in", class: "btn btn-lg btn-warning btn-long btn-big" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="login-override center login-page-footer">
+  <% if devise_mapping.recoverable? && controller_name != "passwords" && controller_name != "registrations" %>
+    <%= link_to "Forgot your password?", new_user_password_path, class: "login-page-forgot-link" %>
+  <% end %>
+</div>

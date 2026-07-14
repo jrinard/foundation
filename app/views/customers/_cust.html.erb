@@ -1,0 +1,82 @@
+<% if cust.nil? %>
+  <p>Customer not found. _cust error 101</p>
+<% else %>
+
+    <div id="<%= dom_id cust %>" class="lead-card-dark">
+      <div class="dark-card-content">
+        <div class="center-text">
+          <h3 class="customer-name-lead"><%= cust.name rescue nil %></h3>
+          <div class="customer-ot-lead">OT <%= cust.one_time_payment rescue nil %></div>
+          <div class="customer-rmc-lead">RMC <%= cust.recurring_monthly_charge rescue nil %>
+              <span class="pull-right"><%= cust.user.name rescue nil %></span>
+          </div>
+
+          <%# if cust.active_proposal === true && cust.active === true %>
+            <%# <p class="blue-text-7"> Existing Customer Lead</p> %>
+          <%# end %>
+          <%# if cust.active_proposal === false && cust.active === false %>
+            <%# <p class="yellow-text-7"> New Lead</p> %>
+          <%# end %>
+          <%# if cust.active_proposal === true && cust.active === false %>
+            <%# <p class="yellow-text-7"> New Lead + Proposal</p> %>
+          <%# end %>
+
+          <%# <p>Status</p> %>
+        <%# </div> %>
+        <div class="icon-buttons-lead">
+          <div class="dark-edit-button-lead">
+            <%= link_to edit_customer_path(cust.id), class: "", data: { turbo_frame: "modal" } do %>
+              <%= image_tag("icon-list-white.png", alt: "Edit", class: "icon-edit tag-lead-card-btn") %>
+            <% end %>
+          </div>
+
+          <%# <div class="dark-intake-button-lead"> %>
+            <%#= link_to edit_notes_note_path(cust.id), class: "", data: { turbo_frame: "modal" } do %>
+              <%#= image_tag("icon-edit-white.png", alt: "Edit", class: "icon-edit tag-lead-card-btn") %>
+            <%# end %>
+          <%# </div> %>
+
+
+          <%# if cust.intake.present? %>
+            <%# <div class="dark-intake-button-lead"> %>
+              <%#= link_to edit_customer_intake_path(cust.intake), class: "", data: { turbo_frame: "modal" } do %>
+                <%#= image_tag("icon-list-yellow.png", alt: "Intake", class: "icon-add") %>
+              <%# end %>
+            <%# </div> %>
+          <%# else %>
+            <%# <div class="dark-intake-button-lead"> %>
+              <%#= link_to({ :add_intakes => "add_intakes", :id => cust.id }, class: "") do %>
+                <%#= image_tag("icon-list-white.png", alt: "Add Intake", class: "icon-edit") %>
+              <%# end %>
+            <%# </div> %>
+          <%# end %>
+
+        <%# # Getting Last Proposal %>
+        <%# if cust.proposals.present? %>
+              <%# lastProposal = cust.proposals.last %>
+        <%# end %>
+
+        <%# # Proposals are only for Active Customers %>
+        <%# if cust.active === false %> 
+
+        <%# Placeholder for proposals %>
+            <%# if cust.active_proposal === true %>
+            <%# <div class="dark-intake-button-lead">  %>
+              <%#= link_to edit_proposal_path(lastProposal), class: "", data: { turbo_frame: "modal" } do %>
+                <%#= image_tag("icon-proposal-yellow.png", alt: "Proposal", class: "icon-add") %>
+              <%# end %>
+            <%# </div> %>
+          <%# else %>
+            <%# <div class="dark-intake-button-lead"> %>
+              <%#= link_to({ :activate_prop => "activate_prop", :id => cust.id }, class: "") do %>
+                <%#= image_tag("icon-proposal-white.png", alt: "Add Proposal", class: "icon-edit") %> <%# class needs to be icon-add %>
+              <%# end %>
+            <%# </div> %>
+          <%# end %>
+
+        <%# end %>
+        </div>
+      </div>
+    </div>
+
+    <% end %>

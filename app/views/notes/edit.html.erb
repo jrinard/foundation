@@ -1,0 +1,7 @@
+
+<!-- app/views/notes/edit.html.erb -->
+<%= turbo_frame_tag "modal" do %>
+ <div class="modal draggable-modal <%= @indiv_notes.length > 0 ? 'xl-modal' : '' %>" id="draggable-modal" data-controller="modals">
+    <%= render partial: 'activity_notes', locals: { indiv_notes: @indiv_notes } %>
+  </div>
+<% end %>

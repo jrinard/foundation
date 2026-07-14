@@ -1,0 +1,139 @@
+<div class="flex-wrapper-cont" data-controller="modals">
+
+<div class="field tag-customers-form">
+    <h2>Customer Edit</h2>
+</div>
+<div id="customers-form-cont">
+<%= form_for(@customer, data: { action: "submit->modals#guardUnsavedActivityNoteBeforeLeave submit->modals#handleSubmit" }) do |f| %>
+  <% if @customer.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@customer.errors.count, "error") %> prohibited this customer from being saved:</h2>
+      <ul>
+        <% @customer.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions field margin-b-15 customer-form-actions">
+    <%= link_to "Close", "#", data: { action: "click->modals#guardUnsavedActivityNoteBeforeLeave click->modals#close" }, class: "btn btn-sm btn-dark cancel-button" %>
+    <%= f.submit "Save", :name => nil, params: { id: customer.id }, class: "btn btn-md btn-warning form-width round" %>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4 desktop-width-32" style="">
+      <div class="field">
+        <label>Status</label>
+        <%= f.select :onBoard, options_for_select([["Potentials", "The List"], ["Lead on Board", "Lead on Board"], ["Current on Board", "Current on Board"], ["Current Not on Board", "Current Not on Board"], ["Archive", "Archive"]], selected: customer.onBoard), {}, class: 'form-control mobile-form-control' %>
+      </div>
+    </div>
+
+    <div class="col-sm-4 desktop-width-32" style="">
+      <div class="field">
+        <label>Account Manager</label>
+        <%= f.select :user_id, @accountManagersByName.present? ? @accountManagersByName : [[User.first.name, User.first.id]], {}, class: 'form-control mobile-form-control' %>
+      </div>
+    </div>
+  </div>
+  <div class="row customer-edit-col-spacer" style=""></div> 
+
+  <div class="row">
+    <!-- New First Column -->
+    <div class="col-sm-4 desktop-width-32" style="">
+      <h3>Customer Details</h3>
+      <div class="field">
+        <%= f.label "Company" %>
+        <%= f.text_field :name, class: "form-control mobile-form-control" %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Domain" %>
+        <%= f.text_field :domain, class: "form-control mobile-form-control" %>
+      </div>
+
+      <div class="field">
+        <label>Phone</label>
+        <%= f.text_field :phone, class: "form-control mobile-form-control" %>
+      </div>
+
+      <div class="field">
+        <%= f.label "One Time Payment " %>
+        <%= f.text_field :one_time_payment, class: "form-control mobile-form-control" %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Re Monthly Charge" %>
+        <%= f.text_field :recurring_monthly_charge, class: "form-control mobile-form-control" %>
+      </div>
+
+    </div> <!-- End of first column -->
+
+    <div class="col-sm-4 desktop-width-32" style="">
+      <div class="field">
+        <%= f.label "Address" %>
+        <%= f.text_field :address, placeholder: "Street", class: "form-control mobile-form-control" %>
+        <%= f.text_field :city, placeholder: "City", class: "form-control mobile-form-control" %>
+        <%= f.text_field :state, placeholder: "State", class: "form-control mobile-form-control" %>
+        <%= f.text_field :zip, placeholder: "Zip", class: "form-control mobile-form-control" %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Followup Timeframe" %>
+        <%= f.select :followup, options_for_select([["No Followup", ""], ["1 month", "30"], ["2 months", "60"], ["3 months", "90"], ["4 months", "120"], ["5 months", "150"], ["6 months", "180"], ["12 months", "365"]], selected: f.object.followup), {}, class: 'form-control m-b mobile-form-control' %>
+      </div>
+
+      <div class="field">
+        <label>Contract Start</label><br>
+        <%= f.date_select :contract_start, prompt: { day: "", month: "", year: "" }, class: "form-control mobile-form-control" %>
+      </div>
+
+       <div class="field">
+       <label>QB ID</label>
+        <%= f.text_field :quickbooks_customer_id, class: "form-control mobile-form-control" %>
+      </div>
+
+      <%= hidden_field_tag(:subaction, customer.id) %>
+    </div> <!-- End of second column -->
+
+    <div class="col-sm-4 desktop-width-32" style="">
+      <% if @contacts.present? %>
+        <h3>Contact Details</h3>
+        <%= f.fields_for :contacts do |contact_form| %>
+          <div class="field">
+            <%= contact_form.label :firstname, 'First Name' %>
+            <%= contact_form.text_field :firstname, class: 'form-control mobile-form-control' %>
+          </div>
+
+          <div class="field">
+            <%= contact_form.label :lastname, 'Last Name' %>
+            <%= contact_form.text_field :lastname, class: 'form-control mobile-form-control' %>
+          </div>
+
+          <div class="field">
+            <%= contact_form.label :phone, 'Contact Phone' %>
+            <%= contact_form.text_field :phone, class: 'form-control mobile-form-control' %>
+          </div>
+
+          <div class="field">
+            <%= contact_form.label :email, 'Email' %>
+            <%= contact_form.text_field :email, class: 'form-control mobile-form-control' %>
+          </div>
+
+          <div class="field">
+            <!-- Note field -->
+          </div>
+          <br>
+        <% end %>
+      <% else %>
+        No Contact Attached
+      <% end %>
+    </div><!-- End of third column -->
+  </div> <!-- End of row -->
+<% end %>
+</div>
+
+  <div class="row">
+    <%= render partial: 'notes/activity_notes', locals: { indiv_notes: @indiv_notes } %>
+  </div>
+</div>

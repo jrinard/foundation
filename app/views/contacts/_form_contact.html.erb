@@ -1,0 +1,50 @@
+<%= form_for(@contact) do |f| %>
+<% if @contact.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@contact.errors.count, "error") %> prohibited this proposal from being saved:</h2>
+    <ul>
+      <% @contact.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %> 
+
+    <div class="field">
+        <label>Position</label>
+        <%= f.text_field :position, :placeholder => 'Position', :class => 'form-control form-width' %>
+    </div>
+
+    <div class="field">
+      <label>First Name</label>
+      <%= f.text_field :firstname, :placeholder => 'First', :class => 'form-control form-width' %>
+    </div>
+
+    <div class="field">
+        <label>Last Name</label>
+        <%= f.text_field :lastname, :placeholder => 'Last', :class => 'form-control form-width' %>
+    </div>
+    
+    <div class="field">
+        <label>Phone</label>
+        <%= f.text_field :phone, minlength: 10, maxlength: 10, :placeholder => 'phone', :id => "copyPhone_", :class => 'form-control form-width' %>
+    </div>  
+    
+      <div class="field">
+        <label>Email</label>
+        <%= f.text_field :email, :placeholder => 'Email', :id => "copyEmail_",:class => 'form-control form-width' %>
+    </div>
+
+<br>
+
+<div class="field">
+  <div class="actions flex-button-container">
+    <%= link_to "Cancel", "#", data: {
+        controller: "modals",
+        action: "modals#close"
+    }, class: "btn btn-sm btn-dark flex-button shift-left-10"  %>
+        <%= f.submit "Save", class: "btn btn-warning flex-button pull-right" %>
+  </div>
+</div>
+<% end %>
+

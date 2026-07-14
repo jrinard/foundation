@@ -1,0 +1,9 @@
+<% if current_user %>
+  <div class="nav-user-account">
+    <div class="nav-user-footer-row">
+      <span class="h3-white nav-user-name"><%= link_to current_user.name, edit_user_registration_path, class: "nav-user-name-link" %></span>
+      <%= link_to image_tag("threedots.png", class: "menu-icon-size3 nav-user-meatball"), edit_user_registration_path, aria: { label: "Account settings" } %>
+    </div>
+    <span class="grey h5 nav-user-role"><%= current_user.position %></span>
+  </div>
+<% end %>

@@ -1,0 +1,19 @@
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.7.5/ext/websocket-driver
+/Users/joshuarinard/.rbenv/versions/3.2.11/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.7.5/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-mgiet0 sitelibdir\=./.gem.20260710-95473-mgiet0 clean
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.7.5/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-mgiet0 sitelibdir\=./.gem.20260710-95473-mgiet0
+compiling websocket_mask.c
+linking shared-object websocket_mask.bundle
+ld: warning: ignoring duplicate libraries: '-lruby.3.2'
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.7.5/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-mgiet0 sitelibdir\=./.gem.20260710-95473-mgiet0 install
+/usr/bin/install -c -m 0755 websocket_mask.bundle ./.gem.20260710-95473-mgiet0
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.7.5/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-mgiet0 sitelibdir\=./.gem.20260710-95473-mgiet0 clean

@@ -1,0 +1,24 @@
+
+  <div class="desk-marg">
+    <div class="shrink">
+      <div class="pull-left mobile-hide letters letter-shift shift-down30">
+      </div>
+    </div>
+    <div class="col-sm-4 shift-down30">
+    <div class="white-card-ff">
+
+
+<p style="color: green"><%= notice %></p>
+
+<%= render @list %>
+
+<div>
+  <%= link_to "Edit this list", edit_list_path(@list) %> |
+  <%= link_to "Back to lists", lists_path %>
+
+  <%= button_to "Destroy this list", @list, method: :delete %>
+</div>
+
+
+</div>
+</div>

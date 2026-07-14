@@ -1,0 +1,122 @@
+
+<!-- app/views/leads/new.html.erb -->
+<div class="field">
+    <h1>New Lead</h1>
+</div>
+
+    <%#= form_with model: @lead, url: leads_path do |f| %>
+<%= form_with(model: @lead, data: { controller: "modals", action: "submit->modals#handleSubmit" }) do |f| %>
+<% if @lead.errors.any? %>
+<div id="error_explanation">
+    <h2><%= pluralize(@lead.errors.count, "error") %> prohibited this lead from being saved:</h2>
+
+    <ul>
+    <% @lead.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+    <% end %>
+    </ul>
+</div>
+<% end %>
+ <div class="row" id="formFields">
+
+<div class="row">
+    <!-- First Column -->
+    <div class="col-sm-6">
+
+    <div class="field">
+        <%# <label>Lead Column</label> %>
+       <%#= f.collection_select :list_id, @lists, :id, :name, {}, class: 'form-control' %>
+        <%#= f.select :list_id, options_for_select(@lists, @lists.first.last), {}, class: 'form-control' %>
+    <%= f.hidden_field :list_id, value: @default_list_id, class: "form-control" %>
+    <%# Assigning account manager %>
+    <%= f.hidden_field :user_id, value: current_user.id, class: "form-control" %>
+    </div>
+
+     <%= f.hidden_field :onBoard, value: "Lead on Board", class: "form-control" %>
+
+
+    <!-- Lead fields -->
+    <div class="field">
+         <label>Company</label>
+        <%= f.text_field :name, required: true, class: "form-control", value: @initial_query %>
+    </div>
+
+<%# Removed by RM request %>
+    <%# <div class="field"> %>
+        <%#= f.label :domain %>
+        <%#= f.text_field :domain, class: "form-control" %>
+    <%# </div> %>
+
+    <%# <div class="field">
+        <label>Business Email</label> %>
+        <%#= f.email_field :email, class: "form-control" %>
+    <%# </div> %>
+
+<%# Removed by RM request %>
+    <%# <div class="field"> %>
+        <%#= f.label :phone %>
+        <%#= f.text_field :phone, class: "form-control" %>
+    <%# </div> %>
+
+    <div class="field">
+        <label>One Time</label>
+        <%= f.text_field :one_time_payment, class: "form-control" %>
+    </div> 
+
+    <div class="field">
+        <label>Recurring Monthly</label>
+        <%= f.text_field :recurring_monthly_charge, class: "form-control" %>
+    </div>
+
+      <div class="field">
+        <label>Account Manager</label>
+        <%#= f.select :user_id, @accountManagers.present? ? @accounts : [[User.first.email, User.first.id]], {}, class: 'form-control' %>
+        <%= f.select :user_id, @accountManagersByName.present? ? @accountManagersByName : [[User.first.name, User.first.id]], {}, class: 'form-control' %>
+      </div>
+    
+    
+    </div>
+    <div class="col-sm-6">
+
+    <!-- Contact fields -->
+    <div class="field">
+          <label>Contact First Name</label>
+        <%= f.text_field :firstname, class: "form-control" %>
+    </div>
+
+    <div class="field">
+            <label>Contact Last Name</label>
+        <%= f.text_field :lastname, class: "form-control" %>
+    </div>
+
+    <div class="field">
+        <label>Contact Phone</label>
+        <%= f.text_field :contact_phone, class: "form-control" %>
+    </div>
+
+    <div class="field">
+        <label>Contact Email</label>
+        <%= f.email_field :contact_email, class: "form-control" %>
+    </div>
+
+
+    
+    <div class="field">
+        <%# <label>Account Manager</label> %>
+       <%#= f.select :user_id, @accounts.present? ? @accounts : [[User.first.email, User.first.id]], {}, class: 'form-control' %>
+    </div>
+    <br>
+
+    </div> <%# col end %>
+
+    <div class="field">
+        <%= f.submit "Create Lead", class: "btn btn-md btn-warning pull-right" %>
+        <%= link_to "Cancel", "#", data: {
+            controller: "modals",
+            action: "modals#close"
+        }, class: "btn btn-sm btn-dark pull-right cancel-button shift-left-10" %>
+     </div>
+
+    </div> <%# row end %>
+<% end %>
+ </div>

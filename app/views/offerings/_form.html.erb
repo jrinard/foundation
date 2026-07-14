@@ -1,0 +1,50 @@
+<%= form_for(@main_offering) do |f| %>
+  <% if @main_offering.errors.any? %>
+    <div id="error_explanation" class="theme-text">
+      <h2><%= pluralize(@main_offering.errors.count, "error") %> prohibited this offering from being saved:</h2>
+      <ul>
+        <% @main_offering.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p class="theme-text help-block">
+    Category is free text for any business (e.g. Web, Materials, Delivery). Kind is service or product — stored for future filters and operations.
+  </p>
+
+  <table class="offerings-edit-table">
+    <tr>
+      <td class="theme-text offerings-edit-table__heading"><br>Category</td>
+      <td class="theme-text offerings-edit-table__heading"><br>Kind</td>
+      <td class="theme-text offerings-edit-table__heading"><br>Offering name</td>
+    </tr>
+
+    <% Offering.slot_numbers.each do |n| %>
+      <tr>
+        <td>
+          <div class="field">
+            <%= f.text_field "offering_#{n}_category", class: "form-control theme-field", placeholder: "Category" %>
+          </div>
+        </td>
+        <td>
+          <div class="field">
+            <%= f.select "offering_#{n}_kind",
+                  options_for_select(Offering.kind_options_for_select, f.object.public_send("offering_#{n}_kind") || Offering::DEFAULT_KIND),
+                  {},
+                  class: "form-control theme-field m-b" %>
+          </div>
+        </td>
+        <td>
+          <div class="field">
+            <%= f.text_field "offering_#{n}_name", class: "form-control theme-field", placeholder: "Offering name" %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+
+  <br>
+  <%= f.submit "Update Offerings", class: "btn btn-md btn-warning" %>
+<% end %>

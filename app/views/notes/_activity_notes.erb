@@ -1,0 +1,58 @@
+<%# Being used on kanban %>
+
+<div id="activity-notes-partial-container" data-controller="activity-draft-indicator">
+<% if !params[:view_notes] %>
+<%= link_to "Add New Activity", {:id => @customer.id, :l => @customer.letter, :view_notes => "view_notes"}, :class => "btn btn-sm btn-warning" %>
+<% end %>
+<% if params[:view_notes] %>
+<div class="activity-notes-toolbar" style="display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
+  <%= link_to "Cancel Add", {:close => "close"}, class: "btn btn-sm btn-dark", data: { action: "click->modals#guardUnsavedActivityNoteBeforeLeave" } %>
+  <span class="activity-draft-unsaved-hint" data-activity-draft-indicator-target="hint" hidden>You have an unsaved activity note.</span>
+</div>
+<% end %>
+
+<div class="activity-notes-container">
+  <div class="inline-notes-container">
+  <% if params[:view_notes] %>
+    <%= form_for(@note) do |f| %>
+      <div class="form-field inline-note-card2">
+       <%= f.text_area :text, placeholder: "Enter Activity Note Info", class: "form-control form-limit inline-note-card2 margin-top-20 activity-note-form-textarea", id: "Text", required: true %>
+
+      </div>
+      <%= f.hidden_field :customer_id, value: @customer.id %>
+      <%= f.hidden_field :user_id, value: @user.id %>
+      <%= hidden_field_tag(:subaction, @customer.id) %>
+      <%= f.submit "Save", name: nil, params: { id: @customer.id, l: @customer.letter, view_notes: "view_notes" }, class: "btn btn-md btn-warning form-width" %>
+    <% end %>
+    <br>
+  <% end %>
+
+
+   <% if indiv_notes.any? %>
+  <% indiv_notes.each do |c| %>
+    <div class="inline-note-card">
+      <% if current_user.admin? || current_user.superadmin? %>
+        <%= link_to "X", c, params: { subaction: @customer.id, l: @customer.letter, view_notes: "view_notes" }, class: "pull-right p-white", id: "delete-test", data: { turbo_confirm: "Are you sure you want to delete the activity?", turbo_method: "delete" } %>
+      <% end %>
+      <span class="inline-note-title h4-grey"><%= c.name %></span>
+      <textarea class="inline-note-text form-control form-limit" placeholder="Text"><%= c.text %></textarea>
+      <span class="inline-note-meta p-grey center">Created At:
+        <%= c.created_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %>
+        by
+        <%= c.user.name rescue 'NA' %>
+      </span>
+    </div>
+  <% end %>
+<% else %>
+  <div class="inline-note-card">
+    <div class="no-activity"><br>
+      <h5 class="p center">No Activity Notes</h5>
+    </div>
+  </div>
+<% end %>
+
+  </div>
+</div>
+
+<%= link_to "Close", "#", data: { action: "click->modals#guardUnsavedActivityNoteBeforeLeave click->modals#close" }, class: "btn btn-sm btn-dark cancel-button shift-left-10" %>
+</div>

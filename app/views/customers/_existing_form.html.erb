@@ -1,0 +1,84 @@
+<%# This form is the existing form used in the new lead button pipeline %>
+<div class="field tag-customers-form" data-id="existing lead">
+  <h1>Existing Customer</h1>
+</div>
+
+<%= form_with(model: @customer, data: { controller: "modals", action: "submit->modals#handleSubmit" }) do |f| %>
+  <% if @customer.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@customer.errors.count, "error") %> prohibited this customer from being saved:</h2>
+
+      <ul>
+        <% @customer.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="row" id="formFields">
+    <!-- First Column -->
+    <div class="col-sm-6 custom-column">
+      <div class="field">
+        <label>Status</label>
+        <%= f.select :onBoard, options_for_select([["Potentials", "The List"], ["Lead on Board", "Lead on Board"], ["Current on Board", "Current on Board"], ["Current Not on Board", "Current Not on Board"], ["Archive", "Archive"]], selected: customer.onBoard), {}, class: 'form-control' %>
+      </div>
+      <div class="field">
+        <label>Company</label>
+        <%= f.text_field :name, required: true, class: "form-control" %>
+      </div>
+      <div class="field">
+        <label>One Time</label>
+        <%= f.text_field :one_time_payment, class: "form-control" %>
+      </div>
+      <div class="field">
+        <label>Recurring Monthly</label>
+        <%= f.text_field :recurring_monthly_charge, class: "form-control" %>
+      </div>
+      <%# <div class="field"> %>
+        <%# <label>Sales Person</label> %>
+        <%#= f.select :sales_person, 
+            options_for_select(@accounts.present? ? @accounts : [[User.first.email, User.first.id]], f.object.sales_person),
+            {},
+            class: 'form-control' %>
+      <%# </div> %>
+      <%# //* Removed { include_blank: 'Unassigned' }, %>
+    </div> <!-- First Column End -->
+
+    <!-- Second Column -->
+    <% if @customer.contacts.present? %>
+      <div class="col-sm-6 custom-column">
+        <div class="field">
+          <%= f.fields_for :contacts do |contact_fields| %>
+            <div class="field">
+              <label>Contact First Name</label>
+              <%= contact_fields.text_field :firstname, placeholder: @contacts&.firstname, class: "form-control" %>
+            </div>
+            <div class="field">
+              <label>Contact Last Name</label>
+              <%= contact_fields.text_field :lastname, placeholder: @contacts&.lastname, class: "form-control" %>
+            </div>
+            <div class="field">
+              <label>Contact Phone</label>
+              <%= contact_fields.text_field :phone, placeholder: @contacts&.phone, class: "form-control" %>
+            </div>
+            <div class="field">
+              <label>Contact Email</label>
+              <%= contact_fields.email_field :email, placeholder: @contacts&.email, class: "form-control" %>
+            </div>
+            <br>
+          <% end %>
+        </div> 
+      </div> <!-- Second Column End -->
+    <% end %>
+
+    <div class="field">
+      <%= f.submit "Save", class: "btn btn-warning flex-button pull-right" %>
+      <%= link_to "Cancel", "#", data: {
+          controller: "modals",
+          action: "modals#close"
+      }, class: "btn btn-sm btn-dark flex-button shift-left-10" %>
+    </div>
+  </div> <!-- Row End -->
+</div> <!-- FormFields End -->
+<% end %>

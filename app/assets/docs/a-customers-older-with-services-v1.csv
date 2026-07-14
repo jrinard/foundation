@@ -1,0 +1,2 @@
+name,domain,phone,email,address,city,state,zip,active,archived,webdesign_standard,webdesign_pro,webdesign_deluxe,hosting,seo_standard,seo_pro,seo_deluxe,ad_fb,ad_ppc,ad_display,ad_youtube,video_standard,video_pro,video_deluxe,ad_budget,reviewbox,extra_notes,contract_start,contract_end,monthtomonth
+Apple,www,2083168338,j@email.com,111 Infinity loop,Vancouver,Wa,98682,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0,FALSE,,"Mon, 04 Apr 2016","Mon, 11 Apr 2018",FALSE

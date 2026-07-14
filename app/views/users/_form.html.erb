@@ -1,0 +1,41 @@
+ 
+ <%= form_for(@user) do |f| %>
+    <div class="flash-desktop">
+      <div class="flash-white" id="flash"><%= flash[:notice] %><%= flash[:errors] %></div>
+    </div>
+    <div class="">
+      <div class="field">
+        <%= f.text_field :name, autofocus: true, :placeholder => "Name", :class => 'form-control form-control-large' %>
+      </div>
+      <div class="field">
+        <%= f.email_field :email, autofocus: true, :placeholder => "Email", :class => 'form-control form-control-large' %>
+      </div>
+      <div class="field">
+        <%= f.password_field :password, autocomplete: "off", :placeholder => "Password", :class => 'form-control form-control-large' %>
+      </div>
+      <div class="field">
+        <%= f.password_field :password_confirmation, autocomplete: "off", :placeholder => "Confirm Password", :class => 'form-control form-control-large' %>
+      </div>
+      <%= f.hidden_field :role, :value => "user", :class => 'form-control form-control-large' %>
+
+      <% if current_user.superadmin? && @organizations.present? %>
+        <div class="field theme-text">
+          <%= label_tag :user_organization_id, "Organization" %>
+          <%= select_tag "user[organization_id]",
+                options_from_collection_for_select(@organizations, :id, :name, @user_organization_id),
+                include_blank: "Select organization",
+                class: "form-control form-control-large" %>
+        </div>
+      <% end %>
+
+    <div class="field">
+      <div class="actions">
+        <%= f.submit "Save", class: "btn btn-warning" %>
+
+        <%= link_to "Cancel", "#", data: {
+            controller: "modals",
+            action: "modals#close"
+        }, class: "btn btn-sm btn-dark pull-right cancel-button" %>
+      </div>
+    </div>
+ <% end %>

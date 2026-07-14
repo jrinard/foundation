@@ -1,0 +1,39 @@
+<div class="flex-box2">
+
+  <div class="desk-marg">
+
+    <div class="col-xs-8 center ">
+
+      <div class="customer-note-report support-white-card-theme offerings-edit-page">
+
+        <%= link_to 'Cancel', settings_path, class: "btn btn-warning btn-wide center round pull-right" %>
+        <h1 class="settings-title">Main Offerings Template</h1>
+        <br>
+
+          <% if current_user.role === "superadmin" %>
+          <div class="theme-card">
+            <h5 class="pull-right theme-text">Main ID: <%= @main_offering.id %></h5>
+          <%= link_to 'Create New Main Service', { create_main_offering: "create_main_offering", id: @main_offering.id }, data: { confirm: "Are you sure you want to create a new blank main offering?" }, class: "btn btn-md btn-warning" %>
+          <br><br>
+          <p class="theme-text">
+           This will create a new blank main offering template that all the others will follow.
+           This specifies the category and name. Whether a customer is assigned the service or not is still done on their customer page and will not be changed here.
+          </p>
+
+          </div>
+          <br>
+          <% else %>
+          <p class="theme-text">Note: Recreating the entire main offering can be done by an admin.</p>
+          <% end %>
+
+          <p class="theme-text">
+            The template data gets sent to all customers upon save. Blank fields do not show on customer interface. So you can group together and create section gaps for future services. Current max is 30.
+          </p>
+
+
+        <%= render 'form', offering: @main_offering %>
+
+      </div>
+    </div>
+  </div>
+</div>

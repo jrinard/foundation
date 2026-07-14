@@ -1,0 +1,49 @@
+
+  <h2 class="h1-black">Create Account</h2>
+
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+<%#= devise_error_messages! %>
+<%= render "devise/shared/error_messages", resource: resource %>
+
+
+
+<div class="flash-desktop">
+    <div class="flash-white" id="flash"><%= flash[:notice] %><%= flash[:errors] %></div>
+</div>
+
+<div class="form white-well round">
+
+  <h3>  Account creation is disabled. <br>Please contact admin.</h3>
+
+
+  <div class="field">
+    <%#= f.text_field :name, autofocus: true, :placeholder => "Name", :class => 'form-control' %>
+  </div>
+
+  <div class="field">
+    <%#= f.email_field :email, autofocus: true, :placeholder => "Email", :class => 'form-control' %>
+  </div>
+
+  <%#= f.hidden_field :role, :value => "admin", :class => 'form-control' %>
+
+  <div class="field">
+    <%#= f.password_field :password, autocomplete: "off", :placeholder => "Password", :class => 'form-control', :id => "rspec_password" %>
+  </div>
+
+  <div class="field">
+    <%#= f.password_field :password_confirmation, autocomplete: "off", :placeholder => "Confirm Password", :class => 'form-control', :id => "rspec_password_confirmation" %>
+  </div>
+
+  <!-- <div class="text-xs-center recap">
+    <div class="btn btn-lg" data-size="compact" id="recaptcha" style="transform:scale(0.70);-webkit-transform:scale(0.70);transform-origin:0 0;-webkit-transform-origin:0 0;">
+      <%#= recaptcha_tags %>
+    </div>
+  </div> -->
+
+  <div class="actions">
+    <%#= f.submit "Create", class: "btn btn-lg btn-warning btn-long btn-big round" %>
+  </div>
+  <% end %><br>
+</div>
+
+<%= render "devise/shared/links" %>

@@ -1,0 +1,17 @@
+<%# locals: cs, customer %>
+<% if cs.present? %>
+  <% Offering.slot_numbers.each do |n| %>
+    <% next unless cs.slot_configured?(n) %>
+    <% active_key = "offering_#{n}_active" %>
+    <% if !cs.slot_active?(n) %>
+      <%= link_to cs.slot_label(n),
+            { active_key => active_key, id: customer.id },
+            class: "btn btn-md btn-default btn-wide-full theme-text" %>
+    <% else %>
+      <%= link_to "#{cs.slot_label(n)} - Remove",
+            { "offering_#{n}_active_false" => active_key, id: customer.id },
+            class: "btn btn-md btn-warning btn-wide-full" %>
+    <% end %>
+  <% end %>
+  <br>
+<% end %>

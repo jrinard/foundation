@@ -1,0 +1,84 @@
+<div class="flex-box">
+  <div class="desk-marg-user">
+    <div class="col-xs-12 center max-w-85 margin-auto org-admin-page">
+      <%= link_to "← All Organizations", organizations_path, class: "org-admin-back theme-text" %>
+
+      <div class="org-admin-header org-admin-header-show">
+        <div class="org-admin-title-block">
+          <div class="org-admin-title-row">
+            <h2 class="h2-white theme-text org-admin-title"><%= @organization.name %></h2>
+            <%= link_to "Rename",
+                  rename_organization_path(@organization),
+                  class: "btn btn-xs btn-default theme-text org-admin-rename-link",
+                  data: { turbo_frame: "modal" } %>
+          </div>
+          <p class="org-admin-subtitle theme-text org-admin-slug-row">
+            <span class="org-admin-slug"><%= @organization.slug %></span>
+          </p>
+        </div>
+        <div class="org-admin-header-actions">
+          <%= button_to "Work in this org", switch_organization_path(organization_id: @organization.id),
+                method: :post, class: "btn btn-warning btn-sm" %>
+          <%= link_to "Edit Features", edit_organization_path(@organization), class: "btn btn-default btn-sm theme-text" %>
+        </div>
+      </div>
+
+      <div class="org-admin-badges org-admin-badges-show">
+        <% @organization.module_badges.each do |badge| %>
+          <span class="org-module-badge"><%= badge %></span>
+        <% end %>
+      </div>
+
+      <div class="white-box-off round theme-card-simple org-admin-users-panel">
+        <div class="org-admin-members-header">
+          <h3 class="h3-white theme-text org-admin-section-title">Members</h3>
+          <% if can?(:create, User) %>
+            <%= link_to "Add user",
+                  new_user_path(organization_id: @organization.id),
+                  class: "btn btn-warning btn-sm",
+                  data: { turbo_frame: "modal" } %>
+          <% end %>
+        </div>
+
+        <table class="org-admin-table">
+          <tr class="mobile-hide">
+            <td class="td-yellow">NAME</td>
+            <td class="td-yellow">EMAIL</td>
+            <td class="td-yellow">ROLE</td>
+            <td class="td-yellow org-admin-table-actions-heading">ACTIONS</td>
+          </tr>
+          <% @memberships.each do |membership| %>
+            <% user = membership.user %>
+            <tr>
+              <td>
+                <span class="td-yellow2 desktop-hide">NAME</span>
+                <span class="mobile-pull-right theme-text"><%= user.name %></span>
+              </td>
+              <td>
+                <span class="td-yellow2 desktop-hide">EMAIL</span>
+                <span class="mobile-pull-right theme-text"><%= user.email %></span>
+              </td>
+              <td>
+                <span class="td-yellow2 desktop-hide">ROLE</span>
+                <span class="mobile-pull-right theme-text"><%= user.role %></span>
+              </td>
+              <td class="org-admin-table-actions">
+                <span class="td-yellow2 desktop-hide">ACTIONS</span>
+                <% if can?(:update, user) %>
+                  <%= link_to "Edit",
+                        edit_user_path(user),
+                        class: "btn btn-xs btn-default theme-text",
+                        data: { turbo_frame: "modal" } %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+
+        <% if @memberships.empty? %>
+          <p class="theme-text org-admin-empty-note">No users assigned yet. Add a user to this organization.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

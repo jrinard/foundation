@@ -1,0 +1,8 @@
+<div class="post activity-card-simple">
+  <%# #Original may be needed elsewhere %>
+  <%#= link_to "#{customer.name rescue nil}", {:params => {:id => customer.id, :l => customer.letter, :view_notes => "view_notes"}}, :class => "h3-black customer-card btn btn-md btn-long" %>
+  <%= link_to "#{customer.name rescue nil}", home_index_path(id: customer.id, view_notes: "view_notes"), class: "h3-black customer-card btn btn-md btn-long activity-card-name" %>
+  <% if local_assigns[:show_account_manager] %>
+    <span class="pull-right h6-grey activity-card-am"><%= customer.user&.name || 'Unassigned' %></span>
+  <% end %>
+</div>

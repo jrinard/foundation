@@ -1,0 +1,55 @@
+
+<%# Home Column 4 Notes   %>
+
+  <% if @indiv_notes.any? %>
+  <div class="col-sm-2 shift-down30">
+
+    <div class="white-card2">
+
+        <div class="flex-box-left">
+          <div class="flex-box-horizontal-limit">
+
+            <% @indiv_notes.each do |c| %>
+
+            <div class="note-contact-card-small">
+              <% if current_user.admin? || current_user.superadmin?   %>
+              <div class="edit_family">
+                <%= link_to "X", c, :params => {:subaction => @chosen_customer.id}, :class => "btn-default pull-right shift-left-again", :id => "delete-test", :data => {:confirm => "Are you sure you want to delete note?",:method => "delete"} %>
+                <% end %>
+                <span class="h4-grey"><%= c.name %></span><br>
+                <textarea class="item-content-old form-control form-limit"><%= c.text %></textarea>
+                <br>
+                <span class="h5-grey center">Last Updated:
+                  <%= c.updated_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %>
+                  by
+                  <%= c.user.name rescue 'NA'  %>
+                </span><br>
+                <span class="h5-grey center">Created At:
+                  <%= c.created_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %></span>
+                <br><hr>
+              </div>
+              <% if current_user.admin? || current_user.superadmin?   %>
+              <div class="edit_f">
+                <%= form_for c do |f| %>
+                <div class="field-off">
+                  <%= f.text_field :name, placeholder: "Label", :class => "form-control", :id => "Label", required: false %>
+                </div>
+                <div class="field-off">
+                  <%= f.text_area :text, placeholder: "Text", :class => "form-control", :id => "Text", required: true %>
+                </div>
+                <%= f.hidden_field :customer_id, :value => @chosen_customer.id %>
+                <%= f.hidden_field :user_id, :value => current_user.id %>
+                <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                <%= f.submit "Save Note", :name => nil, :params => {:id => @chosen_customer.id}, class: "btn btn-md btn-warning form-width round" %>
+                <% end %>
+              </div>
+            </div>
+            <% end %>
+            <% end %>
+          <% else %>&nbsp;&nbsp;&nbsp;&nbsp;
+            <!-- <h3 class="h4-black center">No Notes</h3><br> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>

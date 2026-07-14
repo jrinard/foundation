@@ -1,0 +1,131 @@
+<div class="invoice-container">
+
+  <% if Rails.env.development? %>
+   QB Refresh Key is not happening in localhost to allow this modal to launch - Seed it with fake data for development
+  <% end %> 
+  <!-- Buttons Row -->
+<div class="button-group">
+  <% if customer.quickbooks_customer_id.blank?  %>
+    <%= button_to "Sync ID", start_fetch_customer_home_path(customer, **request.query_parameters), method: :post, class: "btn btn-warning" %>
+ 
+  <% else %>
+    <div class="btn">
+      QB ID
+      <%= customer.quickbooks_customer_id rescue "NA" %>
+    </div>
+  <% end %>
+
+  <% if customer.quickbooks_customer_id.present? %>
+    <%= button_to "Refresh", start_fetch_invoices_home_path(customer, **request.query_parameters), method: :post, class: "btn btn-default theme-text" %>
+    <%#= button_to "Sync Invoices", start_fetch_invoices_home_path(customer, **request.query_parameters), method: :post, class: "btn btn-dark" %>
+    <%#= button_to "Sync Sales Receipts", start_fetch_sales_receipts_home_path(customer, **request.query_parameters), method: :post, class: "btn btn-dark" %>
+  <% end %>
+  <%= link_to "Close", "#", data: { controller: "modals", action: "modals#close" }, class: "btn btn-sm btn-dark close-button" %>
+</div>
+  <% if customer.quickbooks_customer_id.blank? %>
+ <p>Invoices are matched by the QB ID. <br> The "Sync ID" does a search by company name and attempts to get the ID from quickbooks. This is done automatically when you launch this modal. If it is failing to get the Id there is most likely an issue with the Company Name formatting. You can also manually add the ID while editing the customer.</p>
+<% end %> 
+
+<div class="button-group">
+  <% if params[:sort_by_invoice] == "true" %>
+    <%= link_to "Invoices Only X", { sort_by_invoice: "false" }, class: "btn btn-md btn-default theme-text" %>
+  <% else %>
+    <%= link_to "Invoices Only", { sort_by_invoice: "true" }, class: "btn btn-md btn-dark theme-text" %>
+  <% end %>
+
+  <% if params[:sort_by_sr] == "true" %>
+    <%= link_to "Sales Receipts Only X", { sort_by_sr: "false" }, class: "btn btn-md btn-default theme-text" %>
+  <% else %>
+    <%= link_to "Sales Receipts Only", { sort_by_sr: "true" }, class: "btn btn-md btn-dark theme-text" %>
+  <% end %>
+
+  <% if params[:sort_by_rr] == "true" %>
+    <%= link_to "Refund Receipts Only X", { sort_by_rr: "false" }, class: "btn btn-md btn-default theme-text" %>
+  <% else %>
+    <%= link_to "Refund Receipts Only", { sort_by_rr: "true" }, class: "btn btn-md btn-dark theme-text" %>
+  <% end %>
+</div>
+
+
+  <!-- Invoice List -->
+  <div class="invoice-list">
+ 
+
+    <% if invoices.any? %>
+      <div class="invoice-table">
+        <!-- Table Header -->
+        <div class="invoice-header">
+          <span>Date</span>
+          <span>Type</span>
+          <span>No.</span>
+          <span>Total</span>
+          <span>Due Date</span>
+          <span>Created Date</span>
+          <span>Bal Due</span>
+          <span>Download/View</span>
+        </div>
+
+        <!-- Table Rows -->
+        <% invoices.each do |invoice| %>
+          <div class="invoice-row">
+            <span><%= invoice.txn_date.strftime("%b %d, %Y") rescue nil%></span>
+            <span><%= invoice.quickbooks_type rescue nil%></span>
+            <span><%= invoice.doc_number.to_s.gsub(/^INV/, '') rescue nil %></span>
+            <span>$<%= invoice.total_amount rescue nil%></span>
+            <span><%= invoice.due_date.strftime("%b %d, %Y") rescue nil%></span>
+            <span><%= invoice.invoice_create_time.strftime("%b %d, %Y") rescue nil%></span>
+            <span><%= invoice.balance.to_f.zero? ? "Paid" : "$#{invoice.balance}" %></span>
+           <span>
+           
+          <% if invoice.quickbooks_type === "SalesReceipt" %>
+            <div class="button-group">
+              <%= link_to "PDF", download_sales_receipt_pdf_home_path("download", qbInvoiceID: invoice.invoice_id, docNumber: invoice.doc_number), class: "btn btn-dark", download: "Invoice_#{invoice.invoice_id}.pdf" %>
+              
+              <%= link_to download_sales_receipt_pdf_home_path("download", qbInvoiceID: invoice.invoice_id, docNumber: invoice.doc_number), class: "btn btn-dark", target: "_blank" do %>
+                <%= image_tag("icon-eye.png", alt: "View PDF", class: "icon-edit tag-lead-card-btn") %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <% if invoice.quickbooks_type === "Invoice" %>
+            <div class="button-group">
+              <%= link_to "PDF", download_invoice_pdf_home_path("download", qbInvoiceID: invoice.invoice_id, docNumber: invoice.doc_number), class: "btn btn-dark", download: "Sales_Receipt_#{invoice.invoice_id}.pdf" %>
+              
+              <%= link_to download_invoice_pdf_home_path("download", qbInvoiceID: invoice.invoice_id, docNumber: invoice.doc_number), class: "btn btn-dark", target: "_blank" do %>
+                <%= image_tag("icon-eye.png", alt: "View PDF", class: "icon-edit tag-lead-card-btn") %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <% if invoice.quickbooks_type === "RefundReceipt" %>
+            <div class="button-group">
+              <%= link_to "PDF", download_refund_receipt_pdf_home_path("download", qbInvoiceID: invoice.invoice_id, docNumber: invoice.doc_number), class: "btn btn-dark", download: "Refund_Receipt_#{invoice.invoice_id}.pdf" %>
+              
+              <%= link_to download_refund_receipt_pdf_home_path("download", qbInvoiceID: invoice.invoice_id, docNumber: invoice.doc_number), class: "btn btn-dark", target: "_blank" do %>
+                <%= image_tag("icon-eye.png", alt: "View PDF", class: "icon-edit tag-lead-card-btn") %>
+              <% end %>
+            </div>
+
+          <% end %>
+          </span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <h5 class="no-invoices">Nothing to show</h5>
+    <% end %>
+
+    <% if invoices.any? %>
+  <div class="delete-invoices">
+    <%= button_to "Delete Invoices/Sales Receipts for this customer", delete_invoices_home_path(customer), 
+          method: :delete, 
+          data: { confirm: "Are you sure you want to delete all invoices for this customer?" }, 
+          class: "btn btn-dark" %>
+  </div>
+<% end %>
+
+  </div>
+       <div class="flash-white" id="flash"><%= flash[:notice] %><%= flash[:errors] %>
+</div>
+
+

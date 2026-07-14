@@ -1,0 +1,14 @@
+<% if current_user && Organization.active.count > 1 && (current_user.superadmin? || current_user.organizations.count > 1) %>
+  <% header = local_assigns.fetch(:variant, :nav) == :header %>
+  <% wrapper_class = header ? "org-switcher-header" : "org-switcher-nav-item" %>
+  <% tag_name = header ? :div : :li %>
+
+  <%= content_tag tag_name, class: wrapper_class do %>
+    <%= form_with url: switch_organization_path, method: :post, local: true, class: "org-switcher-form org-switcher-nav" do %>
+      <%= select_tag :organization_id,
+            options_from_collection_for_select(Organization.active.order(:name), :id, :name, current_organization&.id),
+            class: "form-control cc-input-dark-select org-switcher-select",
+            onchange: "this.form.requestSubmit()" %>
+    <% end %>
+  <% end %>
+<% end %>

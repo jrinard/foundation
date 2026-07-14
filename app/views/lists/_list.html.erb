@@ -1,0 +1,19 @@
+<div class="lead-column-off" data-id="tag-kanban-column">
+  <div class="center list-height">
+    <br>
+    <div id="<%= dom_id list %>" class="list-container">
+      <h2 class="h3-white">
+        <%= link_to list.name, edit_list_path(list.id), class: "list-name-link", data: { turbo_frame: "modal" } %>
+      </h2>
+      <ul data-controller="sortable" data-sortable-group-value="cust" data-sortable-list-id="<%= list.id %>" class="list-height" data-id="tag-sales-person">
+        <% list.customers.rank(:row_order).each do |cust| %>
+          <% if !params[:user_id].present? || cust.user_id == params[:user_id].to_i %>
+            <li data-sortable-update-url="<%= sort_customer_path(cust) %>">
+              <%= render partial: 'cust', locals: { cust: cust } %>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>

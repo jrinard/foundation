@@ -1,0 +1,418 @@
+{
+  "QueryResponse": {
+    "Invoice": [
+      {
+        "AllowIPNPayment": false,
+        "AllowOnlinePayment": false,
+        "AllowOnlineCreditCardPayment": false,
+        "AllowOnlineACHPayment": false,
+        "domain": "QBO",
+        "sparse": false,
+        "Id": "67",
+        "SyncToken": "2",
+        "MetaData": {
+          "CreateTime": "2024-10-10T12:40:06-07:00",
+          "LastModifiedByRef": {
+            "value": "9341453422758347"
+          },
+          "LastUpdatedTime": "2024-10-10T13:39:32-07:00"
+        },
+        "CustomField": [],
+        "DocNumber": "1021",
+        "TxnDate": "2024-09-19",
+        "CurrencyRef": {
+          "value": "USD",
+          "name": "United States Dollar"
+        },
+        "LinkedTxn": [
+          {
+            "TxnId": "101",
+            "TxnType": "Payment"
+          }
+        ],
+        "Line": [
+          {
+            "Id": "1",
+            "LineNum": 1,
+            "Description": "2 cubic ft. bag",
+            "Amount": 150.0,
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+              "ItemRef": {
+                "value": "15",
+                "name": "Landscaping:Soil"
+              },
+              "UnitPrice": 10,
+              "Qty": 15,
+              "ItemAccountRef": {
+                "value": "49",
+                "name": "Landscaping Services:Job Materials:Plants and Soil"
+              },
+              "TaxCodeRef": {
+                "value": "TAX"
+              }
+            }
+          },
+          {
+            "Id": "2",
+            "LineNum": 2,
+            "Description": "Rock Fountain",
+            "Amount": 275.0,
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+              "ItemRef": {
+                "value": "5",
+                "name": "Design:Fountains:Rock Fountain"
+              },
+              "UnitPrice": 275,
+              "Qty": 1,
+              "ItemAccountRef": {
+                "value": "48",
+                "name": "Landscaping Services:Job Materials:Fountains and Garden Lighting"
+              },
+              "TaxCodeRef": {
+                "value": "TAX"
+              }
+            }
+          },
+          {
+            "Amount": 425.0,
+            "DetailType": "SubTotalLineDetail",
+            "SubTotalLineDetail": {}
+          }
+        ],
+        "TxnTaxDetail": {
+          "TxnTaxCodeRef": {
+            "value": "2"
+          },
+          "TotalTax": 34.0,
+          "TaxLine": [
+            {
+              "Amount": 34.0,
+              "DetailType": "TaxLineDetail",
+              "TaxLineDetail": {
+                "TaxRateRef": {
+                  "value": "3"
+                },
+                "PercentBased": true,
+                "TaxPercent": 8,
+                "NetAmountTaxable": 425.0
+              }
+            }
+          ]
+        },
+        "CustomerRef": {
+          "value": "1",
+          "name": "Amy's Bird Sanctuary"
+        },
+        "CustomerMemo": {
+          "value": "Thank you for your business and have a great day!"
+        },
+        "BillAddr": {
+          "Id": "74",
+          "Line1": "Amy Lauterbach",
+          "Line2": "Amy's Bird Sanctuary",
+          "Line3": "4581 Finch St.",
+          "Line4": "Bayshore, CA  94326",
+          "Lat": "INVALID",
+          "Long": "INVALID"
+        },
+        "ShipAddr": {
+          "Id": "2",
+          "Line1": "4581 Finch St.",
+          "City": "Bayshore",
+          "CountrySubDivisionCode": "CA",
+          "PostalCode": "94326",
+          "Lat": "INVALID",
+          "Long": "INVALID"
+        },
+        "FreeFormAddress": true,
+        "SalesTermRef": {
+          "value": "3",
+          "name": "Net 30"
+        },
+        "DueDate": "2024-10-19",
+        "TotalAmt": 459.0,
+        "ApplyTaxAfterDiscount": false,
+        "PrintStatus": "NotSet",
+        "EmailStatus": "NotSet",
+        "BillEmail": {
+          "Address": "Birds@Intuit.com"
+        },
+        "Balance": 239.0
+      },
+      {
+        "AllowIPNPayment": false,
+        "AllowOnlinePayment": false,
+        "AllowOnlineCreditCardPayment": false,
+        "AllowOnlineACHPayment": false,
+        "domain": "QBO",
+        "sparse": false,
+        "Id": "9",
+        "SyncToken": "3",
+        "MetaData": {
+          "CreateTime": "2024-10-08T14:49:30-07:00",
+          "LastModifiedByRef": {
+            "value": "9341453422758347"
+          },
+          "LastUpdatedTime": "2024-10-10T13:25:20-07:00"
+        },
+        "CustomField": [],
+        "DocNumber": "1001",
+        "TxnDate": "2024-10-08",
+        "CurrencyRef": {
+          "value": "USD",
+          "name": "United States Dollar"
+        },
+        "PrivateNote": "Front yard, hedges, and sidewalks",
+        "LinkedTxn": [
+          {
+            "TxnId": "31",
+            "TxnType": "Payment"
+          }
+        ],
+        "Line": [
+          {
+            "Id": "1",
+            "LineNum": 1,
+            "Description": "Weekly Gardening Service",
+            "Amount": 100.0,
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+              "ItemRef": {
+                "value": "6",
+                "name": "Landscaping:Gardening"
+              },
+              "UnitPrice": 25,
+              "Qty": 4,
+              "ItemAccountRef": {
+                "value": "45",
+                "name": "Landscaping Services"
+              },
+              "TaxCodeRef": {
+                "value": "TAX"
+              }
+            }
+          },
+          {
+            "Amount": 100.0,
+            "DetailType": "SubTotalLineDetail",
+            "SubTotalLineDetail": {}
+          }
+        ],
+        "TxnTaxDetail": {
+          "TxnTaxCodeRef": {
+            "value": "2"
+          },
+          "TotalTax": 8.0,
+          "TaxLine": [
+            {
+              "Amount": 8.0,
+              "DetailType": "TaxLineDetail",
+              "TaxLineDetail": {
+                "TaxRateRef": {
+                  "value": "3"
+                },
+                "PercentBased": true,
+                "TaxPercent": 8,
+                "NetAmountTaxable": 100.0
+              }
+            }
+          ]
+        },
+        "CustomerRef": {
+          "value": "1",
+          "name": "Amy's Bird Sanctuary"
+        },
+        "CustomerMemo": {
+          "value": "Thank you for your business and have a great day!"
+        },
+        "BillAddr": {
+          "Id": "47",
+          "Line1": "Amy Lauterbach",
+          "Line2": "Amy's Bird Sanctuary",
+          "Line3": "4581 Finch St.",
+          "Line4": "Bayshore, CA  94326",
+          "Lat": "INVALID",
+          "Long": "INVALID"
+        },
+        "ShipAddr": {
+          "Id": "2",
+          "Line1": "4581 Finch St.",
+          "City": "Bayshore",
+          "CountrySubDivisionCode": "CA",
+          "PostalCode": "94326",
+          "Lat": "INVALID",
+          "Long": "INVALID"
+        },
+        "FreeFormAddress": true,
+        "SalesTermRef": {
+          "value": "3",
+          "name": "Net 30"
+        },
+        "DueDate": "2024-11-07",
+        "TotalAmt": 108.0,
+        "ApplyTaxAfterDiscount": false,
+        "PrintStatus": "NotSet",
+        "EmailStatus": "NotSet",
+        "BillEmail": {
+          "Address": "Birds@Intuit.com"
+        },
+        "Balance": 0
+      },
+      {
+        "AllowIPNPayment": false,
+        "AllowOnlinePayment": false,
+        "AllowOnlineCreditCardPayment": false,
+        "AllowOnlineACHPayment": false,
+        "domain": "QBO",
+        "sparse": false,
+        "Id": "71",
+        "SyncToken": "2",
+        "MetaData": {
+          "CreateTime": "2024-10-10T12:49:30-07:00",
+          "LastModifiedByRef": {
+            "value": "9341453422758347"
+          },
+          "LastUpdatedTime": "2024-10-10T12:51:28-07:00"
+        },
+        "CustomField": [],
+        "DocNumber": "1025",
+        "TxnDate": "2024-08-24",
+        "CurrencyRef": {
+          "value": "USD",
+          "name": "United States Dollar"
+        },
+        "LinkedTxn": [
+          {
+            "TxnId": "74",
+            "TxnType": "Payment"
+          },
+          {
+            "TxnId": "72",
+            "TxnType": "Payment"
+          }
+        ],
+        "Line": [
+          {
+            "Id": "1",
+            "LineNum": 1,
+            "Description": "Weekly Gardening Service",
+            "Amount": 120.0,
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+              "ItemRef": {
+                "value": "6",
+                "name": "Landscaping:Gardening"
+              },
+              "UnitPrice": 30,
+              "Qty": 4,
+              "ItemAccountRef": {
+                "value": "45",
+                "name": "Landscaping Services"
+              },
+              "TaxCodeRef": {
+                "value": "NON"
+              }
+            }
+          },
+          {
+            "Id": "2",
+            "LineNum": 2,
+            "Description": "Pest Control Services",
+            "Amount": 35.0,
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+              "ItemRef": {
+                "value": "10",
+                "name": "Pest Control:Pest Control"
+              },
+              "UnitPrice": 35,
+              "Qty": 1,
+              "ItemAccountRef": {
+                "value": "54",
+                "name": "Pest Control Services"
+              },
+              "TaxCodeRef": {
+                "value": "NON"
+              }
+            }
+          },
+          {
+            "Id": "3",
+            "LineNum": 3,
+            "Description": "Maintenance & Repair",
+            "Amount": 50.0,
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+              "ItemRef": {
+                "value": "9",
+                "name": "Landscaping:Maintenance & Repair"
+              },
+              "UnitPrice": 50,
+              "Qty": 1,
+              "ItemAccountRef": {
+                "value": "53",
+                "name": "Landscaping Services:Labor:Maintenance and Repair"
+              },
+              "TaxCodeRef": {
+                "value": "NON"
+              }
+            }
+          },
+          {
+            "Amount": 205.0,
+            "DetailType": "SubTotalLineDetail",
+            "SubTotalLineDetail": {}
+          }
+        ],
+        "TxnTaxDetail": {
+          "TotalTax": 0
+        },
+        "CustomerRef": {
+          "value": "1",
+          "name": "Amy's Bird Sanctuary"
+        },
+        "CustomerMemo": {
+          "value": "Thank you for your business and have a great day!"
+        },
+        "BillAddr": {
+          "Id": "78",
+          "Line1": "Amy Lauterbach",
+          "Line2": "Amy's Bird Sanctuary",
+          "Line3": "4581 Finch St.",
+          "Line4": "Bayshore, CA  94326",
+          "Lat": "INVALID",
+          "Long": "INVALID"
+        },
+        "ShipAddr": {
+          "Id": "2",
+          "Line1": "4581 Finch St.",
+          "City": "Bayshore",
+          "CountrySubDivisionCode": "CA",
+          "PostalCode": "94326",
+          "Lat": "INVALID",
+          "Long": "INVALID"
+        },
+        "FreeFormAddress": true,
+        "SalesTermRef": {
+          "value": "3",
+          "name": "Net 30"
+        },
+        "DueDate": "2024-09-23",
+        "TotalAmt": 205.0,
+        "ApplyTaxAfterDiscount": false,
+        "PrintStatus": "NeedToPrint",
+        "EmailStatus": "NotSet",
+        "BillEmail": {
+          "Address": "Birds@Intuit.com"
+        },
+        "Balance": 0
+      }
+    ],
+    "startPosition": 1,
+    "maxResults": 3,
+    "totalCount": 3
+  },
+  "time": "2024-12-09T19:48:56.811-08:00"
+}

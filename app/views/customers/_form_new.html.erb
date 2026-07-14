@@ -1,0 +1,122 @@
+
+
+  <div class="field">
+    <h1>Create Customer</h1>
+    <p>Please note that this bypasses the leads pipeline and sets the customer to active.</p>
+  </div>
+
+<%#= form_for(customer) do |f| %>
+<%# * %>
+<%= form_for(@customer, data: { controller: "modals", action: "submit->modals#handleSubmit" }) do |f| %>
+<% if @customer.errors.any? %>
+<div id="error_explanation">
+    <h2><%= pluralize(@customer.errors.count, "error") %> prohibited this customer from being saved:</h2>
+
+    <ul>
+    <% @customer.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+    <% end %>
+    </ul>
+</div>
+<% end %>
+
+  <div class="row">
+    <!-- First Column -->
+    <div class="col-sm-6" style="width: 45%;">
+
+    <div class="field">
+      <%#= f.select :list_id, options_for_select(@lists, @lists.first), {}, class: 'form-control' %>
+      <%#= f.text_field :list_id, value: @customer.list_id || @lists.first.id, class: 'form-control' %>
+    </div>
+    
+    <%#* New Customers in this context are set to true because they are bypassing the leads pipeline by creating the user on the home page. %>
+      <%#= hidden_field(:active, false) %>
+      <div class="field">
+        <label>Status</label>
+        <%= f.select :onBoard, options_for_select([["Potentials", "The List"], ["Lead on Board", "Lead on Board"], ["Current on Board", "Current on Board"], ["Current Not on Board", "Current Not on Board"], ["Archive", "Archive"]], selected: customer.onBoard), {}, class: 'form-control' %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Company" %>
+        <%= f.text_field :name, class: "form-control" %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Domain" %>
+        <%= f.text_field :domain, class: "form-control" %>
+      </div>
+
+        <div class="field">
+        <%#= f.label "Phone" %>
+          <label>Phone</label>
+        <%= f.text_field :phone, class: "form-control" %>
+      </div>
+
+      <div class="field">
+      <%# Causing Crashing error. I suspect it has to do with the tables? %>
+        <%#= f.label "One Time Payment - test" %>
+        <%#= f.text_field :one_time_payment, class: "form-control" %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Recurring Monthly Charge" %>
+        <%= f.text_field :recurring_monthly_charge, class: "form-control" %>
+      </div>
+
+
+    </div> <!-- End of first column -->
+
+    <!-- Second Column -->
+    <div class="col-sm-6" style="width: 45%;">
+      <div class="field">
+        <%= f.label "Address" %>
+        <%= f.text_field :address, placeholder: "Street", class: "form-control" %>
+        <%= f.text_field :city, placeholder: "City", class: "form-control" %>
+        <%= f.text_field :state, placeholder: "State", class: "form-control" %>
+        <%= f.text_field :zip, placeholder: "Zip", class: "form-control" %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Followup Timeframe" %>
+        <%= f.select :followup, options_for_select([["No Followup", ""], ["1 month", "30"], ["2 months", "60"], ["3 months", "90"], ["4 months", "120"], ["5 months", "150"], ["6 months", "180"], ["12 months", "365"]], :selected => f.object.followup),
+            {}, :class=>'form-control m-b' %>
+      </div>
+
+      <div class="field">
+        <label>Contract Start</label><br>
+       <%= f.date_select :contract_start, prompt: { day: "", month: "", year: "" }, class: "form-control" %>
+      </div>
+
+<%# . %>
+    <%# <div class="field"> %>
+        <%# <label>Sales Person</label> %>
+        <%#= f.select :sales_person, 
+            options_for_select(@accounts.present? ? @accounts : [[User.first.email, User.first.id]], f.object.sales_person),
+            { include_blank: 'Unassigned' },
+            class: 'form-control' %>
+    <%# </div> %>
+
+      <div class="field">
+        <label>Account Manager</label>
+        <%#= f.select :user_id, @accounts, {}, class: "form-control" %>
+         <%= f.select :user_id, @accountManagersByName.present? ? @accountManagersByName : [[User.first.name, User.first.id]], {}, class: 'form-control' %>
+      </div>
+
+
+
+
+      <%= hidden_field_tag(:subaction, customer.id) %>
+
+
+      </div> <!-- End of second column -->
+
+  <div class="actions field">
+    <%= f.submit "Save", name: nil, params: { id: customer.id }, class: "btn btn-md btn-warning form-width round pull-right" %>
+
+   <%= link_to "Cancel", "#", data: { controller: "modals", action: "modals#close" }, class: "btn btn-sm btn-dark pull-right cancel-button shift-left-10" %>
+
+  </div>
+
+  </div> <!-- End of row -->
+<% end %>
+

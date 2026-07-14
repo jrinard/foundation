@@ -1,0 +1,26 @@
+<div class="settings-offerings-inline-row theme-text">
+  <span class="theme-text h3-black">Products/Services:</span>
+  <% svc_on = SiteSetting.customer_offerings_section_visible? %>
+  <span class="settings-status-pill theme-text h3-black"><%= svc_on ? "active" : "hidden" %></span>
+  <% if current_user.admin? || current_user.superadmin? %>
+    <%= button_to(
+      svc_on ? "Hide Products/Services" : "Show Products/Services",
+      settings_toggle_customer_offerings_section_path,
+      method: :post,
+      class: "btn btn-md btn-warning",
+      form: { class: "settings-offerings-toggle-form" }
+    ) %>
+  <% end %>
+</div>
+<br>
+
+<%= link_to "Edit Products/Services", edit_offering_path(@main_offering), class: "btn btn-md btn-default theme-text" %>
+<br><br>
+<p class="theme-text">
+  Main products/services template for <%= current_organization.name %>. Categories are free text; each slot has a kind (service or product) for future filtering.
+</p>
+<br>
+
+<div class="h3-black theme-text">
+  <%= render "settings/offerings_table", main_offering: @main_offering %>
+</div>

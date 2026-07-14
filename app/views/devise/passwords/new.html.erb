@@ -1,0 +1,29 @@
+
+  <h2 class="h2-black theme-text">Forgot your password?</h2>
+
+  <div class="form white-well round">
+
+  <!-- Please Note: This password reset applies to non google accounts. If you logged in through google when you created your account then you will need to reset it
+  <br> -->
+  <%#= link_to 'Reset my Google Account', 'https://myaccount.google.com/security#signin', :class => "" %>
+
+  <hr>
+  <h3 class="theme-text">Reset Account</h3>
+  <%#= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+   <%# Due to the change in the previous route to get to this link this path had to be adjusted as well. Not sure why. %>
+   <%= form_for(resource, as: resource_name, url: user_password_path, html: { method: :post }) do |f| %>
+
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="field theme-text">
+      <%#= f.label :email %>
+      <%= f.email_field :email, autofocus: true, :placeholder => "Email", :class => "form-control" %>
+    </div><br>
+
+    <div class="actions">
+      <%= f.submit "Send reset password info", :class => "btn btn-lg btn-warning round" %>
+    </div>
+  <% end %><br>
+  </div>
+
+  <%= render "devise/shared/links" %>

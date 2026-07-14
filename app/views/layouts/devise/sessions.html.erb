@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Foundation</title>
+    <%= csrf_meta_tags %>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Bangers|Heebo|Passion+One|Open+Sans" rel="stylesheet">
+    <%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload" %>
+  </head>
+  <body class="login-bg">
+    <div class="login-page-wrap">
+      <div class="single-box login-page col-xs-12 col-sm-10 col-md-8 col-lg-5 col-centered center">
+        <div class="logo login-logo-box">
+          <%= link_to image_tag("logo-box.png", alt: "Foundation", class: "img-responsive"), root_path %>
+        </div>
+        <div class="login-links">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

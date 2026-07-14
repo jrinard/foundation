@@ -1,0 +1,9 @@
+
+<%= turbo_frame_tag "modal" do %>
+<%# <div class="animate-modal"> %>
+  <div class="modal draggable-modal" id="draggable-modal">
+    <%= render "form_new", customer: @customer %>
+  </div>
+<%# </div> %>
+<% end %>
+

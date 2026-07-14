@@ -1,0 +1,19 @@
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/racc-1.8.1/ext/racc/cparse
+/Users/joshuarinard/.rbenv/versions/3.2.11/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-4cqzzt sitelibdir\=./.gem.20260710-95473-4cqzzt clean
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-4cqzzt sitelibdir\=./.gem.20260710-95473-4cqzzt
+compiling cparse.c
+linking shared-object racc/cparse.bundle
+ld: warning: ignoring duplicate libraries: '-lruby.3.2'
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-4cqzzt sitelibdir\=./.gem.20260710-95473-4cqzzt install
+/usr/bin/install -c -m 0755 cparse.bundle ./.gem.20260710-95473-4cqzzt/racc
+
+current directory: /Users/joshuarinard/Desktop/Foundation/vendor/bundle/ruby/3.2.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20260710-95473-4cqzzt sitelibdir\=./.gem.20260710-95473-4cqzzt clean

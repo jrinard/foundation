@@ -1,0 +1,40 @@
+
+    <%#= form_for(list) do |f| %>
+    <%= form_for(list, data: { controller: "modals", action: "submit->modals#handleSubmit" }) do |f| %>
+    <div class="flash-desktop">
+      <div class="flash-white" id="flash"><%= flash[:notice] %><%= flash[:errors] %></div>
+    </div>
+
+      <div class="field">
+         <%= f.text_field :name, class: "form-control form-control-large"  %>
+      </div>
+
+      <div class="field" style="margin-top: 12px;">
+        <label class="h6-grey" style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <%= f.check_box :label, { checked: list.include_in_stats_bar? }, "", "excluded" %>
+          Include this column in the stats bar (lead counts, Last 30 days, Total Leads By Week, OT)
+        </label>
+      </div>
+
+      <div class="field" style="margin-top: 8px;">
+        <label class="h6-grey" style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <%= f.check_box :default_for_new_leads %>
+          Make this list the first place new leads go to
+        </label>
+      </div>
+
+    <div class="field">
+      <div class="actions">
+        <%= f.submit "Save", class: "btn btn-warning pull-right" %>
+
+        <%= link_to "Cancel", "#", data: {
+            controller: "modals",
+            action: "modals#close"
+        }, class: "btn btn-sm btn-dark pull-right cancel-button shift-left-10" %>
+      </div>
+    </div>
+ <% end %>
+
+
+
+

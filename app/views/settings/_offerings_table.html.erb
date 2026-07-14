@@ -1,0 +1,16 @@
+<table>
+  <tr>
+    <td class="h4-black theme-text"><br>Category</td>
+    <td class="h4-black theme-text"><br>Kind</td>
+    <td class="h4-black theme-text"><br>Offering name</td>
+  </tr>
+
+  <% Offering.slot_numbers.each do |n| %>
+    <% next if main_offering.slot_name(n).blank? && main_offering.slot_category(n).blank? %>
+    <tr>
+      <td class="theme-text"><%= main_offering.slot_category(n) %></td>
+      <td class="theme-text"><%= main_offering.slot_kind(n).titleize %></td>
+      <td class="theme-text"><%= main_offering.slot_name(n) %></td>
+    </tr>
+  <% end %>
+</table>

@@ -1,0 +1,16 @@
+<% if SiteSetting.customer_offerings_section_visible? %>
+  <br><br>
+  Filter by offering
+  <br>
+  <% template = @main_offering_template || @cs || current_organization&.offerings&.find_by(main: true) %>
+  <% if template.present? %>
+    <% Offering.slot_numbers.each do |n| %>
+      <% next unless template.slot_configured?(n) %>
+      <%= link_to template.slot_label(n),
+            { sort_by_offering: "offering_#{n}_active" },
+            class: "btn btn-md btn-default btn-wide-full theme-text" %>
+    <% end %>
+  <% end %>
+<% else %>
+  <br><br>
+<% end %>

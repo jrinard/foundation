@@ -1,0 +1,15 @@
+<div class="notes">
+  <div class="report-note-card">
+    <%#= note.customer.name rescue nil %>
+      Customer:
+      <%= link_to "#{note.customer.name rescue nil}", customer_detail_path(note.customer, view_notes: "view_notes"), class: "h3-black" %>
+
+      <br>
+      Last Note:
+      <%= note.text %>
+      <br>
+      <span class="h5-grey center">
+        <%= note.created_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %></span>
+
+    </div>
+  </div>

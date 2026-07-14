@@ -1,0 +1,91 @@
+{
+  "QueryResponse": {
+    "RefundReceipt": [
+      {
+        "domain": "QBO",
+        "sparse": false,
+        "Id": "66",
+        "SyncToken": "0",
+        "MetaData": {
+          "CreateTime": "2024-10-09T15:35:07-07:00",
+          "LastUpdatedTime": "2024-10-09T15:35:07-07:00"
+        },
+        "CustomField": [],
+        "DocNumber": "1020",
+        "TxnDate": "2024-10-09",
+        "CurrencyRef": {
+          "value": "USD",
+          "name": "United States Dollar"
+        },
+        "Line": [
+          {
+            "Id": "1",
+            "LineNum": 1,
+            "Description": "Refund - Pest control was ineffective",
+            "Amount": 87.5,
+            "DetailType": "SalesItemLineDetail",
+            "SalesItemLineDetail": {
+              "ItemRef": {
+                "value": "10",
+                "name": "Pest Control:Pest Control"
+              },
+              "UnitPrice": 35,
+              "Qty": 2.5,
+              "ItemAccountRef": {
+                "value": "54",
+                "name": "Pest Control Services"
+              },
+              "TaxCodeRef": {
+                "value": "NON"
+              }
+            }
+          },
+          {
+            "Amount": 87.5,
+            "DetailType": "SubTotalLineDetail",
+            "SubTotalLineDetail": {}
+          }
+        ],
+        "TxnTaxDetail": {
+          "TotalTax": 0
+        },
+        "CustomerRef": {
+          "value": "15",
+          "name": "Pye's Cakes"
+        },
+        "CustomerMemo": {
+          "value": "Thank you for your business and have a great day!"
+        },
+        "BillAddr": {
+          "Id": "73",
+          "Line1": "Karen Pye",
+          "Line2": "Pye's Cakes",
+          "Line3": "350 Mountain View Dr.",
+          "Line4": "South Orange, NJ 07079",
+          "Lat": "40.7489277",
+          "Long": "-74.2609903"
+        },
+        "FreeFormAddress": false,
+        "TotalAmt": 87.5,
+        "ApplyTaxAfterDiscount": false,
+        "PrintStatus": "NotSet",
+        "BillEmail": {
+          "Address": "pyescakes@intuit.com"
+        },
+        "Balance": 0,
+        "PaymentMethodRef": {
+          "value": "2",
+          "name": "Check"
+        },
+        "DepositToAccountRef": {
+          "value": "35",
+          "name": "Checking"
+        }
+      }
+    ],
+    "startPosition": 1,
+    "maxResults": 1,
+    "totalCount": 1
+  },
+  "time": "2025-03-10T20:39:10.370-07:00"
+}

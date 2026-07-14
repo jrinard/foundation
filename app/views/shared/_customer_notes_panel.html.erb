@@ -1,0 +1,174 @@
+<% if @chosen_customer.present? %>
+  <% activity_tab = params[:view_account_notes].blank? %>
+  <div class="col-sm-3 shift-down30 customer-notes-panel-wrap">
+    <div class="customer-notes-panel theme-card theme-text">
+      <div class="tab customer-notes-tabs">
+        <button class="tablinks <%= 'active_bg_tab' if activity_tab %> theme-back-color">
+          <li>
+            <%= link_to "Activity",
+                  customer_detail_path(@chosen_customer, l: @chosen_customer.letter, view_notes: "view_notes"),
+                  class: "h4_black tablinks theme-text" %>
+          </li>
+        </button>
+        <button class="tablinks <%= 'active_bg_tab' if params[:view_account_notes].present? %> theme-back-color">
+          <li>
+            <%= link_to "Account Notes",
+                  customer_detail_path(@chosen_customer, l: @chosen_customer.letter, view_account_notes: "view_account_notes"),
+                  class: "h4_black theme-text" %>
+          </li>
+        </button>
+      </div>
+
+      <% if activity_tab %>
+        <div class="dropdown toggle_contact customer-notes-actions">
+          <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownActivity" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <strong>Add New Activity</strong>
+          </button>
+          <div class="dropdown-menu edit_form_contact hide" aria-labelledby="dropdownActivity">
+            <%= form_for(@note) do |f| %>
+              <div class="field">
+                <%= f.text_area :text, placeholder: "Text", class: "form-control form-limit activity-note-form-textarea theme-field", id: "Text", required: true %>
+              </div>
+              <%= f.hidden_field :customer_id, value: @chosen_customer.id %>
+              <%= f.hidden_field :user_id, value: @user.id %>
+              <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+              <%= f.submit "Save",
+                    name: nil,
+                    params: { id: @chosen_customer.id, l: @chosen_customer.letter, view_notes: "view_notes" },
+                    class: "btn btn-md btn-warning form-width" %>
+            <% end %>
+            <br>
+          </div>
+        </div>
+
+        <div class="customer-notes-list">
+          <% if @indiv_notes.any? %>
+            <% @indiv_notes.each do |c| %>
+              <div id="note_<%= c.id %>" class="customer-notes-item">
+                <div class="customer-notes-card">
+                  <% if current_user.admin? || current_user.superadmin? %>
+                    <div class="edit_family-off">
+                      <%= link_to "X",
+                            c,
+                            params: { subaction: @chosen_customer.id, l: @chosen_customer.letter, view_notes: "view_notes" },
+                            class: "btn-default pull-right theme-icon",
+                            id: "delete-test",
+                            data: { turbo_confirm: "Are you sure you want to delete the activity?", turbo_method: "delete" } %>
+                    </div>
+                  <% end %>
+                  <span class="h4-grey theme-text"><%= c.name %></span><br>
+                  <textarea class="form-control form-limit theme-field"
+                    data-controller="autoresize"
+                    data-action="input->autoresize#adjust"
+                    data-autoresize-target="textarea"><%= c.text %></textarea>
+                  <span class="h6-grey center mt-3">
+                    Created At: <%= c.created_at.strftime("%b %d, %y %I:%M %p") rescue "NA" %>
+                    by <%= c.user.name rescue "NA" %>
+                  </span>
+                  <br>
+                  <% if current_user.admin? || current_user.superadmin? %>
+                    <div class="edit_f">
+                      <%= form_for c do |f| %>
+                        <div class="field">
+                          <%= f.text_field :name, placeholder: "Label", class: "form-control theme-field", id: "Label", required: false %>
+                        </div>
+                        <div class="field">
+                          <%= f.text_area :text, placeholder: "Text", class: "form-control form-limit theme-field", id: "Text", required: true %>
+                        </div>
+                        <%= f.hidden_field :customer_id, value: @chosen_customer.id %>
+                        <%= f.hidden_field :user_id, value: current_user.id %>
+                        <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                        <%= f.submit "Update Note",
+                              name: nil,
+                              params: { id: @chosen_customer.id },
+                              class: "btn btn-md btn-warning form-width" %>
+                      <% end %><br>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="customer-notes-empty theme-text">No Activity yet</p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if params[:view_account_notes].present? %>
+        <div class="dropdown toggle_contact customer-notes-actions">
+          <button class="add-account-note btn btn-warning dropdown-toggle" type="button" id="dropdownAccount" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <strong>Add New Account Note</strong>
+          </button>
+          <div class="dropdown-menu edit_form_contact hide" aria-labelledby="dropdownAccount">
+            <%= form_for(@note) do |f| %>
+              <div class="field">
+                <%= f.text_area :text, placeholder: "Text", class: "form-control form-limit activity-note-form-textarea theme-field", id: "Text", required: true %>
+              </div>
+              <%= f.hidden_field :account_note, value: true %>
+              <%= f.hidden_field :customer_id, value: @chosen_customer.id %>
+              <%= f.hidden_field :user_id, value: @user.id %>
+              <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+              <%= f.submit "Save",
+                    name: nil,
+                    params: { id: @chosen_customer.id, l: @chosen_customer.letter, view_account_notes: "view_account_notes" },
+                    class: "btn btn-md btn-warning form-width" %>
+            <% end %>
+            <br>
+          </div>
+        </div>
+
+        <div class="customer-notes-list">
+          <% if @indiv_account_notes.any? %>
+            <% @indiv_account_notes.each do |c| %>
+              <div id="note_<%= c.id %>" class="customer-notes-item">
+                <div class="customer-notes-card">
+                  <% if current_user.admin? || current_user.superadmin? %>
+                    <div class="edit_family-off">
+                      <%= link_to "X",
+                            c,
+                            params: { subaction: @chosen_customer.id, l: @chosen_customer.letter, view_account_notes: "view_account_notes" },
+                            class: "btn-default pull-right theme-icon",
+                            id: "delete-test",
+                            data: { turbo_confirm: "Are you sure you want to delete note?", turbo_method: "delete" } %>
+                    </div>
+                  <% end %>
+                  <span class="h4-grey theme-text"><%= c.name %></span><br>
+                  <textarea class="form-control form-limit theme-field"
+                    data-controller="autoresize"
+                    data-action="input->autoresize#adjust"
+                    data-autoresize-target="textarea"><%= c.text %></textarea>
+                  <span class="h6-grey center mt-3">
+                    Created At: <%= c.created_at.strftime("%b %d, %y %I:%M %p") rescue "NA" %>
+                    by <%= c.user.name rescue "NA" %>
+                  </span>
+                  <br>
+                  <% if current_user.admin? || current_user.superadmin? %>
+                    <div class="edit_f">
+                      <%= form_for c do |f| %>
+                        <div class="field">
+                          <%= f.text_field :name, placeholder: "Label", class: "form-control theme-field", id: "Label", required: false %>
+                        </div>
+                        <div class="field">
+                          <%= f.text_area :text, placeholder: "Text", class: "form-control form-limit theme-field", id: "Text", required: true %>
+                        </div>
+                        <%= f.hidden_field :customer_id, value: @chosen_customer.id %>
+                        <%= f.hidden_field :user_id, value: current_user.id %>
+                        <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                        <%= f.submit "Update Note",
+                              name: nil,
+                              params: { id: @chosen_customer.id },
+                              class: "btn btn-md btn-warning form-width" %>
+                      <% end %><br>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="customer-notes-empty theme-text">No Account Notes yet</p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

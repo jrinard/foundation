@@ -1,0 +1,51 @@
+<div class="template-form-header account-form-header">
+  <h2 class="h2-white template-form-title">My Account</h2>
+  <div class="template-form-back">
+    <%= link_to "Back", root_path, class: "btn btn-warning btn-wide template-back-btn" %>
+  </div>
+</div>
+
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+  <%= render "devise/shared/error_messages", resource: resource %>
+
+  <div class="form white-well login-form-panel account-form-well">
+    <div class="field theme-text">
+      <%= f.label :name %>
+      <%= f.text_field :name, autofocus: true, class: "form-control input-lg" %>
+    </div>
+
+    <div class="field theme-text">
+      <%= f.label :position %>
+      <%= f.text_field :position, class: "form-control input-lg" %>
+    </div>
+
+    <div class="field theme-text">
+      <%= f.label :email %>
+      <%= f.email_field :email, class: "form-control input-lg" %>
+    </div>
+
+    <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+      <div class="theme-text">Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
+    <% end %>
+
+    <div class="field theme-text">
+      <%= f.label :password %><br>
+      <span class="account-field-note">(leave blank if you don't want to change it)</span>
+      <%= f.password_field :password, autocomplete: "off", class: "form-control input-lg", placeholder: "New Password - #{@minimum_password_length} character minimum" %>
+    </div>
+
+    <div class="field theme-text">
+      <%= f.label :password_confirmation %>
+      <%= f.password_field :password_confirmation, autocomplete: "off", placeholder: "Confirm New Password", class: "form-control input-lg" %>
+    </div>
+
+    <div class="field theme-text">
+      <%= f.label :current_password %>
+      <%= f.password_field :current_password, autocomplete: "off", placeholder: "(we need your current password to confirm your changes)", class: "form-control input-lg" %>
+    </div>
+
+    <div class="actions">
+      <%= f.submit "Save", class: "btn btn-lg btn-warning btn-long account-save-btn" %>
+    </div>
+  </div>
+<% end %>

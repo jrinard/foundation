@@ -1,0 +1,447 @@
+  <div class="desk-marg">
+    <div class="shrink">
+      <div class="pull-left mobile-hide letters letter-shift shift-down30">
+        <%= link_to "A", {:sort_by => "letter",:params => {:l => "A"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "B", {:sort_by => "letter",:params => {:l => "B"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "C", {:sort_by => "letter",:params => {:l => "C"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "D", {:sort_by => "letter",:params => {:l => "D"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "E", {:sort_by => "letter",:params => {:l => "E"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "F", {:sort_by => "letter",:params => {:l => "F"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "G", {:sort_by => "letter",:params => {:l => "G"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "H", {:sort_by => "letter",:params => {:l => "H"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "I", {:sort_by => "letter",:params => {:l => "I"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "J", {:sort_by => "letter",:params => {:l => "J"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "K", {:sort_by => "letter",:params => {:l => "K"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "L", {:sort_by => "letter",:params => {:l => "L"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "M", {:sort_by => "letter",:params => {:l => "M"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "N", {:sort_by => "letter",:params => {:l => "N"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "O", {:sort_by => "letter",:params => {:l => "O"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "P", {:sort_by => "letter",:params => {:l => "P"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "Q", {:sort_by => "letter",:params => {:l => "Q"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "R", {:sort_by => "letter",:params => {:l => "R"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "S", {:sort_by => "letter",:params => {:l => "S"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "T", {:sort_by => "letter",:params => {:l => "T"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "U", {:sort_by => "letter",:params => {:l => "U"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "V", {:sort_by => "letter",:params => {:l => "V"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "W", {:sort_by => "letter",:params => {:l => "W"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "X", {:sort_by => "letter",:params => {:l => "X"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "Y", {:sort_by => "letter",:params => {:l => "Y"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "Z", {:sort_by => "letter",:params => {:l => "Z"}}, :class => "btn btn-xs" %><br>
+      </div>
+    </div>
+
+    <!-- Search by customer -->
+    <div class="col-sm-4 shift-down30">
+
+    <div class="white-card theme-card">
+
+      <h2 class="pull-left theme-text ">Archived Clients</h2>
+
+
+      <div class="center">
+
+        <div class="center">
+          <div class="center">
+            <span class="h5-grey">
+              <%#= paginate @customers %>
+              </span>
+            </div>
+            <% if @archived_customers.any? %>
+              <% @archived_customers.each do |customer| %>
+                <span id="cust_<%= customer.id %>">
+
+                  <%= link_to "#{customer.name}", {:params => {:id => customer.id, :l => customer.letter}}, :class => "h3-black customer-card btn btn-md btn-long" %><br>
+
+                  <span>
+                  <% end %>
+                <% else %>
+                  <br><br><br>
+                  <h3 class="h4-black theme-text">No Customers Archived</h3>
+                <% end %>
+                <div class="center">
+                  <span class="h5-grey">
+                    <%#= paginate @customers%>
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="col-sm-5 shift-down30">
+
+            <% if !@chosen_customer.nil? %>
+
+              <div class="white-card theme-card">
+
+                <!-- MiniMenu -->
+
+   <div class="center">
+      <div class="dropdown toggle_contact ">
+        <button class="btn dropdown-toggle pull-right" type="button" id="dropdownThreeDots" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <%= image_tag("threedots.png", :class => "menu-icon-size5") %>
+        </button>
+        <div class="dropdown-menu edit_form_contact hide" aria-labelledby="dropdownThreeDots">
+            <div class="center">
+              <br>
+              <div class="card-header-yellow-off">
+                <% if params[:id] %>
+
+                  <%= link_to 'Edit', edit_customer_path(@chosen_customer.id), :class => "btn btn-default theme-text", data: { turbo_frame: "modal" } %>
+
+                  <% if @chosen_customer.onBoard === "Archive"  %>
+                    <%= link_to "UnArchive Client", { onBoard: "current", id: @chosen_customer.id }, class: "btn btn-success theme-text", data: { turbo_confirm: "UnArchiving will reactive client and move to current/potential pages" } %>
+                  <% end %>
+
+                  <% if current_user.admin? || current_user.superadmin? %>
+                    <%# turbo with confirmation %>
+                    <%#= link_to 'Delete', @chosen_customer, class: "btn btn-default", id: "delete-test", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this customer?" }, remote: true %>
+                    <%= link_to 'Delete', @chosen_customer, class: "btn btn-default theme-text", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this customer?.", action: "click->modals#handleDelete" } %>
+
+
+                  <% end %>
+
+                  <%# <div class="h3-grey "><br> %>
+                     <%# Account Manager %>
+                    <%#= @chosen_customer.user.name rescue "NA" %>
+                  <%# </div> %>
+                  <%# <div class="h3-grey "><br> %>
+                    <%# Sales Person %>
+                    <%#= @chosen_customer.sales_person.present? ? User.find_by(id: @chosen_customer.sales_person)&.email : "NA" %>
+                  <%# </div> %>
+                </div><hr>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <br>
+        
+
+          <h2 class="theme-text">Client Information</h2>
+
+          <span class="h3-grey theme-text">Company</span><br>
+
+          <!-- Javascript form toggle -->
+          <div class="edit_family-off h3-black theme-text"><%= @chosen_customer.name %></div>
+          <div class="edit_f">
+            <%= form_for @chosen_customer do |f| %>
+            <div class="input-group">
+              <%= f.text_field :name, :placeholder => 'Name', :class => 'form-control form-width theme-field theme-text' %>
+              <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+              <div class="input-group-btn">
+                <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id }, class: "btn-sm btn-warning form-width theme-field" %>
+              </div>
+            </div>
+          <% end %>
+        </div><br>
+
+        <span class="h3-grey theme-text">Domain</span><br>
+        <!-- Javascript form toggle -->
+        <div class="edit_family-off h3-black theme-text"><%= @chosen_customer.domain %></div>
+        <div class="edit_f">
+          <%= form_for @chosen_customer do |f| %>
+          <div class="input-group">
+            <%= f.text_field :domain, :placeholder => 'Domain', :class => 'form-control form-width' %>
+            <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+            <div class="input-group-btn">
+              <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id }, class: " btn-sm btn-warning form-width" %>
+            </div>
+          </div>
+        <% end %>
+      </div><br>
+
+                <span class="h3-grey theme-text">Domain</span><br>
+                <!-- Javascript form toggle -->
+                <div class="edit_family h3-black theme-text"><%= @chosen_customer.domain %></div>
+                <div class="edit_f">
+                  <%= form_for @chosen_customer do |f| %>
+                  <div class="input-group">
+                    <%= f.text_field :domain, :placeholder => 'Domain', :class => 'form-control form-width' %>
+                    <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                    <div class="input-group-btn">
+                      <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id }, class: " btn-sm btn-warning form-width" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div><br>
+
+              <span class="h3-grey theme-text">Phone</span><br>
+              <!-- Javascript form toggle -->
+              <div class="edit_family h3-black theme-text"><%= @chosen_customer.phone %></div>
+              <div class="edit_f">
+                <%= form_for @chosen_customer do |f| %>
+                <div class="input-group">
+                  <%= f.text_field :phone, minlength: 10, maxlength: 10, :placeholder => '208-123-4565', :class => 'form-control form-width' %>
+                  <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                  <div class="input-group-btn">
+                    <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id }, class: " btn-sm btn-warning form-width" %>
+                  </div>
+                </div>
+              <% end %>
+            </div><br>
+
+            <span class="h3-grey theme-text">Address</span><br>
+            <!-- Javascript form toggle -->
+            <div class="edit_family h4-black theme-text theme-text">
+              <%= @chosen_customer.address %><br>
+              <%= @chosen_customer.city %>
+              <%= @chosen_customer.state %>
+              <%= @chosen_customer.zip %>
+            </div>
+            <div class="edit_f">
+              <%= form_for @chosen_customer do |f| %>
+              <div class="input-group">
+                <%= f.text_field :address, :placeholder => 'Street', :class => 'form-control form-width theme-field' %>
+                <%= f.text_field :city, :placeholder => 'City', :class => 'form-control form-width theme-field' %>
+                <%= f.text_field :state, :placeholder => 'State', :class => 'form-control form-width theme-field' %>
+                <%= f.text_field :zip, :placeholder => 'Zip', :class => 'form-control form-width theme-field' %>
+                <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                <div class="input-group-btn">
+                  <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id }, class: " btn-sm btn-warning form-width theme-back-color" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+
+
+          <span class="h3-grey"></span><br>
+          <div class="">
+
+            <!-- Add Contact -->
+            <div class="dropdown toggle_contact">
+              <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownContacts" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                + Contacts.
+              </button>
+              <div class="dropdown-menu edit_form_contact hide" aria-labelledby="dropdownContacts">
+                <div class="">
+                <%= form_for(@contact) do |f| %>
+                <div class="field theme-text">
+                  <%= f.label "Position" %>*
+                  <%= f.text_field :position, placeholder: "Owner", :class => "form-control input-lg", :id => "name", required: false %>
+                </div>
+                <div class="field theme-text">
+                  <%= f.label "First Name" %>*
+                  <%= f.text_field :firstname, placeholder: "First Name", :class => "form-control input-lg", :id => "name", required: true %>
+                </div>
+
+                <div class="field theme-text">
+                  <%= f.label "Last Name" %>
+                  <%= f.text_field :lastname, placeholder: "Last Name", :class => "form-control input-lg", :id => "name" %>
+                </div>
+                <div class="field theme-text">
+                  <%= f.label "Phone" %>
+                  <%= f.text_field :phone, minlength: 10, maxlength: 10, placeholder: "10 Digit Phone Number", :class => "form-control input-lg", :id => "name", required: false %>
+                </div>
+                <div class="field theme-text">
+                  <%= f.label "Email" %>
+                  <%= f.text_field :email, placeholder: "Email", :class => "form-control input-lg", :id => "name", required: false %>
+                </div>
+
+                <%= f.hidden_field :customer_id, :value => @chosen_customer.id %>
+                <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+
+                <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id}, class: "btn btn-md btn-warning form-width round" %>
+
+              <% end %>
+            </div><br>
+          </div>
+
+        </div>
+
+        <div class="flex-box-left">
+          <div class="flex-box-horizontal-limit">
+            <% if @indiv_contacts.any? %>
+              <% @indiv_contacts.each do |c| %>
+
+                <div class="white-contact-card customer-card">
+                  <div class="edit_family">
+                    <%# turbo confirm %>
+                    <%= link_to "X", c, class: "btn-default pull-right btn-clean", data: { turbo_method: "delete", turbo_confirm: "Are you sure you want to delete the contact?" }, params: { subaction: @chosen_customer.id } %>
+                    <span class="p center theme-text"><%= c.position %></span><br>
+                    <span class="h3-black theme-text"><%= c.firstname %>
+                      <%= c.lastname %></span><br>
+                    <span class="h4-grey center theme-text"><%= number_to_phone(c.phone, options = {area_code: true})%></span>
+                    <br>
+                    <span class="h3-grey center theme-text"><%= c.email %></span>
+                  </div>
+                  <div class="edit_f">
+                    <%= form_for c do |f| %>
+                    <div class="input-group">
+                      <%= f.text_field :position, :placeholder => 'Position', :class => 'form-control form-width theme-text' %>
+                      <%= f.text_field :firstname, :placeholder => 'First', :class => 'form-control form-width theme-text' %>
+                      <%= f.text_field :lastname, :placeholder => 'Last', :class => 'form-control form-width theme-text' %>
+                      <%= f.text_field :phone, minlength: 10, maxlength: 10, :placeholder => 'phone', :class => 'form-control form-width theme-text' %>
+                      <%= f.text_field :email, :placeholder => 'Email', :class => 'form-control form-width theme-text' %>
+                      <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                      <%= link_to "Cancel", {:params => {:id => @chosen_customer.id}},:params => {:id => @chosen_customer.id}, :class => " btn-sm btn-default form-width pull-right" %>
+                      <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id }, class: " btn-sm btn-warning form-width pull-right" %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% else %>&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 class="h4-black center theme-text">No Contacts Yet</h3><br>
+          <% end %>
+        </div>
+      </div>
+
+    <!-- TABS -->
+    <div class="tab">
+      <button class="tablinks" data-tab="notes_tab">Notes</button>
+    </div>
+    <br>
+
+<div id="notes_tab" class="tabcontent">
+  <!-- Add Note -->
+  <div class="edit_toggle btn btn-warning round">
+    Notes</div>
+  <div class="edit_f">
+    <div class="">
+      <%= form_for(@note) do |f| %>
+      <!-- <div class="field"> <%#= f.label "Label" %> <%#= f.text_field :name, placeholder: "Label", :class => "form-control", :id => "Label" %> </div> -->
+      <div class="field">
+        <%#= f.label "Text" %>
+          <%= f.text_area :text, placeholder: "Text", :class => "form-control form-limit", :id => "Text", required: true %>
+        </div>
+        <%= f.hidden_field :customer_id, :value => @chosen_customer.id %>
+        <%= f.hidden_field :user_id, :value => @user.id %>
+        <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+        <%= f.submit "Save", :name => nil, :params => {:id => @chosen_customer.id}, class: "btn btn-md btn-warning form-width round" %>
+      <% end %>
+    </div><br>
+  </div>
+
+  <div class="flex-box-left">
+    <div class="flex-box-horizontal-limit">
+      <% if @indiv_notes.any? %>
+        <% @indiv_notes.each do |c| %>
+
+          <div class="note-contact-card">
+            <% if current_user.admin? || current_user.superadmin?   %>
+              <div class="edit_family">
+                <%= link_to "X", c, :params => {:subaction => @chosen_customer.id}, :class => "btn-default pull-right", :id => "delete-test", :data => {:confirm => "Are you sure you want to delete the contact?",:method => "delete"} %>
+              <% end %>
+              <span class="h4-grey"><%= c.name %></span><br>
+              <textarea class="item-content-old form-control"><%= c.text %></textarea>
+              <br>
+              <span class="h5-grey center">Last Updated:
+                <%= c.updated_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %>
+                by
+                <%= c.user.name rescue 'NA' %>
+              </span><br>
+              <span class="h5-grey center">Created At:
+                <%= c.created_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %></span>
+              <br>
+            </div>
+            <% if current_user.admin? || current_user.superadmin?   %>
+              <div class="edit_f">
+                <%= form_for c do |f| %>
+                <div class="field">
+                  <%= f.text_field :name, placeholder: "Label", :class => "form-control", :id => "Label", required: false %>
+                </div>
+                <div class="field">
+                  <%= f.text_area :text, placeholder: "Text", :class => "form-control", :id => "Text", required: true %>
+                </div>
+                <%= f.hidden_field :customer_id, :value => @chosen_customer.id %>
+                <%= f.hidden_field :user_id, :value => current_user.id %>
+                <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                <%= f.submit "Save Note", :name => nil, :params => {:id => @chosen_customer.id}, class: "btn btn-md btn-warning form-width round" %>
+              <% end %>
+            </div>
+            <% end %>
+          </div>
+        <% end %>
+    <% else %>&nbsp;&nbsp;&nbsp;&nbsp;
+      <h3 class="h4-black center">No Notes
+      </h3><br>
+    <% end %>
+  </div>
+</div>
+</div>
+
+
+<% if current_user.admin? || current_user.superadmin?   %>
+  <span class="center"><br>
+    <% if @chosen_customer.present? %>
+      Last Updated on
+      <%= @chosen_customer.updated_at.strftime("%b %d, %Y %I:%M %p") rescue nil %></span><br>
+  <% end %>
+<% end %>
+
+<% end %>
+
+</div>
+<!-- Tab end -->
+</div>
+<!-- service card end -->
+</div>
+<% end %>
+<!-- nil end -->
+</div>
+
+<!-- COLUMN 4 NOTES -->
+
+<% if @indiv_notes.any? %>
+<div class="col-sm-2">
+
+<div class="white-card2">
+
+<div class="flex-box-left">
+<div class="flex-box-horizontal-limit">
+
+<% @indiv_notes.each do |c| %>
+
+<div class="note-contact-card-small">
+  <% if current_user.admin? || current_user.superadmin?   %>
+    <div class="edit_family">
+      <%= link_to "X", c, :params => {:subaction => @chosen_customer.id}, :class => "btn-default pull-right shift-left-again", :id => "delete-test", :data => {:confirm => "Are you sure you want to delete note?",:method => "delete"} %>
+    <% end %>
+    <span class="h4-grey"><%= c.name %></span><br>
+    <textarea class="item-content-old form-control form-limit"><%= c.text %></textarea>
+    <br>
+    <span class="h5-grey center">Last Updated:
+      <%= c.updated_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %>
+      by
+      <%= c.user.name rescue 'NA' %>
+    </span><br>
+    <span class="h5-grey center">Created At:
+      <%= c.created_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %></span>
+    <br><hr>
+  </div>
+  <% if current_user.admin? || current_user.superadmin?   %>
+    <div class="edit_f">
+      <%= form_for c do |f| %>
+      <div class="field-off">
+        <%= f.text_field :name, placeholder: "Label", :class => "form-control", :id => "Label", required: false %>
+      </div>
+      <div class="field-off">
+        <%= f.text_area :text, placeholder: "Text", :class => "form-control", :id => "Text", required: true %>
+      </div>
+      <%= f.hidden_field :customer_id, :value => @chosen_customer.id %>
+      <%= f.hidden_field :user_id, :value => current_user.id %>
+      <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+      <%= f.submit "Save Note", :name => nil, :params => {:id => @chosen_customer.id}, class: "btn btn-md btn-warning form-width round" %>
+    <% end %>
+  </div>
+  <% end %>
+</div>
+<% end %>
+<% else %>&nbsp;&nbsp;&nbsp;&nbsp;
+<!-- <h3 class="h4-black center">No Notes</h3><br> -->
+
+</div>
+</div>
+</div>
+</div>
+<% end %>
+
+<!-- COLUMN 4 NOTES END -->
+
+</div>
+<!-- desk-marg end -->

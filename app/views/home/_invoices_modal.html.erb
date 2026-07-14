@@ -1,0 +1,7 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="modal draggable-modal" id="draggable-modal">
+    <h3 class="h3-white">Invoices for <%= @chosen_customer.name %></h3>
+
+    <%= render "home/form_invoices", invoices: invoices, customer: @chosen_customer %>
+  </div>
+<% end %>

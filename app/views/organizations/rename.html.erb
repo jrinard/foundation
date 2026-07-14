@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="modal draggable-modal" id="draggable-modal">
+    <h3 class="h3-white theme-text">Rename Organization</h3>
+    <%= render "rename_form", organization: @organization %>
+  </div>
+<% end %>

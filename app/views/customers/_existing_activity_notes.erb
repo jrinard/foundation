@@ -1,0 +1,29 @@
+<div class="flex-box-left custom-column">
+  <div class="flex-box-horizontal-limit">
+    <h3 class="margin-l-20">Activity Notes</h3>
+    <% if indiv_notes.any? %>
+      <% indiv_notes.each do |c| %>
+        <span id="note_<%= c.id %>">
+          <div class="note-contact-card-dark current-clients-notes custom-note-width">
+            <% if current_user.admin? || current_user.superadmin? %>
+              <%# <div class="edit_family-off"> %>
+                <%# turbo with confirm %>
+                <%#= link_to "X", c, params: { subaction: @customer.id, l: @customer.letter, view_notes: "view_notes" }, class: "pull-right p-white", id: "delete-test", data: { turbo_confirm: "Are you sure you want to delete the activity?", turbo_method: "delete" } %>
+              <%# </div> %>
+            <% end %>
+            <span class="h4-grey"><%= c.name %></span>
+            <textarea class="form-control form-limit" placeholder="Text"><%= c.text %></textarea>
+            <span class="p-grey center">Created At:
+              <%= c.created_at.strftime("%b %d, %y %I:%M %p") rescue 'NA' %>
+              by
+              <%= c.user.name rescue 'NA' %>
+            </span>
+          </div>
+        </span>
+      <% end %>
+    <% else %>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <h5 class="p center">No Activity Notes</h5>
+    <% end %>
+  </div>
+</div>

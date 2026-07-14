@@ -1,0 +1,121 @@
+<div class="row">
+  <br>
+  <div class="h3-black theme-text">QuickBooks — <%= current_organization.name %></div>
+  <br>
+
+  <p class="theme-text">
+    Per-organization integration. Sandbox is typical until Intuit approves production access.
+    OAuth app credentials (client ID / secret) stay in server ENV; company IDs and tokens are stored here.
+  </p>
+
+  <% integration = @qb_integration || @latest_token %>
+
+  <%= form_with model: integration, url: update_quickbooks_integration_path, method: :patch, local: true do |f| %>
+    <div class="qb-form-cont lead-card-dark theme-text">
+      <h3 class="h4-black theme-text">Connection settings</h3>
+
+      <div class="form-group">
+        <%= f.label :environment, "API environment" %>
+        <%= f.select :environment,
+              options_for_select([["Sandbox (testing)", "sandbox"], ["Production (live)", "production"]], integration.environment),
+              {},
+              class: "form-control" %>
+        <p class="help-block">Use sandbox while the customer completes Intuit’s review; switch to production when approved.</p>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :sandbox_realm_id, "Sandbox realm / company ID" %>
+        <%= f.text_field :sandbox_realm_id, class: "form-control", placeholder: "From Intuit sandbox company" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :production_realm_id, "Production realm / company ID" %>
+        <%= f.text_field :production_realm_id, class: "form-control", placeholder: "From live QuickBooks company" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :realm_id, "Active realm ID (used for API calls)" %>
+        <%= f.text_field :realm_id, class: "form-control", placeholder: "Filled by OAuth or copy from above" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :company_name, "Company name (optional label)" %>
+        <%= f.text_field :company_name, class: "form-control" %>
+      </div>
+
+      <%= f.submit "Save QuickBooks settings", class: "btn btn-xl btn-default settings-menu-button" %>
+    </div>
+  <% end %>
+
+  <br>
+
+  <div class="flex-box-center">
+    <div class="settings-menu">
+      <div class="settings-buttons">
+        <div class="theme-text">
+          <%= link_to "Connect to QuickBooks", quickbooks_auth_path, class: "btn btn-xl btn-default settings-menu-button active" %>
+        </div>
+
+        <div class="theme-text">
+          <%= form_with url: refresh_quickbooks_token_path, method: :post, local: true do %>
+            <%= submit_tag "Refresh QB Token", class: "btn btn-xl btn-default settings-menu-button active opacity-30" %>
+          <% end %>
+        </div>
+
+        <div class="theme-text">
+          <%= button_to "Disconnect QuickBooks", disconnect_quickbooks_path, method: :post,
+                class: "btn btn-xl btn-default settings-menu-button",
+                data: { turbo_confirm: "Disconnect QuickBooks for #{current_organization.name}?" } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="quickbooks-token-container lead-card-dark text-sm theme-text">
+      <% if integration %>
+        <p><strong>Status:</strong> <%= integration.connected? ? "Connected" : "Not connected" %></p>
+        <p><strong>Environment:</strong> <%= integration.environment %></p>
+        <p><strong>Active realm ID:</strong> <%= integration.effective_realm_id.presence || "—" %></p>
+
+        <% if integration.access_token.present? %>
+          <% if integration.expires_at.present? && Time.current > integration.expires_at %>
+            <h3 class="text-red-500">Token expired</h3>
+          <% end %>
+          <p><strong>Refresh token:</strong><br><%= integration.refresh_token %></p>
+          <p><strong>Created:</strong> <%= integration.created_at&.strftime("%I:%M %p %Z %m-%d-%Y") %></p>
+          <p><strong>Expires:</strong> <%= integration.expires_at&.strftime("%I:%M %p %Z %m-%d-%Y") %></p>
+        <% else %>
+          <p>No OAuth tokens stored yet. Connect or paste tokens below.</p>
+        <% end %>
+      <% else %>
+        <p>No QuickBooks integration record for this organization.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <br>
+  <div class="qb-form-cont lead-card-dark">
+    <h3 class="h4-black theme-text">Manual token entry (dev / bootstrap)</h3>
+    <p class="theme-text">Paste tokens from Intuit if OAuth redirect is unavailable.</p>
+    <%= form_with model: integration, url: update_token_path, method: :patch, local: true do |f| %>
+      <div class="form-group theme-text">
+        <%= f.label :refresh_token, "Refresh token" %>
+        <%= f.text_field :refresh_token, class: "form-control theme-text" %>
+      </div>
+      <div class="form-group theme-text">
+        <%= f.label :access_token, "Access token" %>
+        <%= f.text_area :access_token, class: "form-control" %>
+      </div>
+      <div class="form-group theme-text">
+        <%= f.label :expires_at, "Expires at" %>
+        <%= f.datetime_field :expires_at, class: "form-control" %>
+      </div>
+      <%= f.submit "Update tokens", class: "btn btn-xl btn-default settings-menu-button" %>
+    <% end %>
+  </div>
+
+  <br>
+  <p class="theme-text help-block">
+    To hide QuickBooks entirely for this org, turn off the QuickBooks module on the Organizations tab
+    (<code>quickbooks_enabled</code>). That is separate from disconnect above.
+  </p>
+</div>

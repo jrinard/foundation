@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="modal draggable-modal" id="draggable-modal">
+   <h3 class="h3-white">Create Employee User</h3>
+    <%= render "form", user: @user %>
+  </div>
+<% end %>

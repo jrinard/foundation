@@ -1,0 +1,11 @@
+//Was populating css
+
+// @import "~bootstrap/dist/css/bootstrap.css";
+// @import "node_modules/bootstrap/dist/css/bootstrap.min.css";
+
+//Maybe node modules?
+// @import "bootstrap";
+
+//This code imports your custom stylesheets before this file is added to the build process.
+@import "application.bootstrap";
+@import "custom-styles";

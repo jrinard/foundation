@@ -1,0 +1,96 @@
+<div class="h3-black theme-text">Transfer</div><br>
+
+<h3 class="h4-black theme-text">
+  Transfer Customers from one Account Manager to another
+</h3><br>
+<p>Please keep in mind that this action cannot be undone once customers have been combined with others customers.</p>
+<p>The customers should stay in their same locations as before, such as leads, active, or the list.</p>
+<br><br>
+
+
+<div style="max-height: 900px; overflow-y: scroll;">
+  <div class="row">
+    <!-- Left Column for Select Field -->
+    <div class="col-sm-4 lead-grey-cont" style="width: 34%; float: left;">
+      <%= form_with url: settings_path, method: :get, local: true do %>
+        <div class="field">
+          <label class="text-white">Select Account Manager to transfer Customers from.</label>
+          <%= hidden_field_tag :transfer, 'transfer' %>
+          <%= hidden_field_tag :to_user_id, params[:to_user_id] %>
+          <%= select_tag :from_user_id, options_for_select(@accountManagersByName, params[:from_user_id]), prompt: "Select Manager", class: 'form-control', onchange: 'this.form.submit()' %>
+        </div>
+      <% end %>
+      <% if @from_user.present? %>
+        <h4 class="text-white">Customers assigned to <%= @from_user.name %> (<%= @allCustomerForManagerA.count %>)</h4>
+        <% @allCustomerForManagerA.each do |cust| %>
+          <div id="<%= dom_id cust %>" class="lead-card-dark">
+            <div class="dark-card-content">
+              <div class="center-text">
+                <h3 class="customer-name-lead"><%= cust.name rescue nil %></h3>
+                <div class="customer-ot-lead">OT <%= cust.one_time_payment rescue nil %></div>
+                <div class="customer-rmc-lead">RMC <%= cust.recurring_monthly_charge rescue nil %>
+                  <span class="pull-right"><%= cust.user.name rescue nil %></span>
+                </div>
+                <div class="icon-buttons-lead">
+                  <div class="dark-edit-button-lead">
+                    <%= link_to edit_customer_path(cust.id), class: "", data: { turbo_frame: "modal" } do %>
+                      <%= image_tag("icon-list-white.png", alt: "Edit", class: "icon-edit tag-lead-card-btn") %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+<!-- Middle Column for Submit Button -->
+    <% if @from_user.present? && @to_user.present? %>
+      <div class="col-sm-1 text-center" style="width: 6%; padding-top: 80px;">
+        <%= form_with url: settings_transfer_customers_path(from_user_id: params[:from_user_id], to_user_id: params[:to_user_id]), method: :post, local: true do %>
+          <%= hidden_field_tag :from_user_id, params[:from_user_id] %>
+          <%= hidden_field_tag :to_user_id, params[:to_user_id] %>
+          <%= hidden_field_tag :transfer, 'transfer' %>
+          <%= submit_tag 'Transfer All Customers ->', class: 'btn btn-md btn-warning', data: { confirm: "Are you sure you want to transfer all customers?" } %>
+        <% end %>
+      </div>
+    <% end %>
+
+
+    <!-- Right Column for Select Field -->
+    <div class="col-sm-4 lead-grey-cont" style="width: 35%; float: right;">
+      <%= form_with url: settings_path, method: :get, local: true do %>
+        <div class="field">
+          <label class="text-white">Select Account Manager to assign the Customers to</label>
+          <%= hidden_field_tag :transfer, 'transfer' %>
+          <%= hidden_field_tag :from_user_id, params[:from_user_id] %>
+          <%= select_tag :to_user_id, options_for_select(@accountManagersByName, params[:to_user_id]), prompt: "Select Manager", class: 'form-control', onchange: 'this.form.submit()' %>
+        </div>
+      <% end %>
+      <% if @to_user.present? %>
+        <h4 class="text-white">Customers assigned to <%= @to_user.name %> (<%= @allCustomerForManagerB.count %>)</h4>
+        <% @allCustomerForManagerB.each do |cust| %>
+          <div id="<%= dom_id cust %>" class="lead-card-dark">
+            <div class="dark-card-content">
+              <div class="center-text">
+                <h3 class="customer-name-lead"><%= cust.name rescue nil %></h3>
+                <div class="customer-ot-lead">OT <%= cust.one_time_payment rescue nil %></div>
+                <div class="customer-rmc-lead">RMC <%= cust.recurring_monthly_charge rescue nil %>
+                  <span class="pull-right"><%= cust.user.name rescue nil %></span>
+                </div>
+                <div class="icon-buttons-lead">
+                  <div class="dark-edit-button-lead">
+                    <%= link_to edit_customer_path(cust.id), class: "", data: { turbo_frame: "modal" } do %>
+                      <%= image_tag("icon-list-white.png", alt: "Edit", class: "icon-edit tag-lead-card-btn") %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+<div class="flex-box">
+  <div class="desk-marg-user">
+    <div class="col-xs-12 center max-w-85 margin-auto org-admin-page">
+      <%= link_to "← #{@organization.name}", @organization, class: "org-admin-back theme-text" %>
+
+      <div class="white-box-off round theme-card-simple org-admin-form-panel">
+        <h2 class="h2-white theme-text">Edit Features</h2>
+        <%= render "form", organization: @organization %>
+      </div>
+    </div>
+  </div>
+</div>

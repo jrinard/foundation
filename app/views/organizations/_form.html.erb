@@ -1,0 +1,74 @@
+<%= form_with model: organization, local: true, class: "org-admin-form" do |f| %>
+  <% if organization.errors.any? %>
+    <div class="alert alert-danger theme-text-error">
+      <%= organization.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <% unless organization.persisted? %>
+    <div class="field theme-text">
+      <%= f.label :name, "Organization name" %>
+      <%= f.text_field :name, class: "form-control input-lg", placeholder: "Acme Sales Partner" %>
+    </div>
+  <% end %>
+
+  <fieldset class="org-admin-modules theme-text">
+    <legend class="org-admin-modules-legend">Navigation pages</legend>
+
+    <label class="org-admin-check">
+      <%= f.check_box :potentials_enabled %>
+      Potentials
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :leads_enabled %>
+      Leads (kanban + New Lead)
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :current_clients_enabled %>
+      Current Clients
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :archived_enabled %>
+      Archived
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :activity_enabled %>
+      Activity
+    </label>
+
+    <p class="help-block">Org admins can also change these under Settings → Modules.</p>
+  </fieldset>
+
+  <fieldset class="org-admin-modules theme-text">
+    <legend class="org-admin-modules-legend">Platform modules</legend>
+
+    <label class="org-admin-check">
+      <%= f.check_box :sales_pipeline_enabled %>
+      Sales pipeline shortcut (enables Potentials + Leads when checked)
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :quickbooks_enabled %>
+      QuickBooks
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :operations_enabled %>
+      Operations (Phase 3)
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :discovery_enabled %>
+      Discovery (Phase 2)
+    </label>
+  </fieldset>
+
+  <div class="actions org-admin-form-actions">
+    <%= f.submit organization.persisted? ? "Save changes" : "Create organization", class: "btn btn-warning" %>
+    <%= link_to "Cancel", organization.persisted? ? organization : organizations_path, class: "btn btn-dark" %>
+  </div>
+<% end %>

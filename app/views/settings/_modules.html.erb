@@ -1,0 +1,49 @@
+<div class="row">
+  <br>
+  <div class="h3-black theme-text">Navigation pages — <%= current_organization.name %></div>
+  <br>
+
+  <p class="theme-text">
+    Turn CRM sections on or off for this organization. Disabled pages are hidden from the sidebar and blocked if visited directly.
+  </p>
+
+  <%= form_with model: current_organization, url: update_organization_modules_path, method: :patch, local: true do |f| %>
+    <div class="qb-form-cont lead-card-dark theme-text">
+      <h3 class="h4-black theme-text">Enabled pages</h3>
+
+      <label class="org-admin-check">
+        <%= f.check_box :potentials_enabled %>
+        Potentials — pre-pipeline list
+      </label>
+
+      <label class="org-admin-check">
+        <%= f.check_box :leads_enabled %>
+        Leads — kanban board and New Lead
+      </label>
+
+      <label class="org-admin-check">
+        <%= f.check_box :current_clients_enabled %>
+        Current Clients — active customer directory
+      </label>
+
+      <label class="org-admin-check">
+        <%= f.check_box :archived_enabled %>
+        Archived — inactive customers
+      </label>
+
+      <label class="org-admin-check">
+        <%= f.check_box :activity_enabled %>
+        Activity — account manager activity feed
+      </label>
+
+      <br>
+      <%= f.submit "Save navigation settings", class: "btn btn-xl btn-default settings-menu-button" %>
+    </div>
+  <% end %>
+
+  <br>
+  <p class="theme-text help-block">
+    QuickBooks, Operations, and Discovery are platform modules configured on the Organizations tab (superadmin).
+    When QuickBooks is enabled for this org, its settings appear under the Quickbooks tab above.
+  </p>
+</div>

@@ -1,0 +1,7 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="modal draggable-modal" id="draggable-modal">
+   <h3 class="h3-white">Edit Contact</h3>
+
+    <%= render "form_contact", contact: @contact, accounts: @accounts, lists: @lists, customers: @customers  %>
+  </div>
+<% end %>

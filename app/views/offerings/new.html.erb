@@ -1,0 +1,11 @@
+<div class="flex-box">
+
+  <div class="col-xs-12 col-sm-10 col-md-8 col-lg-4 col-centered center">
+    <div class="back">
+    <%= link_to 'Back', customers_path, :class => "btn btn-warning btn-wide pull-right back-shift-up round"%>
+    </div>
+    <div class="NA">
+    <%= render 'form', offering: @main_offering %>
+    </div>
+  </div>
+</div>

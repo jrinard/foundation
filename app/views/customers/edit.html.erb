@@ -1,0 +1,7 @@
+<%= turbo_frame_tag "modal" do %>
+<%# <div class="animate-modal"> %>
+  <div class="modal draggable-modal xl-modal" id="draggable-modal" data-controller="scroll-to-activity" data-scroll-to-activity-show-value="<%= params[:view_notes].present? %>">
+    <%= render "form", customer: @customer, contact: @contacts %>
+  </div>
+<%# </div> %>
+<% end %>

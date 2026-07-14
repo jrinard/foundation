@@ -1,0 +1,72 @@
+<%# Potential Clients %>
+
+  <div class="desk-marg">
+    <div class="col-sm-1 shrink">
+      <div class="pull-left mobile-hide letters letter-shift">
+      </div>
+    </div>
+    
+
+  <div class="col-sm-4 shift-down30">
+
+
+<div id="lists">
+  <ul data-controller="sortable" style="display: flex;">
+    <% @lists.each do |list| %>
+      <li data-sortable-update-url="<%= sort_list_path(list) %>" style="width: 400px;">
+        <%= render list %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+<br><br><br><br>
+  
+      <div class="lead-column">
+        <div class="center"><br>
+    <h2 class="h3-white">New</h2>
+      <div data-sortable-list-id="1" data-drag-group="column1" data-drag-group-source="column1" data-controller="drag" data-drag-url="/customers/:id/move" data-drag-group-value="shared">
+        <% @potential_customers.order(position: :asc).each do |c| %>
+          <div data-id="<%= c.id %>" class="lead-card-dark">
+          <h2><%= c.name %></h2>
+            <span class="pull-right"><%= c.position %></span>
+            OT <%= c.one_time_payment %><br>
+            RMC <%= c.recurring_monthly_charge %>
+
+            <br>
+              <%= link_to 'Edit', edit_customer_path(c.id), :class => "btn btn-dark" %>
+              <%#= link_to 'Change', edit_customer_path(c.id), :class => "btn btn-dark" %>
+          </div>
+        <% end %>
+      </div>
+
+                </div>
+            </div>
+          </div>
+          <div class="col-sm-4 shift-down30">
+            <div class="lead-column">
+              <div class="center"><br>
+
+    <h2 class="h3-white">Contacted</h2>
+      <div data-sortable-list-id="2" data-drag-group="column2" data-drag-group-source="column2" data-controller="drag" data-drag-url="/customers/:id/move" data-drag-group-value="shared">
+        <% @other_customers.order(position: :asc).each do |c| %>
+          <div data-id="<%= c.id %>" class="lead-card-dark">
+          <h2><%= c.name %></h2>
+            <span class="pull-right"><%= c.position %></span>
+            OT <%= c.one_time_payment %><br>
+            RMC <%= c.recurring_monthly_charge %>
+
+            <br>
+              <%= link_to 'Edit', edit_customer_path(c.id), :class => "btn btn-dark" %>
+              <%#= link_to 'Change', edit_customer_path(c.id), :class => "btn btn-dark" %>
+          </div>
+        <% end %>
+      </div>
+
+
+      </div>
+      </div>
+     </div>
+
+
+   </div><!-- desk-marg end -->

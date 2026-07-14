@@ -1,0 +1,86 @@
+<div class="desk-marg">
+  <div class="col-sm-1 shrink">
+    <div class="pull-left mobile-hide letters letter-shift">
+    </div>
+  </div>
+
+  <div class="col-sm-4 shift-down30 shift-down15-mobile">
+    <div class="list-header">
+      <div class="list-header-content-filter">
+        <%= link_to "All Leads", customers_path(selected_week: "#{@start_of_last_week} to #{@end_of_last_week}"), class: "btn btn-dark-ghost margin-r-20" %>
+
+        <%= form_tag("", method: "get") do %>
+          <%= select_tag "user_id", options_for_select([["Filter by Account Manager", ""]] + @accountManagersByName, params[:user_id]), { class: "form-control cc-input-dark-select margin-r-20", onchange: "this.form.submit();" } %>
+        <% end %> <!-- Closing form_tag -->
+
+        <span class="mobile-hide">
+          <div class="filter-tag-dark-container">
+            <% unless @filter_lead_count.nil? %>
+              <div class="filter-tag-dark">Total Leads: <%= @filter_lead_count %></div>
+            <% end %>
+            <% unless @filter_lead_count_last_30.nil? %>
+              <div class="filter-tag-dark">Last 30 days: <%= @filter_lead_count_last_30 %></div>
+            <% end %>
+            <% unless @filter_lead_count_current_month.nil? %>
+              <div class="filter-tag-dark"> Closed this month: <%= @filter_lead_count_current_month %></div>
+            <% end %>
+            <% unless @filter_lead_count_total_recurring_monthly_charge.nil? %>
+              <div class="filter-tag-dark"> Total RMC $<%= @filter_lead_count_total_recurring_monthly_charge %></div>
+            <% end %>
+            <% unless @filter_lead_count_total_one_time_payment.nil? %>
+              <div class="filter-tag-dark"> Total OT $<%= @filter_lead_count_total_one_time_payment %></div>
+            <% end %>
+          </div>
+        </span> <!-- Closing span -->
+
+        <% if !params[:user_id] %>
+        <span class="mobile-hide">
+          <%= form_tag(customers_path, method: :get, local: true) do %>
+            <%= select_tag :selected_stat_id, options_from_collection_for_select(@main_stats.reverse, :id, :week_start_by_text, params[:selected_stat_id]), prompt: "Select a week", class: 'form-control cc-input-dark-select margin-r-20', onchange: "this.form.submit();" %>
+          <% end %>
+        </span>
+        <% if @main_stats.present? && @selected_stat.present? %>
+          <div class="filter-tag-dark">Total Leads By Week: <%= @selected_stat_week_total_leads %></div>
+        <% end %>
+        <span class="mobile-hide">
+          <span class="mr-auto flex-end">
+            <% if @total_one_time_payment_all.present? %>
+              <div class="filter-tag-dark"> Total OT $<%= @total_one_time_payment_all %></div>
+            <% end %>
+            <% if @total_recurring_monthly_charge_all.present? %>
+              <div class="filter-tag-dark"> Total RMC $<%= @total_recurring_monthly_charge_all %></div>
+            <% end %>
+          </span>
+        </span>
+        <% end %>
+      </div> <!-- Closing list-header-content-filter -->
+
+      <div class="list-header-content">
+        <%= link_to "New List", new_list_path, class: "btn btn-dark pull-right mobile-hide", data: { turbo_frame: "modal" } %>
+      </div> <!-- Closing list-header-content -->
+    </div> <!-- Closing list-header -->
+
+    <div id="list-nav">
+      <% @lists.each_with_index do |list, index| %>
+        <div class="nav-dot" data-index="<%= index %>"></div>
+      <% end %>
+    </div> <!-- Closing list-nav -->
+
+    <div id="lists-wrapper">
+      <div id="lists">
+        <ul id="mobile-sort-off" data-controller="sortable" style="display: flex;" className="sortable-list">
+          <% @lists.each do |list| %>
+            <li data-sortable-update-url="<%= sort_list_path(list) %>" class="lead-grey-box sortable-item">
+              <%= render list %>
+              <% if list.customers.empty? %>
+                <%= button_to "Delete #{list.name}", list, method: :delete, class: "btn btn-sm btn-dark delete-btn pull-right", data: { turbo_confirm: "Are you sure you want to delete this list? You can only delete the list if it has zero leads/customers in it." } %>
+              <% else %>
+                <h5 className="opacity-30" data-id="tag-list-delete"><p>List must be empty to delete</p></h5>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div> <!-- Closing id="lists" -->
+    </div> <!-- Closing id="lists-wrapper" -->
+  </div> <!-- Closing col-sm-4 shift-down30 -->
+</div> <!-- Closing desk-marg -->

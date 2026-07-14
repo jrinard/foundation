@@ -1,0 +1,181 @@
+<%# Current Clients %>
+
+  <div class="desk-marg">
+    <div class="shrink">
+      <div class="pull-left mobile-hide letters letter-shift shift-down30">
+        <%= link_to "A", {:sort_by => "letter",:params => {:l => "A"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "B", {:sort_by => "letter",:params => {:l => "B"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "C", {:sort_by => "letter",:params => {:l => "C"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "D", {:sort_by => "letter",:params => {:l => "D"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "E", {:sort_by => "letter",:params => {:l => "E"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "F", {:sort_by => "letter",:params => {:l => "F"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "G", {:sort_by => "letter",:params => {:l => "G"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "H", {:sort_by => "letter",:params => {:l => "H"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "I", {:sort_by => "letter",:params => {:l => "I"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "J", {:sort_by => "letter",:params => {:l => "J"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "K", {:sort_by => "letter",:params => {:l => "K"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "L", {:sort_by => "letter",:params => {:l => "L"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "M", {:sort_by => "letter",:params => {:l => "M"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "N", {:sort_by => "letter",:params => {:l => "N"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "O", {:sort_by => "letter",:params => {:l => "O"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "P", {:sort_by => "letter",:params => {:l => "P"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "Q", {:sort_by => "letter",:params => {:l => "Q"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "R", {:sort_by => "letter",:params => {:l => "R"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "S", {:sort_by => "letter",:params => {:l => "S"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "T", {:sort_by => "letter",:params => {:l => "T"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "U", {:sort_by => "letter",:params => {:l => "U"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "V", {:sort_by => "letter",:params => {:l => "V"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "W", {:sort_by => "letter",:params => {:l => "W"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "X", {:sort_by => "letter",:params => {:l => "X"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "Y", {:sort_by => "letter",:params => {:l => "Y"}}, :class => "btn btn-xs" %><br>
+        <%= link_to "Z", {:sort_by => "letter",:params => {:l => "Z"}}, :class => "btn btn-xs" %><br>
+      </div>
+    </div>
+
+    <!-- Search by customer -->
+    <div class="col-sm-4 shift-down30">
+      <div class="theme-card mb-10">
+        <div class="center">
+          <%= form_tag(home_index_path, method: "get", id: "search-form") do %>
+          <div class="input-group-off">
+            <%= text_field_tag :search, params[:search], placeholder: "Search by Customer and Contact Information", class: "form-control theme-field", required: true %>
+            <div class="input-group-btn">
+              <%= submit_tag "Search", :name => nil, class: "btn btn-warning round", :style => "display: none;" %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @searchResults %>
+          <h4 class="theme-text">Results</h4>
+          <% @searchResults.each do |customer| %>
+
+            <div class="search-results center color-contact-card-search-grey">
+              <!-- Limits usable link to customers that were current -->
+              <%= link_to_if customer.active?, "#{customer.name} ", home_index_path(id: customer.id, search: params[:search]), class: "btn btn-lg theme-text" %><br>
+                <%#= link_to "#{customer.name}", {:params => {:id => customer.id, :l => customer.letter}}, :class => "h3-black customer-card btn btn-md btn-long" %>
+              </div>
+            <% end %>
+            <% if @searchResult.nil? %>
+              <% if @searchResults.empty? %>
+                <%# No Current Client Found %>
+
+              <% end %>
+            <% end %>
+          <% end %>
+
+
+   <% if @searchResultsContacts %>
+        <h4 class="theme-text">Contacts</h4>
+          <% @searchResultsContacts.each do |contact| %>
+
+            <div class="search-results center color-contact-card-search-yellow theme-text">
+              <!-- Needs to point to Customer Contact Belongs too #{contact.email} #{contact.phone} #{contact.email} -->
+              <span class="theme-text">
+                <%= link_to "#{contact.firstname} #{contact.lastname}", home_index_path(id: contact.customer_id, search: params[:search]), class: "btn btn-lg btn-long-search theme-text" %><br>
+              </span>
+               <%= contact.customer.name %>
+              </div>
+            <% end %>
+            <% if @searchResultsContacts.nil? %>
+              <% if @searchResultsContacts.empty? %>
+                <%# No Contact %>
+
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+    <%# Current Clients %>
+    <div class="theme-card">
+      <h2 class="pull-left theme-text">Current Clients</h2>
+        <span class="h2-white center pull-right"><%= link_to '+ Add New', new_customer_path, :class => " btn btn-md btn-warning center ", data: { turbo_frame: "modal" } %></span>
+        <br>
+        <hr>
+        
+          <!-- FILTERS v2 -->
+          <div class="dropdown toggle_contact theme-text">
+            <% if @chosen_filter %>
+              Filtering by <%= @chosen_filter %>
+            <% end %>
+
+            <button class="btn dropdown-toggle pull-right theme-back" type="button" id="filterIconDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <%= image_tag("icon-filter.png", alt: "like", class: "nav-icon-size-dropdown theme-icon") %>
+            </button>
+
+            <div class="dropdown-menu edit_form_contact hide " aria-labelledby="filterIconDropdown">
+              <div class="card-header-yellow-off theme-text">
+                <br >
+                Sort By
+                <br>
+                <%= link_to "Newest", { sort_by: "created_at desc" }, class: "btn btn-md btn-default theme-text" %>
+                <%= link_to "Updated Recently", { sort_by: "updated_at desc" }, class: "btn btn-md btn-default theme-text" %>
+                <%= link_to "Name", { sort_by: "name asc" }, class: "btn btn-md btn-default theme-text" %>
+                <%= render "shared/offering_list_filters" %>
+                <br>
+                Account Manager
+                <br>
+                <%= form_tag("", method: "get") do %>
+                  <%= select_tag "sort_by_manager", options_for_select([["Filter by Account Manager", ""]] + @accountManagersByName.map { |manager| [manager[0], "#{manager[1]} desc"] }, params[:sort_by_manager]), class: "form-control cc-input-select-wide margin-r-20 theme-field", onchange: "this.form.submit();" %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+            <!-- Import Customer CSV -->
+        <div class=""><br>
+          <% if current_user.superadmin? %>
+            <div class="edit_toggle btn btn-default theme-text opacity-30">
+              Import
+            </div>
+            <div class="edit_f">
+              <div class="center">
+                <h4 class="theme-text"> Instructions:</h4>
+                <p class="theme-text">
+                Here is an example of how the .csv file needs to be formatted. The table headers have to be exact. Also, a name is required.<br>
+                </p><h4 class="theme-text">Note - Does not import services V2</h4>
+                <%#= image_tag("csv_example.png", :class => "sample-size") %>
+                <%= link_to "Download CSV File Example", download_pdf_path, :class => "btn btn-xs btn-default round theme-text " %>
+                <br><hr>
+                <%#= form_for @import, url: import_customers_path(:list_id => params[:id], :user_id => current_user.id), multipart: true do |f| %>
+                <%= form_for @import, url: import_customers_path, multipart: true do |f| %>
+                  <%= f.file_field :file, :required => true, :class => " btn btn-lg img-responsive center-block" %>
+                  <%#= f.hidden_field :user_id, :value => current_user.id, :class => 'form-control'  %>
+                  <%#= f.hidden_field :list_id, :value => params[:id], :class => 'form-control'  %>
+                  <%= f.submit "Import Customers", :class => "btn btn-lg btn-warning round" %>
+                <% end %>
+              </div>
+            </div>
+            <% end %> <!-- Import Customer CSV END-->
+          </div>
+          <hr>
+
+                <% if @current_customers.any? %>
+                  <div class="scroll1_off">
+                    <div id="posts">
+                      <%= render @current_customers %>
+                    </div>
+                    <%#= will_paginate @current_customers %>
+                  </div>
+
+                  <%# old loop %>
+                    <%# @current_customers.each do |customer| %>
+                      <span id="cust_<%#= customer.id %>">
+                        <%#= link_to "#{customer.name}", {:params => {:id => customer.id, :l => customer.letter}}, :class => "h3-black customer-card btn btn-md btn-long" %><br>
+                          <span>
+                            <%# end %>
+
+                            <% else %>
+                              <h3 class="h4-black center theme-text">No Clients Available</h3>
+                            <% end %>
+                          </div>
+                        </div>
+
+                        <!-- Middle Section -->
+                        <%= render "home/3-client-information" %>
+
+                        <!-- Right Section -->
+                        <%= render "shared/customer_notes_panel" %>
+
+                        </div>
+                        <!-- desk-marg end -->

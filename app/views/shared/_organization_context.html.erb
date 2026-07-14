@@ -1,0 +1,6 @@
+<% if current_organization %>
+  <div class="org-context-header">
+    <span class="org-context-name org-context-name-prominent"><%= current_organization.name %></span>
+    <%= render "shared/organization_switcher", variant: :header %>
+  </div>
+<% end %>

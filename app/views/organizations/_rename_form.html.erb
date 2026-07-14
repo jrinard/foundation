@@ -1,0 +1,26 @@
+<%= form_with model: organization, url: rename_organization_path(organization), method: :patch, local: true, class: "org-admin-form" do |f| %>
+  <% if organization.errors.any? %>
+    <div class="alert alert-danger theme-text-error">
+      <%= organization.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="field theme-text">
+    <%= f.label :name, "Organization name" %>
+    <%= f.text_field :name, class: "form-control form-control-large", autofocus: true %>
+  </div>
+
+  <div class="field theme-text">
+    <%= f.label :slug, "Slug" %>
+    <%= f.text_field :slug, class: "form-control form-control-large" %>
+    <p class="help-block">Lowercase identifier used internally (e.g. echelon-demo).</p>
+  </div>
+
+  <div class="actions org-admin-form-actions">
+    <%= f.submit "Save", class: "btn btn-warning" %>
+    <%= link_to "Cancel", "#", data: {
+          controller: "modals",
+          action: "modals#close"
+        }, class: "btn btn-sm btn-dark pull-right cancel-button" %>
+  </div>
+<% end %>

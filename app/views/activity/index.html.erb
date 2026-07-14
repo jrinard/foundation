@@ -1,0 +1,137 @@
+<div class="flex-box2">
+
+  <div class="desk-marg">
+
+    <div class="list-header-content-filter shift-down30 shift-right4 ">
+      <%= form_tag(activity_index_path, method: :get) do %>
+        <%= select_tag "user_id", options_for_select([["Filter by Account Manager", ""]] + @accountManagersByName, params[:user_id]), { class: "form-control cc-input-select-wide margin-r-20 theme-field", onchange: "this.form.submit();" } %>
+        <%= hidden_field_tag "followup", params[:followup].presence || "90" %>
+      <% end %>
+    </div>
+
+    <div class="col-sm-4 center ">
+
+      <div class="customer-note-report report-white-card theme-card ">
+        <span class="h3-black theme-text">Customer Note Report
+        </span><br>
+        <p>Latest activity note from an account manager only.</p>
+
+        <% if @last_note_of_each_customer.any? %>
+          <% @last_note_of_each_customer.each do |c| %>
+
+            <% if c.name != nil  %>
+              <% followup_label = { "30" => "1 month", "60" => "2 months", "90" => "3 months", "120" => "4 months", "150" => "5 months", "180" => "6 months", "365" => "12 months" }[c.followup.to_s].presence || "—" %>
+              <div class="notes">
+                <div class="report-note-card lead-card-dark activity-note-report-card">
+                  <%= link_to "#{c.name rescue nil}", home_index_path(id: c.id, view_notes: "view_notes"), class: "h3-black theme-text activity-card-name" %>
+                  <span class="activity-text-limit activity-note-theme-text activity-card-note"><%= c.read_attribute(:am_last_note_text) %></span>
+                  <% am_at = c.read_attribute(:am_last_note_at) %>
+                  <div class="activity-card-footer clearfix">
+                    <span class="h6-grey activity-note-theme-text"><%= am_at.present? ? am_at.strftime("%b %d, %y %I:%M %p") : "NA" %></span>
+                    <span class="h6-grey activity-card-am">Note by <%= c.read_attribute(:am_last_note_author_name).presence || '—' %></span>
+                  </div>
+                  <div class="activity-card-footer">
+                    <span class="h6-grey">Followup: <%= followup_label %></span>
+                    <span class="h6-grey pull-right">Manager: <%= c.user&.name || 'Unassigned' %></span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="col-sm-4 center ">
+
+      <div class="customer-note-report report-white-card theme-card">
+        <span class="h3-black theme-text">Customer Followup
+        </span>
+        <br>
+        <p class="" style="margin-top: 10px;">Total Aging Count: <%= @total_aging_count %></p>
+        <p class="h6-grey">
+        Customers show in the date range when their last activity note by a manager was written. They appear red if its past the customer preference. 
+        </p>
+        <br>
+        <div class="center margin-b-15">
+          <%= form_tag(activity_index_path, method: :get, style: "display: inline-block") do %>
+            <%= hidden_field_tag "user_id", params[:user_id] if params[:user_id].present? %>
+            <% followup_band_labels = [["1 month", "30"], ["2 months", "60"], ["3 months", "90"], ["4 months", "120"], ["5 months", "150"], ["6 months", "180"], ["12 months", "365"]] %>
+            <% followup_opts = followup_band_labels.map { |label, value| count = (@past_due_counts || {})[value].to_i; ["#{label} (#{count})", value] } %>
+            <%= select_tag "followup", options_for_select(followup_opts, params[:followup].presence || "90"), { class: "form-control cc-input-dark-select margin-r-20 activity-followup-select", onchange: "this.form.submit();", data: { past_due_counts: (@past_due_counts.presence || {}).to_json } } %>
+          <% end %>
+        </div>
+
+        <!-- note list oldest to newest - produces customer id - use id to display customer name -->
+        <% if @followup_customers.any? %>
+          <% @followup_customers.each do |c| %>
+            <% followup_label = { "30" => "1 month", "60" => "2 months", "90" => "3 months", "120" => "4 months", "150" => "5 months", "180" => "6 months", "365" => "12 months" }[c.followup.to_s].presence || "—" %>
+            <% am_at = c.read_attribute(:am_last_note_at) %>
+            <% past_due = c.qualifying_activity_past_followup?(am_at) %>
+            <div class="notes">
+              <div class="report-note-card lead-card-dark activity-note-report-card" style="<%= 'border-left: 4px solid #dc3545;' if past_due %>">
+                <% if past_due %><span class="badge" style="background-color: #dc3545; color: white; margin-bottom: 8px; border-radius: 6px; padding-left: 8px;">Past Followup</span><% end %>
+                <%= link_to "#{c.name rescue nil}", home_index_path(id: c.id, view_notes: "view_notes"), class: "h3-black theme-text activity-card-name" %>
+                <span class="activity-text-limit activity-note-theme-text activity-card-note"><%= c.read_attribute(:am_last_note_text) %></span>
+                <span class="activity-text-limit activity-note-theme-text activity-card-note h6-grey"><%= am_at.present? ? am_at.strftime("%b %d, %y %I:%M %p") : "NA" %></span>
+
+                <div class="activity-card-footer">
+                  <span class="h6-grey">Followup: <span class="<%= 'text-danger' if past_due %>"><%= followup_label %></span></span>
+                  <span class="h6-grey pull-right"><%= c.user&.name || 'Unassigned' %></span>
+                </div>
+              </div>
+            </div>
+
+          <% end %>
+
+        <% else %>
+          <br>
+          <p class="h6-grey">
+            No customers in this time window.
+          </p>
+        <% end %>
+
+      </div>
+
+    </div>
+
+    <div class="col-sm-4 center">
+      <!-- uses partial _customer partial in views/customers -->
+      <div class="customer-note-report report-white-card theme-card">
+        <span class="h3-black theme-text">Customers with 0 Activity</span><br>
+        <p>These customers need followup</p>
+        <!-- note list oldest to newest - produces customer id - use id to display customer name -->
+        <% if @all_customers_with_0_notes.any? %>
+          <div class="scroll1_off">
+            <div id="post">
+              <%= render @all_customers_with_0_notes, show_account_manager: true %>
+            </div>
+            <%#= will_paginate @all_customers_with_0_notes %>
+          </div>
+        <% else %>
+          <br>
+          <p>No clients available</p>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+</div>
+  <!-- flex-end -->
+
+  <script>
+    (function() {
+      var select = document.querySelector('.activity-followup-select');
+      var raw = select && select.dataset.pastDueCounts;
+      if (!raw) return;
+      var counts;
+      try {
+        counts = JSON.parse(raw);
+      } catch (e) {
+        return;
+      }
+      if (counts && counts[select.value] && counts[select.value] > 0) {
+        select.style.color = '#dc3545';
+      }
+    })();
+  </script>

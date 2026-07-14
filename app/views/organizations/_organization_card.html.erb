@@ -1,0 +1,29 @@
+<div class="org-admin-card theme-card-simple round"
+     data-org-list-filter-target="card"
+     data-filter-text="<%= "#{organization.name} #{organization.slug}".downcase %>">
+  <div class="org-admin-card-top">
+    <h3 class="org-admin-card-name theme-text">
+      <%= link_to organization.name, organization, class: "org-admin-card-link theme-text" %>
+    </h3>
+  </div>
+
+  <div class="org-admin-badges">
+    <% organization.module_badges.each do |badge| %>
+      <span class="org-module-badge"><%= badge %></span>
+    <% end %>
+    <% if organization.module_badges.empty? %>
+      <span class="org-module-badge org-module-badge-muted">Core only</span>
+    <% end %>
+  </div>
+
+  <div class="org-admin-card-meta theme-text">
+    <span><strong><%= organization.member_count %></strong> members</span>
+  </div>
+
+  <div class="org-admin-card-actions">
+    <%= link_to "View", organization, class: "btn btn-xs btn-default theme-text" %>
+    <%= button_to "Deactivate", organization, method: :delete,
+          class: "btn btn-xs btn-dark",
+          form: { data: { turbo_confirm: "Deactivate #{organization.name}? It will be hidden from the list but data is kept." } } %>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+
+<%# #Simple Form is being used in new lead button but is loading a simple edit for existing %>
+
+<%= turbo_frame_tag "modal" do %>
+<%# <div class="animate-modal"> %>
+<div class="modal draggable-modal" id="draggable-modal">
+    <%= render "existing_form", customer: @customer, contact: @contacts, notes: @indiv_notes %>
+  </div>
+<%# </div> %>
+<% end %>

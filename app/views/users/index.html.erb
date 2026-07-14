@@ -1,0 +1,103 @@
+<div class="flex-box">
+
+  <div class="desk-marg-user">
+
+  <% if current_user.superadmin? || current_user.admin? %>
+
+
+
+<% else %>
+  <!-- Not admin or super -->
+  <div class="user-box center">
+    You do not have the privileges to view this page.
+  </div>
+  <% end %>
+
+  <% if current_user.admin? || current_user.superadmin? %>
+  <div class="col-xs-12 center max-w-85 margin-auto">
+  <br>
+    <%= link_to 'New Employee User', new_user_path, class: "btn btn-xs btn-warning pull-left", data: { turbo_frame: "modal" } %>
+    <br><br>
+
+    <div class="white-box-off round theme-card-simple">
+
+      <table>
+        <tr class="mobile-hide">
+          <td class="td-yellow">NAME</td>
+          <td class="td-yellow" colspan="2">EMAIL</td>
+          <td class="td-yellow">ROLE</td>
+          <% if current_user.superadmin? %>
+          <td class="td-yellow">ID</td>
+          <% end %>
+          <td class="td-yellow" colspan="2">DETAILS</td>
+          <td class="td-yellow">EDIT</td>
+          <td class="td-yellow">DELETE</td>
+        </tr>
+      </table>
+      <% @all_users.each do |u| %>
+      <% if u.email != "josh@lifespringdesign.com" %>
+      <table>
+        <tr>
+          <td>
+            <span class="td-yellow2 desktop-hide">NAME
+            </span>
+            <span class="mobile-pull-right theme-text"><%= link_to u.name, u, :class => "theme-text" %></span>
+          </td>
+          <td colspan="2">
+            <span class="td-yellow2 desktop-hide">EMAIL
+            </span>
+            <span class="mobile-pull-right theme-text"><%= link_to u.email, u, :class => "theme-text" %></span>
+          </td>
+          <td>
+            <span class="td-yellow2 desktop-hide">ROLE
+            </span>
+            <span class="mobile-pull-right theme-text">
+            <% if u.role === "user"  %>
+              <%= link_to 'User', { :user_man => "man",:uid => u.id }, :class => "btn btn-sm btn-default round theme-text" %>
+            <% end %>
+            <% if u.role === "manager"  %>
+              <%= link_to "Account Manager", { :user_user => "user",:uid => u.id }, :class => "btn btn-sm btn-default round theme-text" %>
+            <% end %>
+            <% if u.role === "admin"  %>
+            <%= u.role %>
+            <% end %>
+            </span>
+          </td>
+        <% if current_user.superadmin? %>
+          <td>
+            <span class="td-yellow2 desktop-hide">ID
+            </span>
+            <span class="mobile-pull-right theme-text"><%= u.id %></span>
+          </td>
+        <% end %>
+          <td colspan="2">
+            <span class="td-yellow2 desktop-hide">DETAILS
+            </span>
+            <span class="mobile-pull-right theme-text"><%= link_to "Account Settings", user_path(u.id), :class => "btn btn-sm btn-default round theme-text"  %></span>
+          </td>
+          <td>
+            <span class="td-yellow2 desktop-hide">EDIT
+            </span>
+            <% if can?(:edit, User) %>
+               <span class="mobile-pull-right theme-text"> <%= link_to 'Edit', edit_user_path(u.id), class: "btn btn-xs btn-default theme-text", data: { turbo_frame: "modal" } %></span>
+            <% end %>
+            <%#= link_to_if(can?(:edit, User), image_tag("icon-edit.png", :class => "user-icon-size", data: { turbo_frame: "modal" }, :id => "respec_edit"), edit_user_path(u.id)) {} %></span>
+          </td>
+        <td>
+          <span class="td-yellow2 desktop-hide">DELETE
+          </span>
+          <span class="mobile-pull-right theme-text"><%= link_to_if(can?(:delete, u), image_tag("icon-delete.png", :class => "user-icon-size"), u, :data => {:confirm => "Are you sure?",:method => "delete"}) {} %></span>
+        </td>
+      </tr>
+    </table>
+    <% end %>
+    <% end %>
+
+  </div>
+</div>
+<% end %>
+<!-- sub user admin end -->
+
+</div>
+</div>
+<!-- flex-end -->

@@ -1,0 +1,28 @@
+  <div class="desk-marg">
+    <div class="shrink">
+      <div class="pull-left mobile-hide letters letter-shift shift-down30">
+      </div>
+    </div>
+    <div class="col-sm-4 shift-down30">
+    <div class="white-card-ff">
+
+
+
+<p style="color: green"><%= notice %></p>
+
+<h1>Lists</h1>
+
+<div id="lists">
+  <ul data-controller="sortable" style="display: flex;">
+    <% @lists.each do |list| %>
+      <li data-sortable-update-url="<%= sort_list_path(list) %>" style="width: 400px; border:solid">
+        <%= render list %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+
+
+</div>
+</div>
