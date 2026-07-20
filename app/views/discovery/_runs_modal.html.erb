@@ -1,0 +1,15 @@
+<%= foundation_modal modal_id: "discoveryRuns", title: "Recent runs", size: :lg,
+      dialog_class: "discovery-runs-modal" do %>
+  <p class="discovery-modal-note theme-text">
+    WA SOS fetch history for the last <%= DiscoveryRun::RECENT_WINDOW.in_days.to_i %> days
+    (up to <%= DiscoveryRun::RECENT_LIMIT %> runs).
+  </p>
+
+  <div data-discovery-sos-fetch-target="runs">
+    <%= render "runs_table", recent_discovery_runs: recent_discovery_runs %>
+  </div>
+
+  <%= foundation_modal_footer do %>
+    <%= foundation_modal_close_button "Close", class: "btn btn-default theme-text" %>
+  <% end %>
+<% end %>

@@ -13,6 +13,26 @@ Rails.application.routes.draw do
     end
   end
   resources :activity, only: [:index, :show]
+  resources :discovery, only: [:index, :show] do
+    member do
+      patch :update_captured_business
+      post :promote_to_potential
+      post :archive
+      post :unarchive
+      delete :destroy
+      post :check_google_places
+      post :select_google_place
+      post :score
+      get :score_card
+    end
+    collection do
+      post :fetch_wa_sos
+      post :save_businesses
+      get :captured_list
+      patch :sos_defaults, action: :update_sos_defaults
+      get "runs/:run_id/load", action: :load_discovery_run, as: :load_discovery_run
+    end
+  end
   resources :offerings
 
   get 'new_custom_lead', to: 'leads#new_custom_lead'
@@ -21,6 +41,7 @@ Rails.application.routes.draw do
   get '/settings/transfer_customers', to: 'settings#transfer_customers', as: 'settings_transfer_customers'
   post '/settings/transfer_customers', to: 'settings#transfer_customers', as: 'process_transfer_customers'
   patch '/settings/organization_modules', to: 'settings#update_modules', as: :update_organization_modules
+  patch '/settings/discovery', to: 'settings#update_discovery', as: :update_discovery_settings
   post '/settings/toggle_customer_offerings_section', to: 'settings#toggle_customer_offerings_section', as: :settings_toggle_customer_offerings_section
   post '/settings/toggle_customer_revenue_section', to: 'settings#toggle_customer_revenue_section', as: :settings_toggle_customer_revenue_section
 

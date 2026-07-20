@@ -1,0 +1,44 @@
+<%# locals: business, score_preview (optional) %>
+<%
+  business = local_assigns[:business]
+  score_preview = local_assigns[:score_preview] || business.live_score_preview
+  modal_id = "discoveryScoreCard#{business.id}"
+%>
+<%= foundation_modal_wrapper class: "discovery-score-modal-host",
+      controllers: "discovery-score-modal",
+      data: {
+        discovery_score_modal_score_url_value: score_discovery_path(business),
+        discovery_score_modal_score_card_url_value: score_card_discovery_path(business)
+      } do %>
+  <%= foundation_modal_open_button modal_id,
+        business.scored? ? "Opportunity score (#{business.score})" : "Opportunity score",
+        class: "btn btn-md btn-wide-full discovery-opportunity-score-btn" %>
+
+  <%= foundation_modal modal_id: modal_id,
+        title: "Opportunity score",
+        size: :lg,
+        dialog_class: "discovery-score-card-modal" do %>
+    <p class="theme-text discovery-score-modal-status"
+       data-discovery-score-modal-target="status"></p>
+
+    <div data-discovery-score-modal-target="scoreCardHost">
+      <%= render "discovery/score_card",
+            business: business,
+            score_preview: score_preview,
+            show_actions: false,
+            modal: true %>
+    </div>
+
+    <%= foundation_modal_footer do %>
+      <%= link_to "Open in Discovery",
+            discovery_path(business),
+            class: "btn btn-dark theme-text" %>
+      <button type="button"
+              class="btn btn-warning theme-text"
+              data-action="click->discovery-score-modal#persistScore">
+        <%= business.scored? ? "Update score" : "Score" %>
+      </button>
+      <%= foundation_modal_close_button %>
+    <% end %>
+  <% end %>
+<% end %>

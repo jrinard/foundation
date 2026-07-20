@@ -1,0 +1,27 @@
+<%# locals: field:, value:, update_url:, aria_label: %>
+<%
+  field = local_assigns.fetch(:field)
+  value = local_assigns.fetch(:value).to_s
+  value = DiscoveryBusiness::CHECK_UNCHECKED unless DiscoveryBusiness::CHECK_STATUSES.include?(value)
+  update_url = local_assigns.fetch(:update_url)
+  aria_label = local_assigns.fetch(:aria_label, "Qualification status")
+  status_class =
+    case value
+    when DiscoveryBusiness::CHECK_MISSING then "is-sell"
+    when DiscoveryBusiness::CHECK_FOUND then "is-na"
+    else "is-needs-checked"
+    end
+%>
+<div class="foundation-qualify-select-wrap <%= status_class %>"
+     data-controller="foundation-qualify-select"
+     data-foundation-qualify-select-field-value="<%= field %>"
+     data-foundation-qualify-select-update-url-value="<%= update_url %>">
+  <select class="foundation-qualify-select theme-field"
+          aria-label="<%= aria_label %>"
+          data-foundation-qualify-select-target="select"
+          data-action="change->foundation-qualify-select#update">
+    <option value="<%= DiscoveryBusiness::CHECK_UNCHECKED %>"<%= " selected" if value == DiscoveryBusiness::CHECK_UNCHECKED %>>Needs checked</option>
+    <option value="<%= DiscoveryBusiness::CHECK_FOUND %>"<%= " selected" if value == DiscoveryBusiness::CHECK_FOUND %>>NA</option>
+    <option value="<%= DiscoveryBusiness::CHECK_MISSING %>"<%= " selected" if value == DiscoveryBusiness::CHECK_MISSING %>>Sell</option>
+  </select>
+</div>

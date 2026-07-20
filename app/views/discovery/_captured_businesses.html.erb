@@ -1,0 +1,105 @@
+<% if discovery_businesses.blank? %>
+  <div class="discovery-captured-list" data-captured-count="0">
+  <p class="discovery-results-empty theme-text">
+    <% if local_assigns[:captured_view] == "archived" %>
+      No archived businesses<% if local_assigns[:archive_filter] == DiscoveryBusiness::ARCHIVE_FILTER_DISCOVERIES %> in Discoveries<% elsif local_assigns[:archive_filter] == DiscoveryBusiness::ARCHIVE_FILTER_POTENTIALS %> in Potentials<% end %>.
+    <% else %>
+      No captured businesses yet.
+    <% end %>
+  </p>
+  </div>
+<% else %>
+  <div class="discovery-captured-list" data-captured-count="<%= discovery_businesses.size %>">
+
+  <div class="discovery-results-table-wrap">
+    <table class="discovery-results-table discovery-captured-table">
+      <thead>
+        <tr>
+          <th scope="col" class="theme-text discovery-captured-date">Captured Date</th>
+          <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
+            <% col_class = case column
+                 when "Business Name" then " discovery-captured-name"
+                 when Discovery::Sources::WaSos::CsvParser::OFFICE_ADDRESS_COLUMN then " discovery-captured-office-address"
+                 when Discovery::Sources::WaSos::CsvParser::REGISTERED_AGENT_NAME_COLUMN then " discovery-captured-agent"
+                 when "Business Type" then " discovery-captured-type"
+                 else ""
+                 end %>
+            <th scope="col" class="theme-text<%= col_class %>"><%= column %></th>
+          <% end %>
+          <th scope="col" class="theme-text discovery-captured-phone">Phone</th>
+          <th scope="col" class="theme-text discovery-captured-email">Email</th>
+          <th scope="col" class="theme-text discovery-captured-status">Status</th>
+          <th scope="col" class="theme-text discovery-captured-score-col">Score</th>
+          <th scope="col" class="theme-text discovery-captured-actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% discovery_businesses.each do |business| %>
+          <tr class="discovery-results-row" id="discovery-business-<%= business.id %>">
+            <td class="theme-text discovery-captured-date"><%= l(business.created_at.to_date, format: :long) %></td>
+            <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
+              <% col_class = case column
+                   when "Business Name" then " discovery-captured-name"
+                   when Discovery::Sources::WaSos::CsvParser::OFFICE_ADDRESS_COLUMN then " discovery-captured-office-address"
+                   when Discovery::Sources::WaSos::CsvParser::REGISTERED_AGENT_NAME_COLUMN then " discovery-captured-agent"
+                   when "Business Type" then " discovery-captured-type"
+                   else ""
+                   end %>
+              <td class="theme-text<%= col_class %>">
+                <% value = Discovery::Sources::WaSos::CsvParser.captured_business_value(business, column) %>
+                <% if column == "Business Name" && value.present? %>
+                  <%= link_to value, discovery_path(business), class: "theme-text discovery-business-link" %>
+                <% else %>
+                  <%= value.presence || "—" %>
+                <% end %>
+              </td>
+            <% end %>
+            <td class="theme-text discovery-sos-phone"><%= business.phone.presence || "—" %></td>
+            <td class="theme-text discovery-sos-email"><%= business.email.presence || "—" %></td>
+            <td class="theme-text discovery-captured-status">
+              <% if business.promoted? && business.customer_id.present? && potentials_enabled? %>
+                <%= link_to business.status_label, potentials_path(id: business.customer_id), class: "theme-text" %>
+              <% else %>
+                <%= business.status_label %>
+              <% end %>
+            </td>
+            <td class="theme-text discovery-captured-score">
+              <% if business.score_label.present? %>
+                <%= link_to business.score_label,
+                      discovery_path(business),
+                      class: "theme-text discovery-captured-score-link",
+                      title: "View opportunity score" %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+            <td class="theme-text discovery-captured-actions">
+              <%= link_to "Refine",
+                    discovery_path(business),
+                    class: "btn btn-sm discovery-refine-btn" %>
+
+              <% if business.archived? %>
+                <button type="button"
+                        class="btn btn-default btn-sm theme-text discovery-unarchive-btn"
+                        data-action="click->discovery-sos-fetch#unarchiveBusiness"
+                        data-unarchive-url="<%= unarchive_discovery_path(business) %>"
+                        data-business-name="<%= business.business_name %>">
+                  Unarchive
+                </button>
+              <% else %>
+                <button type="button"
+                        class="btn btn-default btn-sm theme-text discovery-archive-btn"
+                        data-action="click->discovery-sos-fetch#archiveBusiness"
+                        data-archive-url="<%= archive_discovery_path(business) %>"
+                        data-business-name="<%= business.business_name %>">
+                  Archive
+                </button>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  </div>
+<% end %>

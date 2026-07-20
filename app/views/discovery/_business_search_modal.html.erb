@@ -1,0 +1,27 @@
+<%= foundation_modal modal_id: "discoveryBusinessSearch", title: "Business search", size: :md do %>
+
+  <form class="discovery-business-search-form"
+        data-action="submit->discovery-sos-fetch#submitBusinessSearch">
+    <div class="field">
+      <%= label_tag :business_search_name, "Business name", class: "theme-text" %>
+      <%= text_field_tag :business_search_name,
+            nil,
+            class: "form-control theme-field",
+            placeholder: "e.g. LIFESPRING DESIGN",
+            autocomplete: "off",
+            required: true,
+            data: {
+              discovery_sos_fetch_target: "businessSearchInput",
+              action: "keydown->discovery-sos-fetch#handleBusinessSearchKeydown"
+            } %>
+    </div>
+
+    <%= foundation_modal_footer do %>
+      <%= button_tag "Search",
+            type: "submit",
+            class: "btn btn-warning",
+            data: { discovery_sos_fetch_target: "businessSearchSubmit" } %>
+      <%= foundation_modal_close_button %>
+    <% end %>
+  </form>
+<% end %>

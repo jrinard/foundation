@@ -74,8 +74,11 @@
         <% if leads_enabled? %>
         <%= link_to 'New Lead', new_lead_path, class: "btn btn-xs left-align btn-lead btn-lead-hover", data: { turbo_frame: "modal" } %>
         <% end %>
+        <% if discovery_enabled? %>
+        <li class="<%= 'active_bg' if controller_name == 'discovery' %>"><%= link_to "Discovery", discovery_index_path, class: "notWorking" %></li>
+        <% end %>
         <% if potentials_enabled? %>
-        <li class="<%= 'active_bg' if current_page?(potentials_path) %>"><%= link_to "Potentials #{@count_potential.size}", potentials_path(user_id: current_user.id), class: 'notWorking' %></li>
+        <li class="<%= 'active_bg' if current_page?(potentials_path) %>"><%= link_to "Prospects #{@count_potential.size}", potentials_path(user_id: current_user.id), class: 'notWorking' %></li>
         <% end %>
         <% if leads_enabled? %>
         <li class="<%= 'active_bg' if current_page?(customers_path) %>"><%= link_to "Leads #{@count_lead.size}", customers_path(user_id: current_user.id), :class => 'notWorking' %></li>
@@ -161,8 +164,11 @@
                 <% if leads_enabled? %>
                 <li class="<%= 'active_bg2' if current_page?(customers_path) %>"><%= link_to "Leads #{@count_lead.size}", customers_path(user_id: current_user.id), :class => 'btn btn-long-home-nav btn-text-mobile-nav' %></li>
                 <% end %>
+                <% if discovery_enabled? %>
+                <li class="<%= 'active_bg2' if controller_name == 'discovery' %>"><%= link_to "Discovery", discovery_index_path, class: "btn btn-long-home-nav btn-text-mobile-nav" %></li>
+                <% end %>
                 <% if potentials_enabled? %>
-                <li class="<%= 'active_bg2' if current_page?(potentials_path) %>"><%= link_to "Potentials #{@count_potential.size}", potentials_path(user_id: current_user.id), :class => 'btn btn-long-home-nav btn-text-mobile-nav' %></li>
+                <li class="<%= 'active_bg2' if current_page?(potentials_path) %>"><%= link_to "Prospects #{@count_potential.size}", potentials_path(user_id: current_user.id), :class => 'btn btn-long-home-nav btn-text-mobile-nav' %></li>
                 <% end %>
                 <% if current_clients_enabled? %>
                 <li class="<%= 'active_bg2' if controller_name == 'home' %>"><%= link_to "Current Clients #{@count_current.size}", home_index_path, :class => 'btn btn-long-home-nav btn-text-mobile-nav' %></li>

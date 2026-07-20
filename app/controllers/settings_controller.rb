@@ -62,6 +62,18 @@ class SettingsController < ApplicationController
     redirect_to settings_path(modules: "modules")
   end
 
+  def update_discovery
+    authorize! :manage, :settings
+
+    source = DiscoverySource.ensure_wa_sos!(current_organization)
+    if source.update(discovery_source_params)
+      flash[:notice] = "Discovery source settings saved for #{current_organization.name}."
+    else
+      flash[:alert] = source.errors.full_messages.to_sentence
+    end
+    redirect_to settings_path(discovery: "discovery")
+  end
+
   def toggle_customer_offerings_section
     unless current_user.admin? || current_user.superadmin?
       flash[:alert] = "You do not have permission to change that setting."
@@ -159,12 +171,17 @@ class SettingsController < ApplicationController
 
   def organization_modules_params
     params.require(:organization).permit(
+      :discovery_enabled,
       :potentials_enabled,
       :leads_enabled,
       :current_clients_enabled,
       :archived_enabled,
       :activity_enabled
     )
+  end
+
+  def discovery_source_params
+    params.require(:discovery_source).permit(:enabled)
   end
 
   def authorize_settings_read!

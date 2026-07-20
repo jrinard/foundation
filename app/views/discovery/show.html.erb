@@ -1,0 +1,333 @@
+<% business = @discovery_business %>
+<% business_snapshot = business.captured_business_snapshot %>
+<% current_enrichment = {
+     phone: business_snapshot[:phone],
+     website: business_snapshot[:website],
+     google_place_id: business_snapshot[:google_place_id],
+     google_rating: business_snapshot[:google_rating],
+     google_rating_count: business_snapshot[:google_rating_count]
+   } %>
+<% score_preview = Discovery::OpportunityScorePreview.call(discovery_business: business) %>
+
+<div class="desk-marg">
+  <div class="discovery-business-show-wrap shift-down30"
+       data-controller="discovery-business-show"
+       data-action="foundation-qualify-select:saved@window->discovery-business-show#refreshScoreCard foundation-qualify-select:error@window->discovery-business-show#handleToggleError foundation-toggle:saved@window->discovery-business-show#refreshScoreCard foundation-toggle:error@window->discovery-business-show#handleToggleError discovery-inline-field:saved@window->discovery-business-show#handleInlineFieldSaved discovery-inline-field:error@window->discovery-business-show#handleInlineFieldError"
+       data-discovery-business-show-google-places-url-value="<%= check_google_places_discovery_path(business) %>"
+       data-discovery-business-show-select-google-place-url-value="<%= select_google_place_discovery_path(business) %>"
+       data-discovery-business-show-update-url-value="<%= update_captured_business_discovery_path(business) %>"
+       data-discovery-business-show-score-url-value="<%= score_discovery_path(business) %>"
+       data-discovery-business-show-score-card-url-value="<%= score_card_discovery_path(business) %>"
+       data-discovery-business-show-current-enrichment-value="<%= ERB::Util.html_escape(current_enrichment.to_json) %>"
+       data-discovery-business-show-business-snapshot-value="<%= ERB::Util.html_escape(business_snapshot.to_json) %>">
+    <div class="customer-note-report support-white-card-theme discovery-business-show-card">
+      <div class="discovery-business-show-header">
+        <%= link_to "← Discovery", discovery_index_path, class: "theme-text discovery-business-back-link" %>
+
+        <div class="discovery-business-show-title-row">
+          <div class="discovery-business-show-title-group">
+            <h1 class="settings-title discovery-business-show-title"><%= business.business_name %></h1>
+            <p class="theme-text discovery-business-show-meta">
+              Captured <%= l(business.created_at.to_date, format: :long) %>
+              <% if business.vertical_classification.present? %>
+                · <%= business.vertical_classification %>
+              <% end %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="discovery-show-tabbar" aria-label="Discovery business sections">
+        <div class="discovery-show-tabbar-main">
+          <button type="button"
+                  class="discovery-show-tab is-active theme-text"
+                  data-discovery-business-show-target="tab"
+                  data-tab="details"
+                  data-action="click->discovery-business-show#switchTab"
+                  aria-selected="true">
+            Details
+          </button>
+          <button type="button"
+                  class="discovery-show-tab theme-text"
+                  data-discovery-business-show-target="tab"
+                  data-tab="social"
+                  data-action="click->discovery-business-show#switchTab"
+                  aria-selected="false">
+            Social Media Explore
+          </button>
+
+          <div class="discovery-show-tabbar-identifiers"
+               data-discovery-business-show-target="sosMenu"
+               data-action="click@window->discovery-business-show#closeSosMenuOnOutside">
+            <button type="button"
+                    class="discovery-show-tab discovery-show-tab-sos theme-text"
+                    data-action="click->discovery-business-show#toggleSosMenu"
+                    aria-expanded="false"
+                    aria-controls="discoverySosIdentifiersMenu"
+                    data-discovery-business-show-target="sosMenuButton">
+              Identifiers
+              <span class="discovery-show-tab-caret" aria-hidden="true">▾</span>
+            </button>
+
+            <div id="discoverySosIdentifiersMenu"
+                 class="discovery-show-sos-dropdown theme-card-simple theme-text"
+                 data-discovery-business-show-target="sosDropdown"
+                 hidden>
+              <div class="discovery-show-field">
+                <div class="discovery-show-field-label theme-text">Business type</div>
+                <div class="discovery-show-field-value theme-text"><%= business.display_business_type.presence || "—" %></div>
+              </div>
+              <div class="discovery-show-field">
+                <div class="discovery-show-field-label theme-text">UBI#</div>
+                <div class="discovery-show-field-value theme-text"><%= business.display_ubi.presence || "—" %></div>
+              </div>
+              <div class="discovery-show-field">
+                <div class="discovery-show-field-label theme-text">SOS Business ID</div>
+                <div class="discovery-show-field-value theme-text"><%= business.sos_business_id.presence || "—" %></div>
+              </div>
+              <div class="discovery-show-field">
+                <div class="discovery-show-field-label theme-text">Source</div>
+                <div class="discovery-show-field-value theme-text"><%= business.source_label %></div>
+              </div>
+              <div class="discovery-show-field">
+                <div class="discovery-show-field-label theme-text">Import filter city</div>
+                <div class="discovery-show-field-value theme-text"><%= business.filter_city.presence || "—" %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="discovery-show-tabbar-end">
+          <%= render "show_actions", business: business %>
+        </div>
+      </nav>
+
+      <p class="theme-text discovery-sos-status discovery-business-show-status"
+         data-discovery-business-show-target="status"></p>
+
+      <div data-discovery-business-show-target="panel" data-panel="details">
+        <div class="discovery-show-details-layout">
+          <section class="discovery-show-details-main" aria-label="Details">
+            <div class="discovery-show-details-heading-row">
+              <h2 class="discovery-show-details-heading theme-text">Details</h2>
+              <button type="button"
+                      class="btn btn-dark discovery-page-btn theme-text"
+                      data-action="click->discovery-business-show#openEditModal">
+                Edit
+              </button>
+            </div>
+
+            <% inline_update_url = update_captured_business_discovery_path(business) %>
+            <div class="discovery-show-fields">
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Reg Name",
+                    param: :registered_agent_name,
+                    value: business.registered_agent_name.presence || business.display_registered_agent_name,
+                    display_value: business.display_registered_agent_name,
+                    verified: business.field_verified?(:registered_agent_name) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Office address",
+                    param: :office_address,
+                    value: business.office_address.presence || business.display_office_address,
+                    display_value: business.display_office_address,
+                    verified: business.field_verified?(:office_address) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "City",
+                    param: :city,
+                    value: business.city.presence || business.display_city,
+                    display_value: business.display_city,
+                    verified: business.field_verified?(:city) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Phone",
+                    param: :phone,
+                    value: business.phone,
+                    input_type: :tel,
+                    verified: business.field_verified?(:phone) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Email",
+                    param: :email,
+                    value: business.email,
+                    input_type: :email,
+                    verified: business.field_verified?(:email) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Website",
+                    param: :website,
+                    value: business.website,
+                    input_type: :url,
+                    check_param: :website_check_status,
+                    check_status: business.website_check_status,
+                    refresh_score: true,
+                    verified: business.field_verified?(:website) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Google rating",
+                    param: :google_rating,
+                    value: business.google_rating,
+                    rating_count: business.google_rating_count,
+                    input_type: :google_rating,
+                    verified: business.field_verified?(:google_rating) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Google Place ID",
+                    param: :google_place_id,
+                    value: business.google_place_id,
+                    verified: business.field_verified?(:google_place_id) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Vertical",
+                    param: :vertical_classification,
+                    value: business.vertical_classification,
+                    input_type: :vertical_select,
+                    verified: business.field_verified?(:vertical_classification) %>
+
+              <div class="discovery-show-fields-social">
+                <%= render "inline_field",
+                      business: business,
+                      update_url: inline_update_url,
+                      label: "Facebook",
+                      param: :facebook_url,
+                      value: business.facebook_url,
+                      input_type: :url,
+                      check_param: :facebook_check_status,
+                      check_status: business.facebook_check_status,
+                      refresh_score: true,
+                      verified: business.field_verified?(:facebook_url) %>
+                <%= render "inline_field",
+                      business: business,
+                      update_url: inline_update_url,
+                      label: "LinkedIn",
+                      param: :linkedin_url,
+                      value: business.linkedin_url,
+                      input_type: :url,
+                      check_param: :linkedin_check_status,
+                      check_status: business.linkedin_check_status,
+                      refresh_score: true,
+                      verified: business.field_verified?(:linkedin_url) %>
+                <%= render "inline_field",
+                      business: business,
+                      update_url: inline_update_url,
+                      label: "Instagram",
+                      param: :instagram_url,
+                      value: business.instagram_url,
+                      input_type: :url,
+                      check_param: :instagram_check_status,
+                      check_status: business.instagram_check_status,
+                      refresh_score: true,
+                      verified: business.field_verified?(:instagram_url) %>
+              </div>
+            </div>
+          </section>
+
+          <div data-discovery-business-show-target="scoreCardHost">
+            <%= render "score_card",
+                  business: business,
+                  score_preview: score_preview,
+                  show_actions: true %>
+          </div>
+
+          <aside class="discovery-show-capture-panel theme-text" aria-label="Package summary">
+            <h2 class="discovery-show-capture-title theme-text">Summary</h2>
+            <div data-discovery-business-show-target="captureSummaryHost">
+              <%= render "capture_summary", capture_summary: score_preview[:capture_summary] %>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <div data-discovery-business-show-target="panel" data-panel="social" hidden>
+        <section class="discovery-show-social-panel">
+          <h2 class="discovery-business-show-section-title theme-text">Social Media Explore</h2>
+          <p class="theme-text discovery-business-show-section-note">
+            Placeholder lookups for now — expand later. Goal is detecting absence (sellable social gap).
+          </p>
+          <div class="discovery-business-tool-actions">
+            <button type="button"
+                    class="btn btn-dark discovery-page-btn theme-text"
+                    data-network="Facebook"
+                    data-action="click->discovery-business-show#socialPlaceholder">
+              Go find Facebook page
+            </button>
+            <button type="button"
+                    class="btn btn-dark discovery-page-btn theme-text"
+                    data-check-field="facebook_check_status"
+                    data-action="click->discovery-business-show#markCheckMissing">
+              Mark Facebook missing
+            </button>
+            <button type="button"
+                    class="btn btn-dark discovery-page-btn theme-text"
+                    data-network="LinkedIn"
+                    data-action="click->discovery-business-show#socialPlaceholder">
+              Go find LinkedIn page
+            </button>
+            <button type="button"
+                    class="btn btn-dark discovery-page-btn theme-text"
+                    data-check-field="linkedin_check_status"
+                    data-action="click->discovery-business-show#markCheckMissing">
+              Mark LinkedIn missing
+            </button>
+          </div>
+          <div class="discovery-show-fields discovery-show-social-fields">
+            <div class="discovery-show-field">
+              <div class="discovery-show-field-label theme-text">Facebook</div>
+              <div class="discovery-show-field-value theme-text">
+                <% if business.facebook_url.present? %>
+                  <%= link_to business.facebook_url, business.facebook_url, class: "theme-text", target: "_blank", rel: "noopener" %>
+                <% else %>
+                  —
+                <% end %>
+              </div>
+            </div>
+            <div class="discovery-show-field">
+              <div class="discovery-show-field-label theme-text">LinkedIn</div>
+              <div class="discovery-show-field-value theme-text">
+                <% if business.linkedin_url.present? %>
+                  <%= link_to business.linkedin_url, business.linkedin_url, class: "theme-text", target: "_blank", rel: "noopener" %>
+                <% else %>
+                  —
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <%= foundation_modal_wrapper class: "discovery-places-modal-host",
+          data: { discovery_business_show_target: "placesModalHost" } do %>
+      <%= render "google_places_modal" %>
+    <% end %>
+
+    <%= foundation_modal_wrapper class: "discovery-edit-modal-host",
+          data: { discovery_business_show_target: "editModalHost" } do %>
+      <%= render "edit_modal", business: business %>
+    <% end %>
+
+    <div class="discovery-business-show-footer">
+      <%= button_to "Delete Discovery",
+            discovery_path(business),
+            method: :delete,
+            class: "btn btn-dark discovery-page-btn discovery-delete-btn theme-text",
+            form: {
+              data: {
+                turbo_confirm: "Permanently delete \"#{business.business_name}\"? Saved score, Places data, and enrichment will be removed. You can capture it again from Discovery."
+              }
+            } %>
+    </div>
+  </div>
+</div>

@@ -8,6 +8,11 @@ class Customer < ApplicationRecord
   has_many :notes
   has_many :offerings
   has_many :qb_invoices
+  has_many :discovery_businesses
+
+  def linked_discovery_business
+    discovery_businesses.order(updated_at: :desc).first
+  end
   # validates :intake, presence: true  ###!!! Caused Leads to not create
 
   #part of sortable
@@ -66,6 +71,7 @@ class Customer < ApplicationRecord
   # after_update :check_to_move_away_from_lead
   after_update :boardCheck
   after_create :boardCheck
+  before_destroy :reopen_linked_discovery_businesses!
 
   #CUSTOMER IMPORTING
     # def self.import(file, list_id, user_id)
@@ -156,6 +162,14 @@ class Customer < ApplicationRecord
   end
 
     private
+
+    def reopen_linked_discovery_businesses!
+      discovery_businesses.update_all(
+        status: DiscoveryBusiness::STATUS_DISCOVERY,
+        customer_id: nil,
+        updated_at: Time.current
+      )
+    end
 
     def boardCheck
 

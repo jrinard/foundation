@@ -1,0 +1,12 @@
+<%# locals: capture_summary %>
+<%
+  capture_summary = local_assigns.fetch(:capture_summary)
+%>
+<div class="discovery-show-capture-summary">
+  <p class="discovery-show-capture-summary-headline theme-text"><%= capture_summary[:headline] %></p>
+  <ul class="discovery-show-capture-summary-list theme-text">
+    <% Array(capture_summary[:bullets]).each do |bullet| %>
+      <li><%= bullet %></li>
+    <% end %>
+  </ul>
+</div>

@@ -17,6 +17,11 @@
             <%= link_to "Modules", { :modules => "modules" }, class: modules_button_class %>
             <% end %>
 
+            <% if org_admin? && discovery_enabled? %>
+            <% discovery_button_class = params[:discovery] == 'discovery' ? 'btn btn-xl btn-default settings-menu-button active' : 'btn btn-xl btn-default settings-menu-button' %>
+            <%= link_to "Discovery", { :discovery => "discovery" }, class: discovery_button_class %>
+            <% end %>
+
         <% if org_admin? && quickbooks_enabled_for_org? %>
             <% qb_button_class = params[:qb] == 'qb' ? 'btn btn-xl btn-default settings-menu-button active' : 'btn btn-xl btn-default settings-menu-button' %>
             <%= link_to "Quickbooks", { :qb => "qb" }, class: qb_button_class %>
@@ -34,6 +39,9 @@
         <% end %>
          <% if params[:modules] && org_admin? %>
           <%= render 'modules' %>
+        <% end %>
+         <% if params[:discovery] && org_admin? && discovery_enabled? %>
+          <%= render 'discovery' %>
         <% end %>
          <% if params[:qb] && org_admin? && quickbooks_enabled_for_org? %>
           <%= render 'qb' %>

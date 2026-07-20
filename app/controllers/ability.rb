@@ -2,7 +2,7 @@ class Ability
   include CanCan::Ability
 
   CRM_MODELS = [
-    Customer, Lead, List, Contact, Note, Offering, Stats, QbInvoice
+    Customer, Lead, List, Contact, Note, Offering, Stats, QbInvoice, DiscoveryBusiness
   ].freeze
 
   ADMIN_ORG_MODELS = [

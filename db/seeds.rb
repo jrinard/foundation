@@ -78,11 +78,22 @@ if (default_org = Organization.find_by(slug: "default")) && Organization.where.n
   )
 end
 
+lifespring = Organization.find_by(slug: "lifespring") || seed_organization!(
+  slug: "lifespring",
+  name: "LifeSpring Design",
+  sales_pipeline: true
+)
+lifespring.update!(discovery_enabled: true) unless lifespring.discovery_enabled?
+DiscoverySource.ensure_wa_sos!(lifespring)
+
 echelon = Organization.find_by(slug: "echelon-demo") || seed_organization!(
   slug: "echelon-demo",
   name: "Echelon Demo",
   sales_pipeline: true
 )
+
+echelon.update!(discovery_enabled: true) unless echelon.discovery_enabled?
+DiscoverySource.ensure_wa_sos!(echelon)
 
 ridgefield = Organization.find_by(slug: "ridgefield-demo") || seed_organization!(
   slug: "ridgefield-demo",

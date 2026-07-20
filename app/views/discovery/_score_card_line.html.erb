@@ -1,0 +1,81 @@
+<%# locals: line, business (optional), show_actions: false, show_foundation_qualify: false %>
+<%
+  business = local_assigns[:business]
+  show_actions = local_assigns.fetch(:show_actions, false)
+  show_foundation_qualify = local_assigns.fetch(:show_foundation_qualify, false)
+  foundation_qualify_fields = {
+    weak_brand: {
+      field: "brand_check_status",
+      aria_label: "Logo and brand qualification"
+    },
+    no_website: {
+      field: "website_check_status",
+      aria_label: "Website qualification"
+    },
+    hosting_maintenance: {
+      field: "hosting_check_status",
+      aria_label: "Hosting and maintenance qualification"
+    }
+  }
+  qualify_config = foundation_qualify_fields[line.key.to_sym]
+  hosting_scorable =
+    business&.website.present? &&
+    business.website_check_status != DiscoveryBusiness::CHECK_MISSING
+  show_foundation_qualify =
+    show_foundation_qualify &&
+    show_actions &&
+    business.present? &&
+    qualify_config.present? &&
+    (line.key != :hosting_maintenance || hosting_scorable)
+  qualify_value =
+    if qualify_config.present?
+      business.public_send(qualify_config[:field])
+    end
+  mark_missing_fields = {
+    no_facebook: { field: "facebook_check_status", url_present: business&.facebook_url.present? },
+    no_linkedin: { field: "linkedin_check_status", url_present: business&.linkedin_url.present? }
+  }
+  mark_missing = mark_missing_fields[line.key.to_sym]
+  social_mark_missing_keys = %i[no_facebook no_linkedin]
+  show_mark_missing =
+    mark_missing &&
+    show_actions &&
+    business.present? &&
+    social_mark_missing_keys.include?(line.key.to_sym) &&
+    line.status != :gap
+  mark_missing_field = mark_missing&.dig(:field)
+%>
+<li class="discovery-score-card-row is-<%= line.status %>">
+  <div class="discovery-score-card-row-main">
+    <span class="discovery-score-card-label theme-text"><%= line.label %></span>
+
+    <div class="discovery-score-card-row-controls">
+      <% if show_foundation_qualify %>
+        <%= render "shared/foundation_qualify_select",
+              field: qualify_config[:field],
+              value: qualify_value,
+              update_url: update_captured_business_discovery_path(business),
+              aria_label: qualify_config[:aria_label] %>
+      <% elsif show_mark_missing %>
+        <button type="button"
+                class="btn discovery-page-btn discovery-mark-missing-btn theme-text"
+                data-check-field="<%= mark_missing_field %>"
+                data-action="click->discovery-business-show#markCheckMissing">
+          Missing
+        </button>
+      <% end %>
+
+      <span class="discovery-score-card-points theme-text">
+        <% if line.checked? %>
+          <span class="discovery-score-card-checked" aria-label="Checked" title="Checked">✓</span>
+        <% else %>
+          <%= line.display_points_label %>
+        <% end %>
+      </span>
+    </div>
+  </div>
+
+  <% if line.detail.present? %>
+    <div class="discovery-score-card-detail theme-text"><%= line.detail %></div>
+  <% end %>
+</li>

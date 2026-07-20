@@ -1,0 +1,64 @@
+<%
+  modal_size = local_assigns.fetch(:size, :md)
+  size_class = {
+    sm: "foundation-modal-sm",
+    md: "foundation-modal-md",
+    lg: "foundation-modal-lg"
+  }.fetch(modal_size.to_sym, "foundation-modal-md")
+
+  dialog_classes = token_list(
+    "foundation-modal theme-card-simple theme-text",
+    size_class,
+    local_assigns[:dialog_class]
+  )
+
+  title_id = title.present? ? "#{modal_id}Title" : nil
+  aria_label = local_assigns[:aria_label].presence || (title.blank? ? "Dialog" : nil)
+%>
+
+<div class="foundation-modal-backdrop theme-text"
+     data-foundation-modal-target="backdrop"
+     data-action="click->foundation-modal#backdropClick"
+     hidden></div>
+
+<div class="<%= dialog_classes %>"
+     id="<%= modal_id %>"
+     data-foundation-modal-target="dialog"
+     role="dialog"
+     <%= tag.attributes(
+       aria: {
+         labelledby: title_id,
+         label: title_id ? nil : aria_label,
+         modal: true
+       }.compact
+     ) %>
+     hidden>
+  <% unless title.blank? && local_assigns.fetch(:hide_close, false) %>
+    <div class="foundation-modal-header">
+      <% if title.present? %>
+        <h4 class="foundation-modal-title theme-text" id="<%= title_id %>"><%= title %></h4>
+      <% else %>
+        <span></span>
+      <% end %>
+
+      <% unless local_assigns.fetch(:hide_close, false) %>
+        <button type="button"
+                class="foundation-modal-close theme-text"
+                data-action="click->foundation-modal#close"
+                aria-label="Close">
+          &times;
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="foundation-modal-body theme-text">
+    <%= yield %>
+  </div>
+
+  <% if local_assigns[:footer].present? %>
+    <div class="foundation-modal-footer theme-text">
+      <%= footer %>
+    </div>
+  <% end %>
+</div>

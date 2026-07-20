@@ -1,0 +1,14 @@
+<%# locals: business %>
+<div class="discovery-business-show-actions">
+  <% if business.promoted? && business.customer_id.present? && potentials_enabled? %>
+    <%= link_to "View in Potentials",
+          potentials_path(id: business.customer_id),
+          class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text" %>
+  <% elsif business.promotable? && potentials_enabled? %>
+    <%= button_to "Promote to Potentials",
+          promote_to_potential_discovery_path(business),
+          method: :post,
+          class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text",
+          form: { data: { turbo_confirm: "Promote \"#{business.business_name}\" to Potentials?" } } %>
+  <% end %>
+</div>

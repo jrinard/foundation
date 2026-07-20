@@ -9,6 +9,9 @@ class Organization < ApplicationRecord
   has_many :site_settings, class_name: "SiteSetting", dependent: :destroy
   has_many :quickbooks_tokens, dependent: :destroy
   has_one :quickbooks_token, dependent: :destroy
+  has_many :discovery_businesses, dependent: :destroy
+  has_many :discovery_sources, dependent: :destroy
+  has_many :discovery_runs, dependent: :destroy
 
   INDEX_SORT_OPTIONS = %w[name recent quickbooks].freeze
   INDEX_SORT_DEFAULT = "name".freeze
@@ -62,6 +65,14 @@ class Organization < ApplicationRecord
     discovery_enabled
   end
 
+  def discovery_wa_sos_enabled?
+    wa_sos_discovery_source.enabled?
+  end
+
+  def wa_sos_discovery_source
+    @wa_sos_discovery_source ||= DiscoverySource.ensure_wa_sos!(self)
+  end
+
   def member_count
     organization_memberships.count
   end
@@ -102,6 +113,7 @@ class Organization < ApplicationRecord
       setting.show_customer_revenue_section = true
     end
     stats.find_or_create_by!(organization_id: id, main: true)
+    DiscoverySource.ensure_wa_sos!(self) if discovery_enabled?
   ensure
     Current.organization = previous_org
   end

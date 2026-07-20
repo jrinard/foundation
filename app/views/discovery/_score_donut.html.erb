@@ -1,0 +1,107 @@
+<%# locals: score_preview %>
+<%
+  segments = score_preview[:donut_segments] || []
+  donut_progress = score_preview[:donut_progress] || {}
+  size = 240
+  viewbox_pad_left = 28
+  viewbox_width = size + viewbox_pad_left
+  center = size / 2.0
+  radius = 66
+  stroke_width = 28
+  hole_radius = 46
+  label_radius = radius + (stroke_width / 2.0) + 18
+  r_inner = radius - (stroke_width / 2.0)
+  r_outer = radius + (stroke_width / 2.0)
+  pillar_gap_deg = 2.5
+  part_gap_deg = 1.5
+  slice_stroke = 1.75
+
+  annular_slice_path = lambda do |start_deg, end_deg|
+    start_rad = start_deg * Math::PI / 180.0
+    end_rad = end_deg * Math::PI / 180.0
+    x_os = center + r_outer * Math.cos(start_rad)
+    y_os = center + r_outer * Math.sin(start_rad)
+    x_oe = center + r_outer * Math.cos(end_rad)
+    y_oe = center + r_outer * Math.sin(end_rad)
+    x_is = center + r_inner * Math.cos(end_rad)
+    y_is = center + r_inner * Math.sin(end_rad)
+    x_ie = center + r_inner * Math.cos(start_rad)
+    y_ie = center + r_inner * Math.sin(start_rad)
+    span = end_deg - start_deg
+    large_arc = span.abs > 180 ? 1 : 0
+
+    "M #{x_os} #{y_os} A #{r_outer} #{r_outer} 0 #{large_arc} 1 #{x_oe} #{y_oe} " \
+      "L #{x_is} #{y_is} A #{r_inner} #{r_inner} 0 #{large_arc} 0 #{x_ie} #{y_ie} Z"
+  end
+
+  label_anchors = {
+    social: "start",
+    website: "middle",
+    reputation: "end"
+  }
+
+  center_accounted = donut_progress[:accounted] || score_preview[:analyzed_count].to_i
+  center_total = donut_progress[:total] || score_preview[:analyzed_max].to_i
+  center_complete = center_total.positive? && center_accounted >= center_total
+%>
+<div class="discovery-score-donut-wrap" aria-label="Qualification progress: Social, Foundation, Reputation">
+  <div class="discovery-score-donut-chart">
+    <svg class="discovery-score-donut" viewBox="-<%= viewbox_pad_left %> 0 <%= viewbox_width %> <%= size %>" role="img" aria-hidden="true">
+      <% segments.each_with_index do |segment, pillar_index| %>
+        <%
+          parts = segment[:parts] || []
+          next if parts.blank?
+
+          pillar_start = -90 + (pillar_index * 120) + (pillar_gap_deg / 2.0)
+          pillar_end = -90 + ((pillar_index + 1) * 120) - (pillar_gap_deg / 2.0)
+          pillar_span = pillar_end - pillar_start
+          part_gaps_total = (parts.size - 1) * part_gap_deg
+          part_span = (pillar_span - part_gaps_total) / parts.size.to_f
+        %>
+        <% parts.each_with_index do |part, part_index| %>
+          <%
+            slice_start = pillar_start + (part_index * (part_span + part_gap_deg))
+            slice_end = slice_start + part_span
+            accounted = part[:accounted]
+            pillar_color = segment[:color]
+          %>
+          <path class="discovery-score-donut-slice <%= accounted ? "is-accounted" : "is-empty" %>"
+                d="<%= annular_slice_path.call(slice_start, slice_end) %>"
+                fill="<%= accounted ? pillar_color : "currentColor" %>"
+                stroke="<%= pillar_color %>"
+                stroke-width="<%= slice_stroke %>"
+                data-pillar="<%= segment[:key] %>"
+                data-part="<%= part[:key] %>">
+            <title><%= part[:label] %>: <%= accounted ? "Checked" : "Not checked yet" %></title>
+          </path>
+        <% end %>
+      <% end %>
+
+      <% segments.each_with_index do |segment, index| %>
+        <%
+          mid_angle_deg = -90 + (index * 120) + 60
+          mid_angle_rad = mid_angle_deg * Math::PI / 180.0
+          lx = center + label_radius * Math.cos(mid_angle_rad)
+          ly = center + label_radius * Math.sin(mid_angle_rad)
+          key = segment[:key].to_sym
+          anchor = label_anchors[key] || "middle"
+          extra_dy = key == :website ? 8 : 0
+          extra_dx = key == :reputation ? 12 : 0
+        %>
+        <text x="<%= lx + extra_dx %>"
+              y="<%= ly + extra_dy %>"
+              text-anchor="<%= anchor %>"
+              class="discovery-score-donut-segment-label <%= "is-analyzed" if segment[:analyzed] %>"
+              data-pillar="<%= segment[:key] %>"><%= segment[:label] %></text>
+      <% end %>
+
+      <circle cx="<%= center %>" cy="<%= center %>" r="<%= hole_radius %>" class="discovery-score-donut-hole"></circle>
+      <text x="<%= center %>" y="<%= center - 4 %>" text-anchor="middle" class="discovery-score-donut-center-value theme-text <%= "is-complete" if center_complete %>">
+        <%= center_accounted %>/<%= center_total %>
+      </text>
+      <text x="<%= center %>" y="<%= center + 14 %>" text-anchor="middle" class="discovery-score-donut-center-label theme-text <%= "is-complete" if center_complete %>">
+        checked
+      </text>
+    </svg>
+  </div>
+</div>

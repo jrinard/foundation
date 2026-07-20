@@ -12,6 +12,11 @@
       <h3 class="h4-black theme-text">Enabled pages</h3>
 
       <label class="org-admin-check">
+        <%= f.check_box :discovery_enabled %>
+        Discovery — automated business prospecting
+      </label>
+
+      <label class="org-admin-check">
         <%= f.check_box :potentials_enabled %>
         Potentials — pre-pipeline list
       </label>
@@ -43,7 +48,7 @@
 
   <br>
   <p class="theme-text help-block">
-    QuickBooks, Operations, and Discovery are platform modules configured on the Organizations tab (superadmin).
+    QuickBooks and Operations are platform modules configured on the Organizations tab (superadmin).
     When QuickBooks is enabled for this org, its settings appear under the Quickbooks tab above.
   </p>
 </div>

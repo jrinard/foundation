@@ -1,0 +1,40 @@
+<div class="discovery-result-filters">
+  <div class="discovery-result-filters-row">
+    <div class="field discovery-filter-city">
+      <%= label_tag :filter_city, "City", class: "theme-text" %>
+      <%= select_tag :filter_city,
+            options_for_select(Discovery::Sources::WaSos::Cities::OPTIONS, @filter_city),
+            class: "form-control theme-field",
+            data: {
+              discovery_sos_fetch_target: "cityFilter",
+              action: "change->discovery-sos-fetch#applyCityFilter"
+            } %>
+    </div>
+
+    <% if org_admin? %>
+      <%= form_with model: current_organization,
+            url: sos_defaults_discovery_index_path,
+            method: :patch,
+            local: true,
+            class: "discovery-filter-defaults-form",
+            data: { action: "submit->discovery-sos-fetch#syncFilterDefaultBeforeSave" } do |f| %>
+        <%= f.hidden_field :discovery_wa_sos_city,
+              data: { discovery_sos_fetch_target: "filterDefaultsCity" } %>
+        <%= f.submit "Save city default", class: "btn btn-default btn-sm theme-text" %>
+      <% end %>
+    <% end %>
+
+    <div class="field discovery-filter-name-search">
+
+      <%= text_field_tag :filter_business_name,
+            nil,
+            class: "form-control theme-field",
+            placeholder: "Search by name",
+            autocomplete: "off",
+            data: {
+              discovery_sos_fetch_target: "nameFilter",
+              action: "input->discovery-sos-fetch#applyFilters"
+            } %>
+    </div>
+  </div>
+</div>

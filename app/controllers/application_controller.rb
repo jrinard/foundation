@@ -18,6 +18,7 @@ class ApplicationController < ActionController::Base
                     :current_clients_enabled?,
                     :archived_enabled?,
                     :activity_enabled?,
+                    :discovery_enabled?,
                     :quickbooks_enabled_for_org?,
                     :org_admin?,
                     :org_default_path,
@@ -75,10 +76,15 @@ class ApplicationController < ActionController::Base
     current_organization&.activity_enabled?
   end
 
+  def discovery_enabled?
+    current_organization&.discovery_enabled?
+  end
+
   def org_default_path
     org = current_organization
     return root_path unless org
 
+    return discovery_index_path if org.discovery_enabled?
     return customers_path if org.leads_enabled?
     return potentials_path if org.potentials_enabled?
     return home_index_path if org.current_clients_enabled?
@@ -124,7 +130,7 @@ class ApplicationController < ActionController::Base
     devise_controller? ||
       controller_name.in?(%w[
         root organization_switches organizations users settings
-        quickbooks privacy eula registrations
+        quickbooks privacy eula registrations discovery
       ])
   end
 

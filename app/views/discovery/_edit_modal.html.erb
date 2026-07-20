@@ -1,0 +1,199 @@
+<%# locals: business %>
+<%= foundation_modal modal_id: "discoveryBusinessEdit", title: "Edit business", size: :lg do %>
+  <p class="discovery-modal-note theme-text">
+    Clear a field and save to reset it, then re-run Places for fresh data. Most fields can also be edited inline on the Details tab.
+  </p>
+
+  <%= form_with model: business,
+        url: update_captured_business_discovery_path(business),
+        method: :patch,
+        local: true,
+        html: { class: "discovery-business-edit-form" } do |f| %>
+    <div class="discovery-business-edit-grid">
+      <div class="field discovery-edit-field-full">
+        <%= f.label :business_name, "Business name" %>
+        <%= f.text_field :business_name, class: "form-control theme-field", required: true %>
+      </div>
+
+      <div class="field">
+        <%= f.label :registered_agent_name, "Reg Name" %>
+        <%= f.text_field :registered_agent_name, class: "form-control theme-field" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :office_address, "Office address" %>
+        <%= f.text_field :office_address, class: "form-control theme-field" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :city, "City" %>
+        <%= f.text_field :city, class: "form-control theme-field" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :phone, "Phone" %>
+        <%= f.telephone_field :phone, class: "form-control theme-field" %>
+      </div>
+
+      <div class="discovery-edit-field-pair">
+        <div class="field">
+          <%= f.label :website, "Website" %>
+          <%= f.url_field :website, class: "form-control theme-field", placeholder: "https://" %>
+        </div>
+        <div class="field">
+          <%= f.label :website_check_status, "Website check" %>
+          <%= f.select :website_check_status,
+                options_for_select(
+                  [["Not checked yet", "unchecked"], ["Found", "found"], ["Checked — missing", "missing"]],
+                  business.website_check_status
+                ),
+                {},
+                class: "form-control theme-field" %>
+        </div>
+      </div>
+
+      <div class="discovery-edit-field-pair">
+        <div class="field">
+          <%= f.label :google_rating, "Google rating" %>
+          <%= f.number_field :google_rating, class: "form-control theme-field", step: 0.1, min: 0, max: 5 %>
+        </div>
+        <div class="field">
+          <%= f.label :google_rating_count, "Google rating count" %>
+          <%= f.number_field :google_rating_count, class: "form-control theme-field", min: 0, step: 1 %>
+        </div>
+      </div>
+
+      <div class="discovery-edit-field-pair">
+        <div class="field">
+          <%= f.label :google_place_id, "Google Place ID" %>
+          <%= f.text_field :google_place_id, class: "form-control theme-field", placeholder: "ChIJ…" %>
+        </div>
+        <div class="field">
+          <%= f.label :places_check_status, "Places check" %>
+          <%= f.select :places_check_status,
+                options_for_select(
+                  [["Not checked yet", "unchecked"], ["Found / matched", "found"], ["Checked — missing", "missing"]],
+                  business.places_check_status
+                ),
+                {},
+                class: "form-control theme-field" %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= f.label :vertical_classification, "Vertical" %>
+        <%= f.select :vertical_classification,
+              options_for_select([["Select vertical…", ""]] + Discovery::Verticals::OPTIONS.map { |v| [v, v] }, business.vertical_classification),
+              {},
+              class: "form-control theme-field" %>
+      </div>
+    </div>
+
+    <h3 class="discovery-edit-modal-section-title theme-text">Social</h3>
+    <div class="discovery-business-edit-grid">
+      <div class="discovery-edit-field-pair">
+        <div class="field">
+          <%= f.label :facebook_url, "Facebook URL" %>
+          <%= f.url_field :facebook_url, class: "form-control theme-field", placeholder: "https://facebook.com/…" %>
+        </div>
+        <div class="field">
+          <%= f.label :facebook_check_status, "Facebook check" %>
+          <%= f.select :facebook_check_status,
+                options_for_select(
+                  [["Not checked yet", "unchecked"], ["Found", "found"], ["Checked — missing", "missing"]],
+                  business.facebook_check_status
+                ),
+                {},
+                class: "form-control theme-field" %>
+        </div>
+      </div>
+
+      <div class="discovery-edit-field-pair">
+        <div class="field">
+          <%= f.label :linkedin_url, "LinkedIn URL" %>
+          <%= f.url_field :linkedin_url, class: "form-control theme-field", placeholder: "https://linkedin.com/…" %>
+        </div>
+        <div class="field">
+          <%= f.label :linkedin_check_status, "LinkedIn check" %>
+          <%= f.select :linkedin_check_status,
+                options_for_select(
+                  [["Not checked yet", "unchecked"], ["Found", "found"], ["Checked — missing", "missing"]],
+                  business.linkedin_check_status
+                ),
+                {},
+                class: "form-control theme-field" %>
+        </div>
+      </div>
+
+      <div class="discovery-edit-field-pair">
+        <div class="field">
+          <%= f.label :instagram_url, "Instagram URL" %>
+          <%= f.url_field :instagram_url, class: "form-control theme-field", placeholder: "https://instagram.com/…" %>
+        </div>
+        <div class="field">
+          <%= f.label :instagram_check_status, "Instagram check" %>
+          <%= f.select :instagram_check_status,
+                options_for_select(
+                  [["Not checked yet", "unchecked"], ["Found", "found"], ["Checked — missing", "missing"]],
+                  business.instagram_check_status
+                ),
+                {},
+                class: "form-control theme-field" %>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="discovery-edit-modal-section-title theme-text">Other</h3>
+    <div class="discovery-business-edit-grid">
+      <div class="field">
+        <%= f.label :business_type, "Business type" %>
+        <%= f.text_field :business_type, class: "form-control theme-field" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :email, "Email" %>
+        <%= f.email_field :email, class: "form-control theme-field" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :sos_business_id, "State Business ID" %>
+        <%= f.number_field :sos_business_id, class: "form-control theme-field", min: 1, step: 1 %>
+      </div>
+
+      <div class="field">
+        <%= f.label :hosting_check_status, "Hosting & maintenance check" %>
+        <%= f.select :hosting_check_status,
+              options_for_select(
+                [
+                  ["Not checked yet", "unchecked"],
+                  ["Not a hosting sell", "found"],
+                  ["Hosting sell opportunity", "missing"]
+                ],
+                business.hosting_check_status
+              ),
+              {},
+              class: "form-control theme-field" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :brand_check_status, "Logo / brand check" %>
+        <%= f.select :brand_check_status,
+              options_for_select(
+                [
+                  ["Not checked yet", "unchecked"],
+                  ["Brand OK", "found"],
+                  ["Brand sell opportunity", "missing"]
+                ],
+                business.brand_check_status
+              ),
+              {},
+              class: "form-control theme-field" %>
+      </div>
+    </div>
+
+    <%= foundation_modal_footer do %>
+      <%= f.submit "Save", class: "btn btn-warning discovery-page-btn theme-text" %>
+      <%= foundation_modal_close_button "Cancel", class: "discovery-page-btn" %>
+    <% end %>
+  <% end %>
+<% end %>

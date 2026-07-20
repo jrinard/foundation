@@ -1,0 +1,29 @@
+<div class="row">
+  <br>
+  <div class="h3-black theme-text">Discovery — <%= current_organization.name %></div>
+  <br>
+
+  <p class="theme-text">
+    Enable data sources for automated prospecting. Search defaults for each source are stored per organization.
+  </p>
+
+  <% wa_sos_source = DiscoverySource.ensure_wa_sos!(current_organization) %>
+
+  <%= form_with model: wa_sos_source, url: update_discovery_settings_path, method: :patch, local: true do |f| %>
+    <div class="qb-form-cont lead-card-dark theme-text">
+      <h3 class="h4-black theme-text">Data sources</h3>
+
+      <label class="org-admin-check">
+        <%= f.check_box :enabled %>
+        Washington Secretary of State
+      </label>
+
+      <br>
+      <%= f.submit "Save source settings", class: "btn btn-xl btn-default settings-menu-button" %>
+    </div>
+  <% end %>
+
+  <p class="theme-text help-block">
+    WA SOS search defaults (business type, date range, city filter) are saved from the Discovery page into this org’s persisted WA SOS source record.
+  </p>
+</div>

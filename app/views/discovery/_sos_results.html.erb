@@ -1,0 +1,37 @@
+<% if rows.blank? %>
+  <p class="discovery-results-empty theme-text">
+    <% if total_before_filter.to_i.positive? %>
+      No businesses in <strong><%= city_filter %></strong> (<%= total_before_filter %> without filter).
+    <% else %>
+      No businesses returned for this search.
+    <% end %>
+  </p>
+<% else %>
+  <p class="discovery-results-count theme-text">
+    <%= pluralize(rows.size, "business") %> in <strong><%= city_filter %></strong>
+    <% if total_before_filter.to_i > rows.size %>
+      <span class="discovery-results-filter-note">(<%= total_before_filter %> without filter)</span>
+    <% end %>
+  </p>
+
+  <div class="discovery-results-table-wrap">
+    <table class="discovery-results-table">
+      <thead>
+        <tr>
+          <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
+            <th scope="col" class="theme-text"><%= column %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% rows.each do |row| %>
+          <tr class="discovery-results-row">
+            <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
+              <td class="theme-text"><%= row[column].presence || "—" %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

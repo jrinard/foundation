@@ -1,0 +1,62 @@
+<%= foundation_modal modal_id: "discoverySosSettings", title: "WA SOS search settings", size: :md do %>
+  <p class="discovery-modal-note theme-text">
+    These settings are saved on this org’s WA SOS discovery source and used when you run <strong>Collect State</strong>.
+  </p>
+
+  <div class="field">
+    <%= label_tag :modal_business_type_id, "Business type" %>
+    <%= select_tag :modal_business_type_id,
+          options_for_select(Discovery::Sources::WaSos::BusinessTypes::OPTIONS, @sos_settings[:business_type_id]),
+          class: "form-control theme-field",
+          data: { discovery_sos_page_target: "modalBusinessTypeId" } %>
+  </div>
+
+  <div class="field">
+    <%= label_tag :modal_start_date, "Start date (MM/DD/YYYY)" %>
+    <%= text_field_tag :modal_start_date, @sos_settings[:start_date],
+          class: "form-control theme-field",
+          data: { discovery_sos_page_target: "modalStartDate" } %>
+  </div>
+
+  <div class="field">
+    <%= label_tag :modal_end_date, "End date (MM/DD/YYYY)" %>
+    <%= text_field_tag :modal_end_date, @sos_settings[:end_date],
+          class: "form-control theme-field",
+          data: { discovery_sos_page_target: "modalEndDate" } %>
+  </div>
+
+  <div class="discovery-cadence-buttons">
+    <% Discovery::Sources::WaSos::DateCadence::OPTIONS.each do |cadence, label| %>
+      <%= button_tag label,
+            type: "button",
+            class: token_list(
+              "btn btn-default btn-sm theme-text discovery-cadence-btn",
+              ("discovery-cadence-active" if @sos_settings[:date_cadence] == cadence)
+            ),
+            data: {
+              discovery_sos_page_target: "cadenceButton",
+              action: "discovery-sos-page#setCadence",
+              discovery_sos_page_cadence_param: cadence
+            } %>
+    <% end %>
+  </div>
+
+  <%= foundation_modal_footer do %>
+    <%= button_tag "Apply",
+          type: "button",
+          class: "btn btn-warning",
+          data: { action: "click->discovery-sos-page#applySettings click->foundation-modal#close" } %>
+
+    <%= form_with model: current_organization, url: sos_defaults_discovery_index_path, method: :patch, local: true, class: "discovery-sos-defaults-form" do |f| %>
+      <%= f.hidden_field :discovery_wa_sos_business_type_id, value: @sos_settings[:business_type_id],
+            data: { discovery_sos_page_target: "defaultsBusinessTypeId" } %>
+      <%= f.hidden_field :discovery_wa_sos_date_cadence, value: @sos_settings[:date_cadence],
+            data: { discovery_sos_page_target: "defaultsDateCadence" } %>
+      <%= f.submit "Save as defaults", class: "btn btn-default theme-text",
+            data: { action: "click->discovery-sos-page#syncDefaultsBeforeSave" },
+            name: "save_wa_sos_defaults", value: "Save as defaults" %>
+    <% end %>
+
+    <%= foundation_modal_close_button %>
+  <% end %>
+<% end %>

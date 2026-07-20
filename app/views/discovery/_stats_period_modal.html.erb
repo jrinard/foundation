@@ -1,0 +1,36 @@
+<%# locals: stats_period, stats_period_links %>
+<%
+  stats_period = local_assigns.fetch(:stats_period, Discovery::StatsPeriod::DEFAULT)
+  stats_period_links = local_assigns.fetch(:stats_period_links)
+  modal_id = "discoveryStatsPeriod"
+%>
+<%= foundation_modal_wrapper class: "discovery-stats-period-host" do %>
+  <%= foundation_modal_open_button modal_id,
+        Discovery::StatsPeriod.label(stats_period),
+        class: "btn btn-sm discovery-stats-period-btn theme-text",
+        aria: { label: "Change stats time period" } do %>
+    <%= Discovery::StatsPeriod.label(stats_period) %>
+    <span class="discovery-stats-period-caret" aria-hidden="true">▾</span>
+  <% end %>
+
+  <%= foundation_modal modal_id: modal_id, title: "Stats period", size: :sm do %>
+    <p class="discovery-stats-period-note theme-text">
+      Counts SOS pulls, captures, and pipeline activity for the selected window.
+    </p>
+    <ul class="discovery-stats-period-options">
+      <% Discovery::StatsPeriod::OPTIONS.each do |value, label| %>
+        <li>
+          <%= link_to label,
+                stats_period_links[value],
+                class: token_list(
+                  "discovery-stats-period-option theme-text",
+                  "is-active" => stats_period == value
+                ) %>
+        </li>
+      <% end %>
+    </ul>
+    <%= foundation_modal_footer do %>
+      <%= foundation_modal_close_button %>
+    <% end %>
+  <% end %>
+<% end %>

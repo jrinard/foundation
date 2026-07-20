@@ -1,0 +1,165 @@
+<%# locals: score_preview, business (optional), show_actions: false, modal: false %>
+<%
+  business = local_assigns[:business]
+  score_preview = local_assigns.fetch(:score_preview)
+  show_actions = local_assigns.fetch(:show_actions, false)
+  modal = local_assigns.fetch(:modal, false)
+  card_classes = token_list(
+    "discovery-score-card theme-text",
+    ("is-modal" if modal)
+  )
+%>
+<div class="<%= card_classes %>" aria-label="Opportunity score">
+  <div class="discovery-score-card-header">
+    <div>
+      <h2 class="discovery-score-card-title theme-text">Opportunity score</h2>
+      <p class="discovery-score-card-note theme-text">
+        <% if business&.scored? %>
+          Last saved <%= l(business.scored_at, format: :short) %>
+          · <%= business.score %>/<%= score_preview[:max_total] %>
+          <% if business.score != score_preview[:total] %>
+            <span class="discovery-score-unsaved-hint">· preview <%= score_preview[:total] %></span>
+          <% end %>
+        <% else %>
+          Live preview — save when checks are complete
+        <% end %>
+      </p>
+    </div>
+
+    <% if show_actions && business.present? %>
+      <div class="discovery-score-card-actions">
+        <div class="discovery-capture-split-btn">
+          <button type="button"
+                  class="btn discovery-page-btn discovery-capture-btn discovery-capture-split-btn-main theme-text"
+                  data-api="v1"
+                  data-action="click->discovery-business-show#checkGooglePlaces">
+            Advanced Place Data
+          </button>
+          <button type="button"
+                  class="btn discovery-page-btn discovery-capture-btn discovery-capture-split-btn-cog theme-text"
+                  data-api="legacy"
+                  data-action="click->discovery-business-show#checkGooglePlaces"
+                  aria-label="Advanced Legacy Data">
+            &#9881;
+          </button>
+        </div>
+        <button type="button"
+                class="btn discovery-page-btn discovery-capture-btn theme-text"
+                data-action="click->discovery-business-show#persistScore"
+                data-discovery-business-show-target="scoreButton">
+          Save
+        </button>
+      </div>
+    <% end %>
+  </div>
+
+  <%= render "discovery/score_donut", score_preview: score_preview %>
+
+  <%
+    summary = score_preview[:opportunity_summary] || {}
+    show_checks_needed =
+      score_preview[:unchecked_total].to_i.positive? &&
+      summary[:summary_text].blank? &&
+      summary[:total].to_i.zero?
+  %>
+  <% if show_checks_needed %>
+    <div class="discovery-score-focus discovery-score-focus-warn theme-text">
+      <span class="discovery-score-focus-label">Checks needed</span>
+      <strong class="discovery-score-focus-value">
+        Run Places, brand review, and social checks before gap scoring
+      </strong>
+    </div>
+  <% else %>
+    <div class="discovery-score-summary theme-text">
+      <div class="discovery-score-summary-main">
+        <span class="discovery-score-summary-label">Total opportunity</span>
+        <strong class="discovery-score-summary-value">
+          <%= summary[:total] %>
+          <span class="discovery-score-card-total-max">/ <%= summary[:max_total] %></span>
+        </strong>
+      </div>
+      <% if summary[:summary_text].present? %>
+        <p class="discovery-score-summary-pillars"><%= summary[:summary_text] %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="discovery-score-pillars">
+    <% score_preview[:pillars].each do |pillar| %>
+      <section class="discovery-score-pillar discovery-score-pillar-scored discovery-score-pillar-<%= pillar.key %><%= ' is-analyzed' if pillar.analyzed? %>"
+               style="--pillar-accent: <%= pillar.color %>;">
+        <div class="discovery-score-pillar-header">
+          <div>
+            <h3 class="discovery-score-pillar-title theme-text"><%= pillar.label %></h3>
+            <p class="discovery-score-pillar-blurb theme-text"><%= pillar.blurb %></p>
+          </div>
+          <div class="discovery-score-pillar-subtotal theme-text">
+            <% if pillar.unchecked_count.positive? && pillar.total.zero? %>
+              <span class="discovery-score-unchecked-badge">Check</span>
+            <% else %>
+              <%= pillar.total %><span class="discovery-score-card-total-max">/<%= pillar.max_total %></span>
+            <% end %>
+          </div>
+        </div>
+
+        <% if pillar.groups.present? %>
+          <% pillar.groups.each do |group| %>
+            <div class="discovery-score-pillar-group">
+              <h4 class="discovery-score-pillar-group-title theme-text"><%= group.label %></h4>
+              <ul class="discovery-score-card-list">
+                <% group.lines.each do |line| %>
+                  <%= render "discovery/score_card_line",
+                        line: line,
+                        business: business,
+                        show_actions: show_actions,
+                        show_foundation_qualify: %i[weak_brand no_website hosting_maintenance].include?(line.key) %>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        <% else %>
+          <ul class="discovery-score-card-list">
+            <% pillar.lines.each do |line| %>
+              <%= render "discovery/score_card_line",
+                    line: line,
+                    business: business,
+                    show_actions: show_actions,
+                        show_brand_toggle: false,
+                        show_foundation_qualify: false %>
+            <% end %>
+          </ul>
+        <% end %>
+      </section>
+    <% end %>
+
+    <section class="discovery-score-pillar discovery-score-pillar-fit">
+      <div class="discovery-score-pillar-header">
+        <div>
+          <h3 class="discovery-score-pillar-title theme-text">Fit</h3>
+          <p class="discovery-score-pillar-blurb theme-text">Timing &amp; targeting</p>
+        </div>
+        <div class="discovery-score-pillar-subtotal theme-text">
+          <%= score_preview[:fit_total] %><span class="discovery-score-card-total-max">/<%= score_preview[:fit_max] %></span>
+        </div>
+      </div>
+
+      <ul class="discovery-score-card-list">
+        <% score_preview[:fit_lines].each do |line| %>
+          <li class="discovery-score-card-row is-<%= line.status %>">
+            <div class="discovery-score-card-row-main">
+              <span class="discovery-score-card-label theme-text"><%= line.label %></span>
+              <div class="discovery-score-card-row-controls">
+                <span class="discovery-score-card-points theme-text">
+                  <%= line.awarded? ? "+#{line.points}" : "0" %>
+                </span>
+              </div>
+            </div>
+            <% if line.detail.present? %>
+              <div class="discovery-score-card-detail theme-text"><%= line.detail %></div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  </div>
+</div>

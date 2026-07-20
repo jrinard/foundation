@@ -228,6 +228,14 @@
 
 <br>
 
+<% linked_discovery = @chosen_customer&.linked_discovery_business %>
+<% if discovery_enabled? && linked_discovery.present? %>
+  <div class="discovery-prospect-score-entry">
+    <%= render "discovery/score_card_modal", business: linked_discovery %>
+  </div>
+  <br>
+<% end %>
+
 <!-- Offerings V2 -->
 <% if SiteSetting.customer_offerings_section_visible? %>
 <% if @customer_offerings_find.any? %>

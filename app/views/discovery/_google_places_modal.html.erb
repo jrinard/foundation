@@ -1,0 +1,28 @@
+<%= foundation_modal modal_id: "discoveryGooglePlaces", title: "Google Places", size: :lg,
+      dialog_class: "discovery-places-modal" do %>
+  <p class="theme-text discovery-modal-note discovery-places-modal-status"
+     data-discovery-business-show-target="modalStatus"></p>
+
+  <div data-discovery-business-show-target="modalMatches"></div>
+  <div data-discovery-business-show-target="modalDetails" hidden></div>
+
+  <%= foundation_modal_footer do %>
+    <button type="button"
+            class="btn btn-dark discovery-page-btn theme-text"
+            hidden
+            data-discovery-business-show-target="modalBackButton"
+            data-action="click->discovery-business-show#backToMatches">
+      ← Matches
+    </button>
+
+    <button type="button"
+            class="btn btn-warning discovery-page-btn theme-text"
+            hidden
+            data-discovery-business-show-target="modalConfirmButton"
+            data-action="click->discovery-business-show#confirmPlacesSave">
+      Confirm &amp; save
+    </button>
+
+    <%= foundation_modal_close_button "Cancel", class: "discovery-page-btn" %>
+  <% end %>
+<% end %>

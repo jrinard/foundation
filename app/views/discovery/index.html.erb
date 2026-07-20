@@ -1,0 +1,118 @@
+<div class="desk-marg"
+     data-controller="discovery-sos-fetch foundation-modal"
+     data-discovery-sos-fetch-columns-value="<%= Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.to_json %>"
+     data-discovery-sos-fetch-save-url-value="<%= save_businesses_discovery_index_path %>"
+     data-discovery-sos-fetch-fetch-url-value="<%= fetch_wa_sos_discovery_index_path %>"
+     data-discovery-sos-fetch-captured-list-url-value="<%= captured_list_discovery_index_path %>"
+     data-discovery-sos-fetch-captured-view-value="<%= @captured_view %>"
+     data-discovery-sos-fetch-hide-archived-value="<%= @hide_archived %>"
+     data-discovery-sos-fetch-archive-filter-value="<%= @archive_filter %>">
+  <div class="discovery-header-wrap shift-down30">
+    <%= foundation_modal_wrapper controllers: "discovery-sos-page foundation-modal",
+          class: "customer-note-report support-white-card-theme discovery-page discovery-header" do %>
+      <div class="discovery-header-top">
+        <div class="discovery-header-title">
+          <h1 class="settings-title">Discovery</h1>
+        </div>
+        <%= render "stats_card",
+              stats: @discovery_stats,
+              stats_period: @stats_period,
+              stats_period_links: @stats_period_links %>
+      </div>
+
+      <% unless current_organization.discovery_wa_sos_enabled? %>
+        <div class="alert alert-warning theme-text discovery-source-disabled-notice">
+          WA Secretary of State source is off. Enable it under <%= link_to "Settings → Discovery", settings_path(discovery: "discovery"), class: "theme-text" %>.
+        </div>
+      <% end %>
+
+      <div class="discovery-action-bar">
+        <div class="discovery-collect-actions">
+          <%= form_with url: fetch_wa_sos_discovery_index_path,
+                method: :post,
+                local: true,
+                class: "discovery-sos-fetch-form discovery-action-bar-form",
+                data: { action: "submit->discovery-sos-fetch#submit", discovery_sos_page_target: "fetchForm" } do %>
+            <%= hidden_field_tag :business_type_id, @sos_settings[:business_type_id],
+                  data: { discovery_sos_page_target: "businessTypeId" } %>
+            <%= hidden_field_tag :start_date, @sos_settings[:start_date],
+                  data: { discovery_sos_page_target: "startDate" } %>
+            <%= hidden_field_tag :end_date, @sos_settings[:end_date],
+                  data: { discovery_sos_page_target: "endDate" } %>
+            <%= hidden_field_tag :date_cadence, @sos_settings[:date_cadence],
+                  data: { discovery_sos_page_target: "dateCadence" } %>
+
+            <div class="discovery-split-btn">
+              <%= submit_tag "Collect State",
+                    class: "btn btn-warning discovery-split-btn-main",
+                    disabled: !current_organization.discovery_wa_sos_enabled? %>
+
+              <button type="button"
+                      class="btn btn-warning discovery-split-btn-cog"
+                      data-action="click->discovery-sos-page#syncModalFromForm click->foundation-modal#open"
+                      aria-controls="discoverySosSettings"
+                      aria-expanded="false"
+                      aria-label="SOS search settings">
+                &#9881;
+              </button>
+            </div>
+          <% end %>
+
+          <%= foundation_modal_open_button "discoveryBusinessSearch",
+                "Business Search",
+                class: "btn btn-default theme-text discovery-business-search-btn",
+                disabled: !current_organization.discovery_wa_sos_enabled?,
+                aria: { label: "Search WA SOS by business name" } %>
+        </div>
+
+        <div class="discovery-action-bar-right">
+          <%= foundation_modal_open_button "discoveryRuns", "View Runs",
+                class: "btn btn-default theme-text discovery-runs-btn",
+                aria: { label: "View recent WA SOS runs" } %>
+          <p class="theme-text discovery-sos-status discovery-sos-status-under-runs"
+             data-discovery-sos-fetch-target="status"></p>
+        </div>
+      </div>
+
+      <%= render "sos_settings_modal" %>
+      <%= render "business_search_modal" %>
+      <%= render "runs_modal", recent_discovery_runs: @recent_discovery_runs %>
+    <% end %>
+  </div>
+
+  <div class="discovery-results-wrap">
+    <div class="customer-note-report support-white-card-theme discovery-results-card">
+      <h2 class="settings-title discovery-results-title">Results</h2>
+
+      <%= render "sos_result_filters" %>
+
+      <div class="discovery-results-toggle-row">
+        <button type="button"
+                class="discovery-results-toggle theme-text"
+                data-discovery-sos-fetch-target="resultsToggle"
+                data-action="click->discovery-sos-fetch#toggleResults"
+                aria-expanded="true"
+                aria-controls="discoveryResultsPanel"
+                aria-label="Show or hide results">
+          <span class="discovery-results-toggle-arrow" aria-hidden="true">&#9660;</span>
+        </button>
+      </div>
+
+      <div id="discoveryResultsPanel"
+           class="discovery-results-panel"
+           data-discovery-sos-fetch-target="resultsPanel">
+        <div class="discovery-results-body" data-discovery-sos-fetch-target="results"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="discovery-captured-wrap">
+    <div class="customer-note-report support-white-card-theme discovery-results-card">
+      <%= render "captured_panel",
+            discovery_businesses: @discovery_businesses,
+            captured_view: @captured_view,
+            archive_filter: @archive_filter,
+            hide_archived: @hide_archived %>
+    </div>
+  </div>
+</div>

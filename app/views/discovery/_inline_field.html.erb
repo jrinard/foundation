@@ -1,0 +1,131 @@
+<%# locals: business, update_url, label:, param:, value:, verified:, input_type: :text, check_param: nil, check_status: nil, refresh_score: false, rating_count: nil %>
+<% display_value = local_assigns[:display_value].presence %>
+<% input_type = (local_assigns[:input_type] || :text).to_s %>
+<% check_param = local_assigns[:check_param] %>
+<% check_status = local_assigns.fetch(:check_status, "unchecked").to_s.presence || "unchecked" %>
+<% refresh_score = local_assigns.fetch(:refresh_score, false) %>
+<% rating_count = local_assigns[:rating_count] %>
+<% empty = "—" %>
+
+<div class="discovery-show-field discovery-show-field-checked discovery-inline-field"
+     data-controller="discovery-inline-field"
+     data-discovery-inline-field-update-url-value="<%= update_url %>"
+     data-discovery-inline-field-param-value="<%= param %>"
+     data-discovery-inline-field-input-type-value="<%= input_type %>"
+     data-discovery-inline-field-refresh-score-value="<%= refresh_score ? "true" : "false" %>"
+     <% if check_param.present? %>
+       data-discovery-inline-field-check-param-value="<%= check_param %>"
+     <% end %>>
+  <span class="discovery-field-check <%= "is-verified" if verified %>"
+        data-discovery-inline-field-target="checkIndicator"
+        aria-hidden="true"
+        title="<%= verified ? "Verified on file" : "Not checked yet" %>"></span>
+
+  <div class="discovery-show-field-body">
+    <div class="discovery-show-field-label theme-text"><%= label %></div>
+
+    <div class="discovery-inline-field-row">
+      <div class="discovery-inline-field-view" data-discovery-inline-field-target="viewMode">
+        <div class="discovery-show-field-value theme-text discovery-inline-display"
+             data-discovery-inline-field-target="display"
+             <% unless input_type == "url" && value.present? %>
+               data-action="click->discovery-inline-field#startEdit"
+               title="Click to edit"
+             <% end %>>
+          <% if input_type == "url" && value.present? %>
+            <%= link_to value, value, class: "theme-text", target: "_blank", rel: "noopener" %>
+          <% elsif input_type == "google_rating" %>
+            <%= business.google_rating_label %>
+          <% elsif input_type == "vertical_select" %>
+            <%= value.presence || empty %>
+          <% else %>
+            <%= display_value.presence || value.presence || empty %>
+          <% end %>
+        </div>
+        <button type="button"
+                class="discovery-inline-edit-btn theme-text"
+                title="Edit <%= label %>"
+                aria-label="Edit <%= label %>"
+                data-action="click->discovery-inline-field#startEdit">
+          ✎
+        </button>
+      </div>
+
+      <div class="discovery-inline-field-edit"
+           data-discovery-inline-field-target="editMode"
+           data-action="keydown->discovery-inline-field#handleKeydown">
+        <div class="discovery-inline-field-edit-fields">
+          <% if input_type == "vertical_select" %>
+            <select class="form-control theme-field discovery-inline-field-input"
+                    data-discovery-inline-field-target="input">
+              <option value="">Select vertical…</option>
+              <% Discovery::Verticals::OPTIONS.each do |option| %>
+                <option value="<%= option %>" <%= "selected" if value.to_s == option %>><%= option %></option>
+              <% end %>
+            </select>
+          <% elsif input_type == "google_rating" %>
+            <input type="number"
+                   class="form-control theme-field discovery-inline-field-input"
+                   value="<%= value %>"
+                   step="0.1"
+                   min="0"
+                   max="5"
+                   placeholder="Rating"
+                   data-discovery-inline-field-target="input">
+            <input type="number"
+                   class="form-control theme-field discovery-inline-field-input discovery-inline-field-input-count"
+                   value="<%= rating_count %>"
+                   min="0"
+                   step="1"
+                   placeholder="Count"
+                   data-discovery-inline-field-target="ratingCountInput">
+          <% elsif check_param.present? %>
+            <% field_options = {
+                 class: "form-control theme-field discovery-inline-field-input",
+                 placeholder: (input_type == "url" ? "https://" : nil),
+                 data: { discovery_inline_field_target: "input" }
+               } %>
+            <% if input_type == "url" %>
+              <%= url_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% else %>
+              <%= text_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% end %>
+            <select class="form-control theme-field discovery-inline-field-check-select"
+                    aria-label="<%= label %> check status"
+                    data-discovery-inline-field-target="checkSelect">
+              <option value="unchecked" <%= "selected" if check_status == "unchecked" %>>Not checked</option>
+              <option value="found" <%= "selected" if check_status == "found" %>>Found</option>
+              <option value="missing" <%= "selected" if check_status == "missing" %>>Missing</option>
+            </select>
+          <% else %>
+            <% field_options = {
+                 class: "form-control theme-field discovery-inline-field-input",
+                 placeholder: (input_type == "url" ? "https://" : nil),
+                 data: { discovery_inline_field_target: "input" }
+               } %>
+            <% case input_type %>
+            <% when "url" %>
+              <%= url_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% when "tel" %>
+              <%= telephone_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% when "email" %>
+              <%= email_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% when "number" %>
+              <%= number_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% else %>
+              <%= text_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% end %>
+          <% end %>
+        </div>
+        <button type="button"
+                class="btn btn-dark discovery-page-btn discovery-inline-save-btn"
+                data-discovery-inline-field-target="saveButton"
+                data-action="click->discovery-inline-field#save"
+                title="Save"
+                aria-label="Save <%= label %>">
+          ✓
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

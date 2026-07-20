@@ -1,0 +1,56 @@
+<div class="discovery-captured-header">
+  <h2 class="settings-title discovery-results-title discovery-captured-title"
+      data-discovery-sos-fetch-target="capturedTitle">
+    <span data-discovery-sos-fetch-target="capturedTitleLabel"><%= captured_view == "archived" ? "Archived Businesses" : "Captured Businesses" %></span><span class="discovery-captured-count theme-text" data-discovery-sos-fetch-target="capturedCount">(<%= discovery_businesses.size %>)</span>
+  </h2>
+
+  <div class="discovery-captured-controls">
+    <label class="discovery-hide-archived-label theme-text<%= " is-hidden" if captured_view == "archived" %>"
+           data-discovery-sos-fetch-target="hideArchivedLabel">
+      <%= check_box_tag :hide_archived, "1", hide_archived,
+            class: "discovery-hide-archived-checkbox",
+            data: {
+              discovery_sos_fetch_target: "hideArchived",
+              action: "change->discovery-sos-fetch#refreshCapturedList"
+            } %>
+      Hide Archived
+    </label>
+
+    <div class="discovery-archive-filter-wrap<%= " is-hidden" unless captured_view == "archived" %>"
+         data-discovery-sos-fetch-target="archiveFilterWrap">
+      <%= label_tag :archive_filter, "Show", class: "theme-text discovery-archive-filter-label" %>
+      <%= select_tag :archive_filter,
+            options_for_select(
+              [
+                ["All", DiscoveryBusiness::ARCHIVE_FILTER_ALL],
+                ["Discoveries", DiscoveryBusiness::ARCHIVE_FILTER_DISCOVERIES],
+                ["Potentials", DiscoveryBusiness::ARCHIVE_FILTER_POTENTIALS]
+              ],
+              archive_filter
+            ),
+            class: "form-control theme-field discovery-archive-filter",
+            data: {
+              discovery_sos_fetch_target: "archiveFilter",
+              action: "change->discovery-sos-fetch#refreshCapturedList"
+            } %>
+    </div>
+
+    <button type="button"
+            class="btn btn-default btn-sm theme-text discovery-archived-view-btn"
+            data-discovery-sos-fetch-target="archivedViewBtn"
+            data-action="click->discovery-sos-fetch#toggleArchivedView"
+            data-captured-view="<%= captured_view %>">
+      <%= captured_view == "archived" ? "Captured List" : "View Archive" %>
+    </button>
+  </div>
+</div>
+
+<p class="theme-text discovery-sos-status discovery-save-status" data-discovery-sos-fetch-target="saveStatus"></p>
+
+<div data-discovery-sos-fetch-target="captured">
+  <%= render "captured_businesses",
+        discovery_businesses: discovery_businesses,
+        captured_view: captured_view,
+        archive_filter: archive_filter,
+        hide_archived: hide_archived %>
+</div>

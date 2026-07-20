@@ -1,0 +1,22 @@
+<%# locals: stats, stats_period, stats_period_links %>
+<%
+  stat_rows = stats.is_a?(Hash) ? stats[:stats] : stats
+  stats_period = local_assigns.fetch(:stats_period, stats[:period])
+  stats_period_links = local_assigns.fetch(:stats_period_links)
+%>
+<aside class="discovery-stats-card theme-text" aria-label="Discovery funnel stats">
+  <div class="discovery-stats-list-wrap">
+    <%= render "stats_period_modal",
+          stats_period: stats_period,
+          stats_period_links: stats_period_links %>
+
+    <ul class="discovery-stats-list">
+      <% stat_rows.each do |stat| %>
+        <li class="discovery-stat">
+          <span class="discovery-stat-value theme-text"><%= number_with_delimiter(stat.value) %></span>
+          <span class="discovery-stat-label theme-text"><%= stat.label %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</aside>

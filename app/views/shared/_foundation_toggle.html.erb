@@ -1,0 +1,30 @@
+<%# locals: checked:, field:, update_url:, on_label: "Sell", off_label: "NA", on_value: "missing", off_value: "found", aria_label: %>
+<%
+  checked = local_assigns.fetch(:checked, false)
+  field = local_assigns.fetch(:field)
+  update_url = local_assigns.fetch(:update_url)
+  on_label = local_assigns.fetch(:on_label, "Sell")
+  off_label = local_assigns.fetch(:off_label, "NA")
+  on_value = local_assigns.fetch(:on_value, DiscoveryBusiness::CHECK_MISSING)
+  off_value = local_assigns.fetch(:off_value, DiscoveryBusiness::CHECK_FOUND)
+  aria_label = local_assigns.fetch(:aria_label, "Toggle")
+%>
+<div class="foundation-toggle<%= ' is-on' if checked %>"
+     data-controller="foundation-toggle"
+     data-foundation-toggle-checked-value="<%= checked %>"
+     data-foundation-toggle-field-value="<%= field %>"
+     data-foundation-toggle-update-url-value="<%= update_url %>"
+     data-foundation-toggle-on-value-value="<%= on_value %>"
+     data-foundation-toggle-off-value-value="<%= off_value %>">
+  <span class="foundation-toggle-label foundation-toggle-label-off theme-text"><%= off_label %></span>
+  <button type="button"
+          class="foundation-toggle-track theme-text"
+          role="switch"
+          aria-checked="<%= checked %>"
+          aria-label="<%= aria_label %>"
+          data-foundation-toggle-target="track"
+          data-action="click->foundation-toggle#toggle">
+    <span class="foundation-toggle-thumb" aria-hidden="true"></span>
+  </button>
+  <span class="foundation-toggle-label foundation-toggle-label-on theme-text"><%= on_label %></span>
+</div>

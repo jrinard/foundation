@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_07_14_120000) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_14_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -88,6 +88,87 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_14_120000) do
     t.bigint "organization_id", null: false
     t.index ["list_id"], name: "index_customers_on_list_id"
     t.index ["organization_id"], name: "index_customers_on_organization_id"
+  end
+
+  create_table "discovery_businesses", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "customer_id"
+    t.string "source", default: "wa_sos", null: false
+    t.string "external_id", null: false
+    t.string "business_name", null: false
+    t.string "business_type"
+    t.string "office_address"
+    t.string "registered_agent_name"
+    t.string "city"
+    t.string "filter_city"
+    t.string "status", default: "discovery", null: false
+    t.jsonb "raw_payload", default: {}, null: false
+    t.bigint "sos_business_id"
+    t.string "phone"
+    t.string "email"
+    t.datetime "advanced_captured_at"
+    t.string "google_place_id"
+    t.string "website"
+    t.string "vertical_classification"
+    t.string "facebook_url"
+    t.string "linkedin_url"
+    t.decimal "google_rating", precision: 2, scale: 1
+    t.integer "google_rating_count"
+    t.string "places_check_status", default: "unchecked", null: false
+    t.string "facebook_check_status", default: "unchecked", null: false
+    t.string "linkedin_check_status", default: "unchecked", null: false
+    t.string "website_check_status", default: "unchecked", null: false
+    t.string "brand_check_status", default: "unchecked", null: false
+    t.string "hosting_check_status", default: "unchecked", null: false
+    t.string "instagram_url"
+    t.string "instagram_check_status", default: "unchecked", null: false
+    t.integer "score"
+    t.jsonb "score_breakdown", default: {}, null: false
+    t.jsonb "score_summary", default: {}, null: false
+    t.datetime "scored_at"
+    t.boolean "archived", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_discovery_businesses_on_customer_id"
+    t.index ["organization_id", "archived"], name: "index_discovery_businesses_on_org_and_archived"
+    t.index ["organization_id", "google_place_id"], name: "index_discovery_businesses_on_org_google_place_id"
+    t.index ["organization_id", "sos_business_id"], name: "index_discovery_businesses_on_org_sos_business_id"
+    t.index ["organization_id", "source", "external_id"], name: "index_discovery_businesses_on_org_source_external_id", unique: true
+    t.index ["organization_id"], name: "index_discovery_businesses_on_organization_id"
+  end
+
+  create_table "discovery_runs", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "discovery_source_id", null: false
+    t.string "source_key", null: false
+    t.string "triggered_by", null: false
+    t.bigint "triggered_by_user_id"
+    t.string "status", null: false
+    t.datetime "started_at", null: false
+    t.datetime "finished_at"
+    t.integer "row_count", default: 0, null: false
+    t.integer "http_status"
+    t.text "error"
+    t.jsonb "settings_snapshot", default: {}, null: false
+    t.text "raw_csv"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discovery_source_id", "started_at"], name: "index_discovery_runs_on_source_and_started_at"
+    t.index ["discovery_source_id"], name: "index_discovery_runs_on_discovery_source_id"
+    t.index ["organization_id", "started_at"], name: "index_discovery_runs_on_org_and_started_at"
+    t.index ["organization_id"], name: "index_discovery_runs_on_organization_id"
+    t.index ["triggered_by_user_id"], name: "index_discovery_runs_on_triggered_by_user_id"
+  end
+
+  create_table "discovery_sources", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "source_key", null: false
+    t.boolean "enabled", default: true, null: false
+    t.jsonb "settings", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "source_key"], name: "index_discovery_sources_on_org_and_source_key", unique: true
+    t.index ["organization_id"], name: "index_discovery_sources_on_organization_id"
   end
 
   create_table "leads", force: :cascade do |t|
@@ -297,6 +378,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_14_120000) do
     t.boolean "archived_enabled", default: true, null: false
     t.boolean "activity_enabled", default: true, null: false
     t.boolean "active", default: true, null: false
+    t.boolean "discovery_wa_sos_enabled", default: true, null: false
+    t.string "discovery_wa_sos_business_type_id", default: "65", null: false
+    t.boolean "discovery_wa_sos_active_only", default: true, null: false
+    t.string "discovery_wa_sos_date_cadence", default: "24h", null: false
+    t.string "discovery_wa_sos_city", default: "Vancouver", null: false
     t.index ["slug"], name: "index_organizations_on_slug", unique: true
   end
 
@@ -411,6 +497,12 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_14_120000) do
   add_foreign_key "contacts", "organizations"
   add_foreign_key "customers", "lists"
   add_foreign_key "customers", "organizations"
+  add_foreign_key "discovery_businesses", "customers"
+  add_foreign_key "discovery_businesses", "organizations"
+  add_foreign_key "discovery_runs", "discovery_sources"
+  add_foreign_key "discovery_runs", "organizations"
+  add_foreign_key "discovery_runs", "users", column: "triggered_by_user_id"
+  add_foreign_key "discovery_sources", "organizations"
   add_foreign_key "leads", "lists"
   add_foreign_key "leads", "organizations"
   add_foreign_key "lists", "organizations"

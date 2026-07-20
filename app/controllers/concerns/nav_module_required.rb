@@ -27,7 +27,8 @@ module NavModuleRequired
       leads: "Leads",
       current_clients: "Current Clients",
       archived: "Archived",
-      activity: "Activity"
+      activity: "Activity",
+      discovery: "Discovery"
     }.fetch(module_name.to_sym, module_name.to_s.humanize)
   end
 end

@@ -1,0 +1,50 @@
+<% if recent_discovery_runs.blank? %>
+  <p class="discovery-results-empty theme-text">No runs yet — use <strong>Collect State</strong> to fetch.</p>
+<% else %>
+  <div class="discovery-results-table-wrap discovery-runs-table-wrap">
+    <table class="discovery-results-table discovery-runs-table">
+      <thead>
+        <tr>
+          <th scope="col" class="theme-text">When</th>
+          <th scope="col" class="theme-text">Triggered by</th>
+          <th scope="col" class="theme-text">Status</th>
+          <th scope="col" class="theme-text">Rows</th>
+          <th scope="col" class="theme-text">Query</th>
+          <th scope="col" class="theme-text">Duration</th>
+          <th scope="col" class="theme-text discovery-runs-actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% recent_discovery_runs.each do |run| %>
+          <tr class="discovery-results-row">
+            <td class="theme-text discovery-runs-when">
+              <%= l(run.started_at, format: :short) %>
+            </td>
+            <td class="theme-text discovery-runs-trigger"><%= run.trigger_label %></td>
+            <td class="theme-text">
+              <span class="discovery-run-status discovery-run-status-<%= run.status %>"
+                    <% if run.error.present? %>title="<%= h(run.error) %>"<% end %>>
+                <%= run.status_label %>
+              </span>
+            </td>
+            <td class="theme-text discovery-runs-rows"><%= run.row_count %></td>
+            <td class="theme-text discovery-runs-query"><%= run.query_summary %></td>
+            <td class="theme-text discovery-runs-duration"><%= run.duration_label %></td>
+            <td class="theme-text discovery-runs-actions">
+              <% if run.reloadable? %>
+                <button type="button"
+                        class="btn btn-dark btn-sm discovery-load-run-btn"
+                        data-action="click->discovery-sos-fetch#loadRun"
+                        data-load-run-url="<%= load_discovery_run_discovery_index_path(run) %>">
+                  Load
+                </button>
+              <% else %>
+                <span class="theme-text discovery-runs-no-load">—</span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
