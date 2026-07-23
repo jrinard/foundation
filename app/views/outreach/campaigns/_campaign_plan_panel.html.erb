@@ -1,0 +1,32 @@
+<% plan = local_assigns.fetch(:plan) %>
+
+<div class="outreach-campaign-plan-panel theme-text">
+  <div class="outreach-plan-card-head outreach-campaign-plan-head">
+    <h2 class="theme-text h4"><%= plan.name %></h2>
+    <span class="outreach-pill outreach-pill-muted"><%= plan.step_count %> steps</span>
+  </div>
+
+  <% if plan.description.present? %>
+    <p class="theme-text outreach-plan-desc"><%= plan.description %></p>
+  <% end %>
+
+  <ol class="outreach-step-list outreach-campaign-plan-steps">
+    <% plan.steps.each do |step| %>
+      <li class="outreach-step-list-item">
+        <strong><%= step.position %>.</strong>
+        <%= step.name %>
+        <span class="outreach-step-type">— <%= step.step_type_label %></span>
+        <% if step.suggested_day_offset.present? %>
+          <span class="outreach-step-type">· Day <%= step.suggested_day_offset %></span>
+        <% end %>
+        <% if step.instructions.present? %>
+          <div class="outreach-step-instructions"><%= step.instructions %></div>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+
+  <p class="theme-text outreach-muted outreach-campaign-plan-foot">
+    <%= link_to "Edit plan details", edit_outreach_plan_path(plan), class: "theme-text" %>
+  </p>
+</div>

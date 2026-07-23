@@ -172,6 +172,7 @@ class SettingsController < ApplicationController
   def organization_modules_params
     params.require(:organization).permit(
       :discovery_enabled,
+      :outreach_enabled,
       :potentials_enabled,
       :leads_enabled,
       :current_clients_enabled,

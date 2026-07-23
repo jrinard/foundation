@@ -9,6 +9,7 @@ class Customer < ApplicationRecord
   has_many :offerings
   has_many :qb_invoices
   has_many :discovery_businesses
+  has_many :outreach_enrollments, dependent: :destroy
 
   def linked_discovery_business
     discovery_businesses.order(updated_at: :desc).first

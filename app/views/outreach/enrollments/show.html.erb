@@ -1,0 +1,142 @@
+<div class="outreach-header-wrap discovery-header-wrap shift-down30">
+  <div class="discovery-page outreach-page discovery-header support-white-card-theme">
+    <div class="discovery-header-top outreach-header-top">
+      <div class="discovery-header-title">
+        <h1 class="settings-title"><%= @enrollment.customer.name %></h1>
+        <p class="theme-text outreach-subtitle">
+          Campaign: <%= @enrollment.outreach_campaign.name %>
+          · Plan: <%= @enrollment.outreach_plan.name %>
+          · <span class="outreach-pill <%= outreach_status_badge_class(@enrollment.status) %>"><%= @enrollment.status_label %></span>
+          · <span class="outreach-pill <%= customer_crm_stage_badge_class(@enrollment.customer) %>"><%= customer_crm_stage_label(@enrollment.customer) %></span>
+        </p>
+      </div>
+      <div class="outreach-header-actions">
+        <%= link_to customer_crm_stage_label(@enrollment.customer), outreach_customer_work_path(@enrollment.customer), class: "btn btn-default theme-text" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="outreach-campaigns-wrap discovery-captured-wrap shift-down30">
+  <div class="discovery-page outreach-page support-white-card-theme outreach-card-pad">
+    <%= render "outreach/shared/context_nav", enrollment: @enrollment %>
+
+    <div class="outreach-enrollment-work-grid">
+      <div class="outreach-enrollment-step-panel">
+        <% if @enrollment.plan_complete? %>
+          <div class="outreach-current-step-card">
+            <h2 class="theme-text h4">Current step</h2>
+            <p class="theme-text outreach-empty">Plan complete for this campaign.</p>
+          </div>
+        <% else %>
+          <div class="outreach-current-step-card">
+            <h2 class="theme-text h4">Current step</h2>
+            <p class="theme-text outreach-current-step-label">
+              Step <%= @enrollment.current_step_position %> of <%= @enrollment.total_steps %> —
+              <strong><%= @enrollment.current_step_name %></strong>
+              (<%= @enrollment.current_step_type_label %>)
+            </p>
+            <% if @enrollment.current_step&.dig("instructions").present? %>
+              <p class="theme-text outreach-step-instructions"><%= @enrollment.current_step["instructions"] %></p>
+            <% end %>
+
+            <% unless @enrollment.paused? %>
+              <%= form_with url: complete_step_outreach_enrollment_path(@enrollment), method: :post, local: true, class: "outreach-complete-form theme-text" do %>
+                <div class="outreach-form-row outreach-form-row-wrap">
+                  <%= select_tag :outcome,
+                        options_for_select([
+                          ["Completed", "completed"],
+                          ["Waiting for response", "waiting"],
+                          ["Conversation started", "conversation"],
+                          ["Interested", "interested"],
+                          ["Not interested", "not_interested"],
+                          ["Follow up later", "follow_up_later"]
+                        ]),
+                        class: "form-control theme-field outreach-select" %>
+                  <%= text_field_tag :notes, nil, placeholder: "Notes (optional)", class: "form-control theme-field outreach-grow" %>
+                  <%= submit_tag "Complete step", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary" %>
+                </div>
+              <% end %>
+            <% else %>
+              <p class="theme-text outreach-muted">Enrollment is paused.</p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="outreach-enrollment-sidebar">
+        <div class="outreach-enrollment-progress-panel">
+          <div class="outreach-enrollment-progress-head">
+            <h2 class="theme-text h4">Plan progress</h2>
+            <div class="outreach-enrollment-progress-actions">
+              <% if @enrollment.reenrollable? %>
+                <%= button_to "Re-enroll in this campaign",
+                      reenroll_outreach_enrollment_path(@enrollment),
+                      method: :post,
+                      class: "btn btn-warning discovery-split-btn-main btn-xs",
+                      data: { turbo_confirm: "Start a fresh run in #{@enrollment.outreach_campaign.name}? The previous attempt will stay in history." } %>
+              <% elsif @enrollment.paused? %>
+                <%= button_to "Resume", resume_outreach_enrollment_path(@enrollment), method: :post, class: "btn btn-default btn-xs theme-text" %>
+              <% else %>
+                <%= button_to "Pause", pause_outreach_enrollment_path(@enrollment), method: :post, class: "btn btn-default btn-xs theme-text" %>
+              <% end %>
+            </div>
+          </div>
+          <%= render "outreach/enrollments/step_checklist", enrollment: @enrollment %>
+        </div>
+
+        <div class="outreach-enrollment-activity-panel">
+          <h2 class="theme-text h4">Activity</h2>
+          <div class="outreach-enrollment-activity-feed">
+            <% if @activities.any? %>
+              <ul class="outreach-activity-list theme-text">
+                <% @activities.each do |activity| %>
+                  <li>
+                    <span class="outreach-activity-time"><%= activity.created_at.strftime("%b %d %I:%M %p") %></span>
+                    <span class="outreach-activity-actor"><%= outreach_activity_actor_label(activity) %></span>
+                    <%= activity.summary %>
+                  </li>
+                <% end %>
+              </ul>
+            <% else %>
+              <p class="theme-text outreach-empty">No activity yet.</p>
+            <% end %>
+          </div>
+        </div>
+
+        <% if customer_promotable_to_lead?(@enrollment.customer) && @promote_lists.present? %>
+          <div class="outreach-enrollment-promote-panel">
+            <h2 class="theme-text h4">Promote to Leads</h2>
+            <p class="theme-text outreach-promote-help">Move to Leads Board when pursuit is hot. Outreach keeps running on this enrollment.</p>
+            <%= form_with url: outreach_promote_customer_path(customer_id: @enrollment.customer_id), method: :post, local: true, class: "outreach-promote-form theme-text" do %>
+              <div class="outreach-form-row outreach-enrollment-promote-form-row">
+                <div class="outreach-enrollment-promote-control">
+                  <%= select_tag :list_id,
+                        options_for_select(@promote_lists, @default_promote_list_id),
+                        class: "form-control theme-field outreach-select outreach-enrollment-promote-select",
+                        required: true %>
+                  <%= submit_tag "Promote to Leads", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary outreach-enrollment-promote-submit",
+                        data: { turbo_confirm: "Move #{@enrollment.customer.name} to the Lead Pipeline?" } %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @prior_attempts.any? %>
+      <hr>
+      <h2 class="theme-text h4">Previous attempts</h2>
+      <ul class="outreach-prior-attempts theme-text">
+        <% @prior_attempts.each do |attempt| %>
+          <li>
+            <%= attempt.status_label %>
+            · <%= attempt.enrolled_at.strftime("%b %d, %Y") %>
+            · <%= link_to "View", outreach_enrollment_path(attempt), class: "theme-text" %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+</div>

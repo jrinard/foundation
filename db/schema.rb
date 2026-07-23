@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_07_14_180000) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_21_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -383,7 +383,78 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_14_180000) do
     t.boolean "discovery_wa_sos_active_only", default: true, null: false
     t.string "discovery_wa_sos_date_cadence", default: "24h", null: false
     t.string "discovery_wa_sos_city", default: "Vancouver", null: false
+    t.boolean "outreach_enabled", default: false, null: false
     t.index ["slug"], name: "index_organizations_on_slug", unique: true
+  end
+
+  create_table "outreach_activities", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "outreach_enrollment_id", null: false
+    t.bigint "user_id"
+    t.string "activity_type", null: false
+    t.text "summary"
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_outreach_activities_on_organization_id"
+    t.index ["outreach_enrollment_id"], name: "index_outreach_activities_on_outreach_enrollment_id"
+    t.index ["user_id"], name: "index_outreach_activities_on_user_id"
+  end
+
+  create_table "outreach_campaigns", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "outreach_plan_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.string "status", default: "active", null: false
+    t.integer "cohort_goal"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_outreach_campaigns_on_organization_id"
+    t.index ["outreach_plan_id"], name: "index_outreach_campaigns_on_outreach_plan_id"
+  end
+
+  create_table "outreach_enrollments", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "customer_id", null: false
+    t.bigint "outreach_campaign_id", null: false
+    t.bigint "outreach_plan_id", null: false
+    t.integer "current_step_position", default: 1, null: false
+    t.string "status", default: "ready", null: false
+    t.jsonb "plan_snapshot", default: [], null: false
+    t.datetime "enrolled_at", null: false
+    t.datetime "paused_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_outreach_enrollments_on_customer_id"
+    t.index ["organization_id"], name: "index_outreach_enrollments_on_organization_id"
+    t.index ["outreach_campaign_id", "customer_id"], name: "index_outreach_enrollments_on_campaign_and_customer"
+    t.index ["outreach_campaign_id"], name: "index_outreach_enrollments_on_outreach_campaign_id"
+    t.index ["outreach_plan_id"], name: "index_outreach_enrollments_on_outreach_plan_id"
+  end
+
+  create_table "outreach_plan_steps", force: :cascade do |t|
+    t.bigint "outreach_plan_id", null: false
+    t.integer "position", null: false
+    t.string "name", null: false
+    t.string "step_type", null: false
+    t.text "instructions"
+    t.integer "suggested_day_offset"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["outreach_plan_id", "position"], name: "index_outreach_plan_steps_on_plan_and_position", unique: true
+    t.index ["outreach_plan_id"], name: "index_outreach_plan_steps_on_outreach_plan_id"
+  end
+
+  create_table "outreach_plans", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.string "service_tag"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_outreach_plans_on_organization_id"
   end
 
   create_table "qb_invoices", force: :cascade do |t|
@@ -510,6 +581,17 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_14_180000) do
   add_foreign_key "offerings", "organizations"
   add_foreign_key "organization_memberships", "organizations"
   add_foreign_key "organization_memberships", "users"
+  add_foreign_key "outreach_activities", "organizations"
+  add_foreign_key "outreach_activities", "outreach_enrollments"
+  add_foreign_key "outreach_activities", "users"
+  add_foreign_key "outreach_campaigns", "organizations"
+  add_foreign_key "outreach_campaigns", "outreach_plans"
+  add_foreign_key "outreach_enrollments", "customers"
+  add_foreign_key "outreach_enrollments", "organizations"
+  add_foreign_key "outreach_enrollments", "outreach_campaigns"
+  add_foreign_key "outreach_enrollments", "outreach_plans"
+  add_foreign_key "outreach_plan_steps", "outreach_plans"
+  add_foreign_key "outreach_plans", "organizations"
   add_foreign_key "qb_invoices", "organizations"
   add_foreign_key "quickbooks_tokens", "organizations"
   add_foreign_key "site_settings", "organizations"

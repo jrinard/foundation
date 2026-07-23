@@ -1,0 +1,14 @@
+<ol class="outreach-plan-progress theme-text">
+  <% enrollment.plan_steps.each do |step| %>
+    <% marker = outreach_step_marker(enrollment, step) %>
+    <li class="outreach-plan-progress-item outreach-plan-progress-item--<%= marker %>">
+      <div class="outreach-plan-progress-head">
+        <span class="outreach-plan-progress-glyph" aria-hidden="true"><%= outreach_step_marker_glyph(marker) %></span>
+        <span class="outreach-plan-progress-title">
+          Step <%= step["position"] %> — <%= step["name"] %>
+          <span class="outreach-plan-progress-channel">— <%= outreach_step_channel_label(step["step_type"]) %></span>
+        </span>
+      </div>
+    </li>
+  <% end %>
+</ol>

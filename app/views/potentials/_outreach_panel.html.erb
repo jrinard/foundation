@@ -1,0 +1,9 @@
+<%# Legacy inline panel — Potentials uses _outreach_dock instead. Kept for reuse if needed. %>
+<% if outreach_enabled? && customer.present? %>
+  <div class="col-sm-3 shift-down30 outreach-panel-wrap">
+    <div class="white-card mb-20 theme-card theme-text outreach-panel discovery-page support-white-card-theme">
+      <h2 class="outreach-panel-title">Outreach</h2>
+      <%= render "potentials/outreach_panel_content", customer: customer %>
+    </div>
+  </div>
+<% end %>

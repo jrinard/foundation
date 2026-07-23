@@ -1,0 +1,26 @@
+<% campaign = local_assigns.fetch(:campaign) %>
+
+<article class="outreach-campaign-card theme-text"
+         data-controller="outreach-campaign-row"
+         data-action="click->outreach-campaign-row#visit"
+         data-outreach-campaign-row-url-value="<%= outreach_campaign_path(campaign) %>">
+  <div class="outreach-campaign-card-body">
+    <div class="outreach-campaign-card-head">
+      <h3 class="outreach-campaign-card-title"><%= campaign.name %></h3>
+      <span class="outreach-pill <%= campaign.active? ? 'outreach-pill-active' : 'outreach-pill-muted' %>"><%= campaign.status.humanize %></span>
+    </div>
+    <dl class="outreach-campaign-card-meta">
+      <div class="outreach-campaign-card-meta-row">
+        <dt>Created</dt>
+        <dd><%= campaign.created_at.strftime("%b %d, %Y") %></dd>
+      </div>
+      <div class="outreach-campaign-card-meta-row">
+        <dt>Enrolled</dt>
+        <dd><%= campaign.enrollment_count %></dd>
+      </div>
+    </dl>
+  </div>
+  <div class="outreach-campaign-card-actions" data-action="click->outreach-campaign-row#stop">
+    <%= render "edit_campaign_modal", campaign: campaign %>
+  </div>
+</article>

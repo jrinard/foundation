@@ -87,6 +87,7 @@ class OrganizationsController < ApplicationController
       quickbooks_enabled
       operations_enabled
       discovery_enabled
+      outreach_enabled
     ]
     keys.unshift(:name) if action_name == "create"
     params.require(:organization).permit(*keys)

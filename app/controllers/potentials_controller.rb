@@ -5,6 +5,7 @@ require 'json'
 class PotentialsController < ApplicationController
       include NavModuleRequired
       include OfferingSlotActions
+      include OutreachCustomerLoading
       require_nav_module :potentials
 
       before_action :authenticate_user!
@@ -92,6 +93,10 @@ class PotentialsController < ApplicationController
       if @chosen_customer
         @customer_offerings_find = Offering.where(customer_id: @chosen_customer.id)
         @cs = @customer_offerings_find.first if @customer_offerings_find.any?
+
+        if outreach_enabled?
+          load_outreach_for_customer!(@chosen_customer)
+        end
 
         if params[:add_offerings] == "add_offerings"
           assign_customer_offering_from_template!(@chosen_customer)

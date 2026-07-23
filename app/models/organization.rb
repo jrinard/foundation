@@ -12,6 +12,9 @@ class Organization < ApplicationRecord
   has_many :discovery_businesses, dependent: :destroy
   has_many :discovery_sources, dependent: :destroy
   has_many :discovery_runs, dependent: :destroy
+  has_many :outreach_plans, dependent: :destroy
+  has_many :outreach_campaigns, dependent: :destroy
+  has_many :outreach_enrollments, dependent: :destroy
 
   INDEX_SORT_OPTIONS = %w[name recent quickbooks].freeze
   INDEX_SORT_DEFAULT = "name".freeze
@@ -65,6 +68,10 @@ class Organization < ApplicationRecord
     discovery_enabled
   end
 
+  def outreach_enabled?
+    outreach_enabled
+  end
+
   def discovery_wa_sos_enabled?
     wa_sos_discovery_source.enabled?
   end
@@ -91,6 +98,7 @@ class Organization < ApplicationRecord
     badges << "QuickBooks" if quickbooks_enabled?
     badges << "Operations" if operations_enabled?
     badges << "Discovery" if discovery_enabled?
+    badges << "Outreach" if outreach_enabled?
     badges
   end
 
@@ -114,6 +122,7 @@ class Organization < ApplicationRecord
     end
     stats.find_or_create_by!(organization_id: id, main: true)
     DiscoverySource.ensure_wa_sos!(self) if discovery_enabled?
+    Outreach::SeedDefaultPlans.call(organization: self) if outreach_enabled?
   ensure
     Current.organization = previous_org
   end

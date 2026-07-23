@@ -1,0 +1,42 @@
+<%= form_with model: campaign, url: campaign.persisted? ? outreach_campaign_path(campaign) : outreach_campaigns_path, local: true, class: "theme-text" do |f| %>
+  <% if campaign.errors.any? %>
+    <div class="alert alert-danger"><%= campaign.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <% plan = local_assigns[:default_plan] || campaign.outreach_plan || OutreachPlan.default_for_organization %>
+  <% if plan.nil? %>
+    <p class="theme-text outreach-empty">No outreach plan found. Run <code>db:seed</code> for your organization.</p>
+  <% else %>
+    <%= f.hidden_field :outreach_plan_id, value: plan.id %>
+
+    <div class="form-group">
+      <%= f.label :name, class: "h3-grey" %>
+      <%= f.text_field :name, class: "form-control theme-field", required: true, placeholder: "e.g. Week of boat sales" %>
+    </div>
+
+    <div class="form-group">
+      <label class="h3-grey">Plan</label>
+      <p class="theme-text outreach-plan-locked"><%= plan.name %> — <%= plan.step_count %> steps</p>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :description, class: "h3-grey" %>
+      <%= f.text_area :description, rows: 3, class: "form-control theme-field" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :cohort_goal, "Cohort goal (optional)", class: "h3-grey" %>
+      <%= f.number_field :cohort_goal, class: "form-control theme-field", min: 1 %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :status, class: "h3-grey" %>
+      <%= f.select :status, OutreachCampaign::STATUSES.map { |s| [s.humanize, s] }, {}, class: "form-control theme-field" %>
+    </div>
+
+    <div class="outreach-form-actions">
+      <%= f.submit campaign.persisted? ? "Save campaign" : "Create campaign", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary" %>
+      <%= link_to "Cancel", campaign.persisted? ? outreach_campaign_path(campaign) : outreach_campaigns_path, class: "btn btn-default theme-text" %>
+    </div>
+  <% end %>
+<% end %>

@@ -3092,7 +3092,8 @@ body#app-theme-body[data-dark] .org-admin-card {
 
 .discovery-header-wrap,
 .discovery-results-wrap,
-.discovery-captured-wrap {
+.discovery-captured-wrap,
+.outreach-subnav-wrap {
   box-sizing: border-box;
   margin-left: 30px;
   margin-right: 35px;
@@ -3125,7 +3126,10 @@ body#app-theme-body[data-dark] .org-admin-card {
 @media screen and (min-width: 601px) {
   .desk-marg .discovery-header-wrap,
   .desk-marg .discovery-results-wrap,
-  .desk-marg .discovery-captured-wrap {
+  .desk-marg .discovery-captured-wrap,
+  .desk-marg .outreach-subnav-wrap,
+  .desk-marg .outreach-header-wrap,
+  .desk-marg .outreach-campaigns-wrap {
     width: calc(100vw - 200px - 65px);
     max-width: calc(100vw - 200px - 65px);
   }
@@ -8148,7 +8152,7 @@ body#app-theme-body[data-dark] .lead-card-dark {
   flex-direction: column;
   background-color: #111;
   color: #ececec;
-  padding: 12px 10px 10px 10px;
+  padding: 12px 10px 20px 10px;
   margin: 8px 2px;
   border-radius: 8px;
   border: solid 1px #444;
@@ -8158,7 +8162,7 @@ body#app-theme-body .lead-card-dark {
   display: flex;
   flex-direction: column;
   color: #ececec;
-  padding: 12px 10px 10px 10px;
+  padding: 12px 10px 20px 10px;
   margin: 8px 2px;
   border-radius: 8px;
   border: solid 1px lightgrey;
@@ -8479,14 +8483,81 @@ body#app-theme-body .customer-name-lead {
   color: #222;
 }
 
-.customer-ot-lead {
+.lead-card-meta-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  margin-top: 6px;
+  text-align: left;
+}
+
+.lead-card-outreach-btn {
+  @include discovery-primary-btn;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: auto !important;
+  padding: 5px 12px !important;
+  font-size: 0.78em !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.lead-card-manager {
   font-size: 0.8em;
   color: #777;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body#app-theme-body[data-dark] .lead-card-manager {
+  color: #bbb;
+}
+
+.lead-card-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.lead-card-edit-icon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  background-color: #222;
+  -webkit-mask-image: var(--lead-edit-icon);
+  mask-image: var(--lead-edit-icon);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  opacity: 0.9;
+}
+
+.lead-card-edit-btn:hover .lead-card-edit-icon {
+  opacity: 1;
+}
+
+body#app-theme-body[data-dark] .lead-card-edit-icon {
+  background-color: #f0f0f0;
+}
+
+.customer-ot-lead {
+  display: none;
 }
 
 .customer-rmc-lead {
-  font-size: 0.8em;
-  color: #777;
+  display: none;
 }
 
 body#app-theme-body[data-dark] .activity-note-theme-text {
@@ -9227,10 +9298,231 @@ body#app-theme-body .offerings-edit-page.support-white-card-theme {
 }
 
 // Current Clients / Potentials — Activity & Account Notes column (no HappyFox tickets)
+$outreach-dock-width: 442px;
+$outreach-dock-tab-width: 44px;
+$outreach-dock-tab-height: 200px;
+
+// Outreach dock — fixed overlay; does not reserve layout space (no desk-marg padding).
+
+.outreach-dock {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: $outreach-dock-width;
+  height: 100vh;
+  max-height: 100vh;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+  pointer-events: none;
+
+  &.outreach-dock--collapsed {
+    transform: translateX(calc(#{$outreach-dock-width} - #{$outreach-dock-tab-width}));
+  }
+}
+
+.outreach-dock-tab,
+.outreach-dock-body {
+  pointer-events: auto;
+}
+
+.outreach-dock-tab {
+  flex: 0 0 $outreach-dock-tab-width;
+  width: $outreach-dock-tab-width;
+  height: $outreach-dock-tab-height;
+  align-self: center;
+  margin-right: -1px;
+  border: 1px solid $brand-purple-trial-border;
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  padding: 14px 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: $brand-purple-trial !important;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85em;
+  line-height: 1.2;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.18);
+  z-index: 1;
+
+  &:hover,
+  &:focus {
+    background-color: $brand-purple-trial-hover !important;
+    outline: none;
+  }
+}
+
+.outreach-dock-tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+
+.outreach-dock-tab-chevron {
+  font-size: 1.45em;
+  line-height: 1;
+  color: #fff;
+  font-weight: 700;
+}
+
+.outreach-dock-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  @include discovery-card-purple-bg;
+  border-left: 1px solid purple-trial-alpha(0.2);
+  box-shadow: -4px 0 18px rgba(0, 0, 0, 0.12);
+}
+
+.outreach-dock-body-inner {
+  padding: 16px 18px 28px;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.outreach-dock-head {
+  margin-bottom: 12px;
+}
+
+.outreach-dock-panel-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid purple-trial-alpha(0.3);
+  padding-bottom: 8px;
+}
+
+.outreach-dock-panel-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &.active,
+  &:hover {
+    @include discovery-primary-btn;
+    color: #fff;
+  }
+}
+
+.outreach-dock-prospect {
+  margin: 4px 0 0;
+  font-size: 0.95em;
+  opacity: 0.85;
+}
+
+.outreach-score-tab-inner {
+  .discovery-score-card,
+  .discovery-score-card .theme-text,
+  .discovery-score-card-title,
+  .discovery-score-card-note,
+  .discovery-score-card-label,
+  .discovery-score-summary-label,
+  .discovery-score-summary-value {
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .discovery-score-card {
+    margin-top: 0;
+  }
+}
+
+.outreach-score-tab-foot {
+  margin-top: 12px;
+  font-size: 0.92em;
+}
+
+.outreach-promote-help {
+  font-size: 0.92em;
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+
+.outreach-dock-stage-note {
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+
+.outreach-crm-prospect {
+  background: purple-trial-alpha(0.2);
+  border: 1px solid purple-trial-alpha(0.45);
+}
+
+.outreach-crm-lead {
+  background: rgba(254, 175, 33, 0.2);
+  border: 1px solid rgba(254, 175, 33, 0.45);
+  color: #fff;
+}
+
+.outreach-crm-current {
+  background: rgba(76, 175, 80, 0.18);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #fff;
+}
+
+.outreach-crm-muted {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.outreach-panel-wrap {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .customer-notes-panel-wrap {
   padding-left: 16px;
   padding-right: 8px;
   min-width: 0;
+}
+
+@media screen and (max-width: 600px) {
+  .outreach-dock {
+    position: static;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    transform: none !important;
+    box-shadow: none;
+    margin-top: 16px;
+    flex-direction: column;
+  }
+
+  .outreach-dock-tab {
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    min-height: 48px;
+    padding: 10px 14px;
+    border-right: none;
+    border-bottom: 1px solid $brand-purple-trial-border;
+    border-radius: 0;
+    align-self: auto;
+  }
+
+  .outreach-dock-tab-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .outreach-dock-body {
+    max-height: none;
+  }
 }
 
 body#app-theme-body .customer-notes-panel.theme-card,
@@ -9472,4 +9764,915 @@ body#app-theme-body[data-dark] .customer-notes-empty {
   align-items: center;
   margin: 0;
   flex: 0 0 auto;
+}
+
+// Outreach — shares Discovery purple trial shell (theme bulk-change later)
+
+// **Bold colors** — darker nested surfaces on Outreach/Discovery purple cards.
+// Reference in design chat as "bold colors". Mixins: outreach-bold-colors, outreach-bold-colors-divider.
+@mixin outreach-bold-colors($interactive: false) {
+  border: 1px solid rgba(196, 160, 207, 0.42);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #1a1220 0%, #0c0a0f 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  @if $interactive {
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      background: linear-gradient(180deg, #24182c 0%, #121018 100%);
+      border-color: rgba(196, 160, 207, 0.62);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 0 0 1px rgba(79, 38, 94, 0.25);
+    }
+  }
+}
+
+@mixin outreach-bold-colors-divider {
+  border-top: 1px solid rgba(196, 160, 207, 0.22);
+}
+
+.outreach-page {
+  @include discovery-card-purple-bg;
+
+  .outreach-btn-primary,
+  .btn-warning.discovery-split-btn-main,
+  input.btn-warning.discovery-split-btn-main,
+  button.btn-warning.discovery-split-btn-main {
+    @include discovery-primary-btn;
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  a.outreach-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Outreach page headers — always dark (light theme .support-white-card-theme is #eee + white text)
+body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
+  @include discovery-card-purple-bg;
+  border: 1px solid purple-trial-alpha(0.4);
+  color: #fff;
+
+  .settings-title {
+    color: #fff;
+  }
+
+  .outreach-subtitle,
+  .theme-text {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .discovery-header-top {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+  }
+
+  a.theme-text {
+    color: $brand-purple-trial-on-dark;
+
+    &:hover,
+    &:focus {
+      color: #fff;
+    }
+  }
+
+  .btn-default.theme-text {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.08);
+
+    &:hover,
+    &:focus {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
+
+.outreach-subnav {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 0 4px;
+}
+
+.outreach-subnav-link {
+  color: inherit;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+
+  &.active {
+    @include discovery-primary-btn;
+  }
+}
+
+.outreach-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.outreach-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.outreach-plan-locked {
+  margin: 4px 0 0;
+  opacity: 0.9;
+}
+
+.outreach-btn-danger {
+  color: #ffb4b4 !important;
+  border-color: rgba(255, 120, 120, 0.45) !important;
+
+  &:hover,
+  &:focus {
+    color: #fff !important;
+    background-color: rgba(180, 40, 40, 0.35) !important;
+    border-color: rgba(255, 120, 120, 0.6) !important;
+  }
+}
+
+.outreach-campaign-closed-note {
+  margin: 0 0 4px;
+}
+
+.outreach-subtitle {
+  margin: 6px 0 0;
+  opacity: 0.85;
+}
+
+.outreach-card-pad {
+  padding: 18px 20px;
+}
+
+.outreach-section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+.outreach-section-tab {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92em;
+  opacity: 0.75;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &.is-active {
+    opacity: 1;
+    @include discovery-primary-btn;
+    color: #fff !important;
+  }
+}
+
+.outreach-context-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.outreach-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.outreach-breadcrumb-item {
+  min-width: 0;
+}
+
+.outreach-breadcrumb-link {
+  font-weight: 600;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.55);
+
+  &:hover,
+  &:focus {
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: underline;
+  }
+}
+
+.outreach-breadcrumb-current {
+  font-weight: 600;
+  color: #fff;
+}
+
+.outreach-breadcrumb-sep {
+  color: rgba(255, 255, 255, 0.38);
+  user-select: none;
+}
+
+.outreach-context-nav-end {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.outreach-campaigns-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px 0 14px;
+}
+
+.outreach-campaigns-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.92em;
+  cursor: pointer;
+  opacity: 0.88;
+}
+
+.outreach-campaigns-filter-checkbox {
+  margin: 0;
+  cursor: pointer;
+}
+
+.outreach-enrollments-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+}
+
+.outreach-enrollments-title {
+  margin: 0;
+}
+
+.outreach-campaign-plan-panel {
+  margin-top: 2px;
+}
+
+.outreach-campaign-plan-head {
+  margin-bottom: 8px;
+}
+
+.outreach-campaign-plan-steps {
+  margin-bottom: 12px;
+}
+
+.outreach-campaign-plan-foot {
+  margin: 0;
+}
+
+.outreach-campaign-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.outreach-campaign-card {
+  width: 300px;
+  max-width: 100%;
+  min-height: 148px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  @include outreach-bold-colors($interactive: true);
+  cursor: pointer;
+}
+
+.outreach-campaign-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.outreach-campaign-card-title {
+  margin: 0;
+  font-size: 1.35em;
+  font-weight: 700;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.outreach-campaign-card-meta {
+  margin: 0;
+}
+
+.outreach-campaign-card-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 6px;
+  font-size: 0.9em;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  dt {
+    margin: 0;
+    font-weight: 500;
+    opacity: 0.72;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.outreach-campaign-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 10px;
+  @include outreach-bold-colors-divider;
+}
+
+.outreach-table {
+  width: 100%;
+  margin-bottom: 0;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background-color: #111;
+    color: #fff;
+    padding: 10px 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 2px solid #333;
+  }
+
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid purple-trial-alpha(0.2);
+  }
+
+  tbody tr.outreach-table-row--clickable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: purple-trial-alpha(0.1);
+    }
+  }
+}
+
+body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clickable:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.outreach-table-actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.outreach-edit-campaign-modal {
+  .outreach-campaign-edit-form-actions {
+    margin-top: 16px;
+  }
+}
+
+.outreach-link-strong {
+  font-weight: 600;
+}
+
+.outreach-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid purple-trial-alpha(0.35);
+}
+
+.outreach-pill-active {
+  background: purple-trial-alpha(0.15);
+}
+
+.outreach-pill-muted {
+  opacity: 0.75;
+}
+
+.outreach-status-interested {
+  border-color: #5c8600;
+  background: rgba(92, 134, 0, 0.12);
+}
+
+.outreach-status-completed {
+  border-color: #0a55a2;
+  background: rgba(10, 85, 162, 0.12);
+}
+
+.outreach-status-lost {
+  border-color: #a94442;
+  background: rgba(169, 68, 66, 0.12);
+}
+
+.outreach-status-paused,
+.outreach-status-default {
+  background: purple-trial-alpha(0.08);
+}
+
+.outreach-form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.outreach-prospect-picker {
+  width: 100%;
+  max-width: 450px;
+  margin-left: auto;
+}
+
+.outreach-prospect-picker--modal {
+  max-width: none;
+  margin-left: 0;
+}
+
+.outreach-prospect-picker-search {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.outreach-prospect-picker-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid purple-trial-alpha(0.25);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.outreach-enroll-prospect-host {
+  margin-bottom: 4px;
+}
+
+.outreach-enroll-prospect-modal {
+  .foundation-modal-body {
+    padding-top: 0;
+  }
+
+  .outreach-prospect-picker-list {
+    max-height: min(300px, calc(100vh - 280px));
+  }
+}
+
+.outreach-prospect-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid purple-trial-alpha(0.15);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &[hidden] {
+    display: none !important;
+  }
+}
+
+.outreach-prospect-picker-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.outreach-prospect-picker-name {
+  display: block;
+  font-weight: 600;
+}
+
+.outreach-prospect-picker-city {
+  display: block;
+  font-size: 0.88em;
+  opacity: 0.75;
+}
+
+.outreach-prospect-picker-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.outreach-prospect-picker-date {
+  font-size: 0.82em;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.outreach-prospect-picker-add {
+  min-width: 56px;
+}
+
+.outreach-prospect-picker-empty {
+  margin-top: 10px;
+}
+
+.outreach-form-row-wrap {
+  flex-wrap: wrap;
+}
+
+.outreach-form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.outreach-select,
+.outreach-grow {
+  min-width: 140px;
+}
+
+.outreach-grow {
+  flex: 1;
+}
+
+.outreach-input-sm {
+  max-width: 72px;
+}
+
+.outreach-empty,
+.outreach-muted {
+  opacity: 0.8;
+}
+
+.outreach-plan-card {
+  border: 1px solid purple-trial-alpha(0.25);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.outreach-plan-card-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.outreach-plan-desc {
+  margin: 8px 0;
+}
+
+.outreach-plan-progress {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.outreach-plan-progress-item {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid purple-trial-alpha(0.18);
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.outreach-plan-progress-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1.35;
+}
+
+.outreach-plan-progress-glyph {
+  flex-shrink: 0;
+  width: 1.1em;
+  text-align: center;
+}
+
+.outreach-plan-progress-title {
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.outreach-plan-progress-channel {
+  font-weight: 500;
+  opacity: 0.72;
+}
+
+.outreach-plan-progress-item--current {
+  .outreach-plan-progress-glyph {
+    color: $brand-purple-trial-on-dark;
+  }
+
+  .outreach-plan-progress-title {
+    color: #fff;
+  }
+
+  .outreach-plan-progress-channel {
+    opacity: 0.85;
+  }
+}
+
+.outreach-plan-progress-item--done {
+  .outreach-plan-progress-title {
+    opacity: 0.58;
+  }
+}
+
+.outreach-plan-progress-item--upcoming {
+  .outreach-plan-progress-glyph,
+  .outreach-plan-progress-title {
+    opacity: 0.42;
+  }
+}
+
+.outreach-step-preview,
+.outreach-step-list,
+.outreach-step-checklist,
+.outreach-activity-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+
+.outreach-step-type {
+  opacity: 0.75;
+  font-size: 0.9em;
+}
+
+.outreach-step-instructions {
+  font-size: 0.9em;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+.outreach-step-checklist-item {
+  margin-bottom: 6px;
+  list-style: none;
+  margin-left: -20px;
+}
+
+.outreach-step-glyph {
+  display: inline-block;
+  width: 1.2em;
+}
+
+.outreach-step-current .outreach-step-glyph {
+  color: $brand-purple-trial;
+}
+
+.outreach-step-done .outreach-step-label {
+  opacity: 0.7;
+}
+
+.outreach-current-step-card {
+  @include outreach-bold-colors;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.outreach-enrollment-work-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.45fr) minmax(240px, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+.outreach-enrollment-sidebar {
+  min-width: 0;
+  padding-right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.outreach-enrollment-progress-panel,
+.outreach-enrollment-step-panel {
+  min-width: 0;
+}
+
+.outreach-enrollment-progress-panel .outreach-plan-progress {
+  margin-top: 8px;
+}
+
+.outreach-enrollment-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.outreach-enrollment-progress-actions {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.outreach-enrollment-step-panel .outreach-current-step-card {
+  margin-bottom: 0;
+}
+
+.outreach-enrollment-step-panel .outreach-complete-form {
+  margin-top: 14px;
+  padding-top: 14px;
+  @include outreach-bold-colors-divider;
+}
+
+@media (max-width: 900px) {
+  .outreach-enrollment-work-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.outreach-enrollment-activity-panel,
+.outreach-enrollment-promote-panel {
+  min-width: 0;
+}
+
+.outreach-enrollment-activity-panel {
+  padding-top: 20px;
+  border-top: 1px solid purple-trial-alpha(0.25);
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.outreach-enrollment-activity-feed {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 8px;
+  padding-right: 4px;
+}
+
+.outreach-enrollment-promote-panel {
+  padding-top: 20px;
+  border-top: 1px solid purple-trial-alpha(0.25);
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.outreach-enrollment-promote-form-row {
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.outreach-enrollment-promote-control {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.outreach-enrollment-promote-select {
+  width: 168px;
+  max-width: 55vw;
+  min-width: 0;
+  flex: 0 1 auto;
+  margin: 0;
+  min-height: 34px;
+  height: auto;
+  border-radius: 4px;
+}
+
+.outreach-enrollment-promote-submit {
+  flex: 0 0 auto;
+  margin: 0;
+  white-space: nowrap;
+  min-height: 34px;
+  border-radius: 4px;
+}
+
+.outreach-enrollment-activity-panel .outreach-activity-list {
+  margin-top: 0;
+}
+
+.outreach-current-step-label {
+  font-size: 1.05em;
+}
+
+.outreach-panel {
+  padding: 16px 18px;
+}
+
+.outreach-panel-title {
+  margin-top: 0;
+}
+
+.outreach-enrollment-card {
+  border: 1px solid purple-trial-alpha(0.25);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.outreach-enrollment-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.outreach-enrollment-plan {
+  margin: 6px 0 10px;
+  font-size: 0.92em;
+}
+
+.outreach-enrollment-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.outreach-enrollment-card--prior {
+  opacity: 0.82;
+  border-style: dashed;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.outreach-enrollment-prior-label {
+  margin: 0 0 8px;
+  font-size: 0.82em;
+  opacity: 0.75;
+}
+
+.outreach-prior-attempts {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+
+  li {
+    margin-bottom: 6px;
+  }
+}
+
+.outreach-activity-actor {
+  font-weight: 600;
+  margin-right: 6px;
+  font-size: 0.9em;
+}
+
+.outreach-mini-complete-form {
+  display: inline;
+}
+
+.outreach-activity-time {
+  opacity: 0.65;
+  margin-right: 8px;
+  font-size: 0.85em;
 }

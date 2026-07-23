@@ -1,0 +1,39 @@
+<div class="outreach-enrollment-card<%= " outreach-enrollment-card--prior" if local_assigns[:prior_attempt] %>">
+  <% if local_assigns[:prior_attempt] %>
+    <p class="outreach-enrollment-prior-label theme-text">
+      Previous attempt · <%= enrollment.status_label %> · <%= enrollment.enrolled_at.strftime("%b %d, %Y") %>
+    </p>
+  <% end %>
+
+  <div class="outreach-enrollment-card-head">
+    <strong><%= enrollment.outreach_campaign.name %></strong>
+    <% unless local_assigns[:prior_attempt] %>
+      <span class="outreach-pill <%= outreach_status_badge_class(enrollment.status) %>"><%= enrollment.status_label %></span>
+    <% end %>
+  </div>
+  <p class="outreach-enrollment-plan theme-text">Plan: <%= enrollment.outreach_plan.name %></p>
+
+  <% unless local_assigns[:prior_attempt] %>
+    <%= render "outreach/enrollments/step_checklist", enrollment: enrollment %>
+
+    <div class="outreach-enrollment-actions">
+      <% if enrollment.reenrollable? %>
+        <%= button_to "Re-enroll",
+              reenroll_outreach_enrollment_path(enrollment),
+              method: :post,
+              class: "btn btn-xs btn-warning discovery-split-btn-main",
+              data: { turbo_confirm: "Start a fresh run in #{enrollment.outreach_campaign.name}? The previous attempt will stay in history." } %>
+      <% elsif !enrollment.plan_complete? && !enrollment.paused? %>
+        <%= form_with url: complete_step_outreach_enrollment_path(enrollment), method: :post, local: true, class: "outreach-mini-complete-form" do %>
+          <%= hidden_field_tag :outcome, "completed" %>
+          <%= submit_tag "Complete current step", class: "btn btn-xs btn-warning discovery-split-btn-main" %>
+        <% end %>
+      <% end %>
+      <%= link_to "View", outreach_enrollment_path(enrollment), class: "btn btn-xs btn-default theme-text" %>
+    </div>
+  <% else %>
+    <div class="outreach-enrollment-actions">
+      <%= link_to "View history", outreach_enrollment_path(enrollment), class: "btn btn-xs btn-default theme-text" %>
+    </div>
+  <% end %>
+</div>

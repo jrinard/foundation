@@ -80,6 +80,9 @@
         <% if potentials_enabled? %>
         <li class="<%= 'active_bg' if current_page?(potentials_path) %>"><%= link_to "Prospects #{@count_potential.size}", potentials_path(user_id: current_user.id), class: 'notWorking' %></li>
         <% end %>
+        <% if outreach_enabled? %>
+        <li class="<%= 'active_bg' if controller_path.start_with?('outreach/') %>"><%= link_to "Outreach", outreach_root_path, class: "notWorking" %></li>
+        <% end %>
         <% if leads_enabled? %>
         <li class="<%= 'active_bg' if current_page?(customers_path) %>"><%= link_to "Leads #{@count_lead.size}", customers_path(user_id: current_user.id), :class => 'notWorking' %></li>
         <% end %>
@@ -170,6 +173,9 @@
                 <% if potentials_enabled? %>
                 <li class="<%= 'active_bg2' if current_page?(potentials_path) %>"><%= link_to "Prospects #{@count_potential.size}", potentials_path(user_id: current_user.id), :class => 'btn btn-long-home-nav btn-text-mobile-nav' %></li>
                 <% end %>
+                <% if outreach_enabled? %>
+                <li class="<%= 'active_bg2' if controller_path.start_with?('outreach/') %>"><%= link_to "Outreach", outreach_root_path, class: "btn btn-long-home-nav btn-text-mobile-nav" %></li>
+                <% end %>
                 <% if current_clients_enabled? %>
                 <li class="<%= 'active_bg2' if controller_name == 'home' %>"><%= link_to "Current Clients #{@count_current.size}", home_index_path, :class => 'btn btn-long-home-nav btn-text-mobile-nav' %></li>
                 <% end %>
@@ -206,7 +212,13 @@
 
          <%# Adding turbo-frame id="modal" herecauses customer details to never load %>
          <%#= turbo_frame_tag "modal" %>
-          <%= yield %>
+          <% if controller_path.start_with?("outreach/") %>
+            <div class="desk-marg">
+              <%= yield %>
+            </div>
+          <% else %>
+            <%= yield %>
+          <% end %>
           
         </div>
 

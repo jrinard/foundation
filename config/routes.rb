@@ -13,6 +13,28 @@ Rails.application.routes.draw do
     end
   end
   resources :activity, only: [:index, :show]
+  namespace :outreach do
+    root to: "campaigns#index"
+    resources :campaigns do
+      member do
+        post :close
+      end
+      resources :enrollments, only: [:create], controller: "campaign_enrollments"
+    end
+    resources :plans do
+      resources :steps, only: [:create, :destroy], controller: "plan_steps"
+    end
+    resources :enrollments, only: [:show, :create] do
+      member do
+        post :complete_step
+        post :pause
+        post :resume
+        post :reenroll
+      end
+    end
+    post "customers/:customer_id/promote_to_lead", to: "customer_promotions#create", as: :promote_customer
+  end
+
   resources :discovery, only: [:index, :show] do
     member do
       patch :update_captured_business

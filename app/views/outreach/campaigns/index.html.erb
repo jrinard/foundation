@@ -1,0 +1,45 @@
+<div class="outreach-header-wrap discovery-header-wrap shift-down30">
+  <div class="discovery-page outreach-page discovery-header support-white-card-theme">
+    <div class="discovery-header-top outreach-header-top">
+      <div class="discovery-header-title">
+        <h1 class="settings-title">Outreach</h1>
+        <p class="theme-text outreach-subtitle">Use campaigns for reaching out to possible customers.</p>
+      </div>
+      <div class="outreach-header-actions">
+        <%= link_to "New campaign", new_outreach_campaign_path, class: "btn btn-warning discovery-split-btn-main outreach-btn-primary" %>
+        <%= link_to "Plan Settings", outreach_plans_path, class: "btn btn-default theme-text" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="outreach-campaigns-wrap discovery-captured-wrap shift-down30">
+  <div class="discovery-page outreach-page support-white-card-theme outreach-card-pad">
+    <%= render "outreach/shared/context_nav" %>
+
+    <%= form_with url: outreach_campaigns_path, method: :get, local: true, class: "outreach-campaigns-toolbar theme-text" do %>
+      <label class="outreach-campaigns-filter-label">
+        <%= check_box_tag :show_completed, "1", @show_completed, class: "outreach-campaigns-filter-checkbox", onchange: "this.form.requestSubmit()" %>
+        Show completed
+      </label>
+    <% end %>
+
+    <% if @campaigns.any? %>
+      <div class="outreach-campaign-card-grid">
+        <% @campaigns.each do |campaign| %>
+          <%= render "campaign_card", campaign: campaign %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="theme-text outreach-empty">
+        <% if @show_completed %>
+          No campaigns yet.
+          <%= link_to "Create one", new_outreach_campaign_path, class: "theme-text" %>.
+        <% else %>
+          No active campaigns.
+          Turn on <strong>Show completed</strong> to see closed lists.
+        <% end %>
+      </p>
+    <% end %>
+  </div>
+</div>

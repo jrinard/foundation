@@ -1,0 +1,21 @@
+<% modal_id = "outreachEnrollProspect#{campaign.id}" %>
+
+<%= foundation_modal_wrapper class: "outreach-enroll-prospect-host",
+      controllers: "outreach-prospect-picker" do %>
+  <%= foundation_modal_open_button modal_id,
+        "Enroll prospect",
+        class: "btn btn-warning discovery-split-btn-main outreach-btn-primary" %>
+
+  <%= foundation_modal modal_id: modal_id,
+        title: "Enroll prospect",
+        size: :md,
+        dialog_class: "outreach-enroll-prospect-modal discovery-page outreach-page support-white-card-theme" do %>
+    <%= render "enroll_prospect_picker",
+          campaign: campaign,
+          enrollable_potentials: enrollable_potentials,
+          in_modal: true %>
+    <%= foundation_modal_footer do %>
+      <%= foundation_modal_close_button "Done", class: "btn btn-default theme-text" %>
+    <% end %>
+  <% end %>
+<% end %>

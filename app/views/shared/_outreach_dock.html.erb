@@ -1,0 +1,48 @@
+<div class="outreach-dock theme-text"
+     data-controller="outreach-dock outreach-dock-panel"
+     data-outreach-dock-expand-value="<%= local_assigns.fetch(:expand, false) ? 'true' : 'false' %>"
+     aria-expanded="true"
+     role="complementary"
+     aria-label="Outreach for <%= customer.name %>">
+  <button type="button"
+          class="outreach-dock-tab"
+          data-action="click->outreach-dock#toggle"
+          aria-label="Toggle outreach panel">
+    <span class="outreach-dock-tab-chevron" data-outreach-dock-target="tabChevron">›</span>
+    <span class="outreach-dock-tab-label">Outreach</span>
+  </button>
+
+  <div class="outreach-dock-body discovery-page support-white-card-theme">
+    <div class="outreach-dock-body-inner outreach-panel theme-text">
+      <div class="outreach-dock-head">
+        <h2 class="outreach-panel-title"><%= customer.name %></h2>
+        <p class="outreach-dock-prospect theme-text">
+          <span class="outreach-pill <%= customer_crm_stage_badge_class(customer) %>"><%= customer_crm_stage_label(customer) %></span>
+        </p>
+      </div>
+
+      <div class="outreach-dock-panel-tabs">
+        <button type="button"
+                class="outreach-dock-panel-tab active"
+                data-outreach-dock-panel-target="outreachTab"
+                data-action="click->outreach-dock-panel#showOutreach">
+          Outreach
+        </button>
+        <button type="button"
+                class="outreach-dock-panel-tab"
+                data-outreach-dock-panel-target="scoreTab"
+                data-action="click->outreach-dock-panel#showScore">
+          Score
+        </button>
+      </div>
+
+      <div data-outreach-dock-panel-target="outreachPane">
+        <%= render "shared/outreach_panel_content", customer: customer %>
+      </div>
+
+      <div data-outreach-dock-panel-target="scorePane" hidden>
+        <%= render "shared/outreach_score_tab", customer: customer %>
+      </div>
+    </div>
+  </div>
+</div>

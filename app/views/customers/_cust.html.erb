@@ -6,27 +6,24 @@
       <div class="dark-card-content">
         <div class="center-text">
           <h3 class="customer-name-lead"><%= cust.name rescue nil %></h3>
-          <div class="customer-ot-lead">OT <%= cust.one_time_payment rescue nil %></div>
-          <div class="customer-rmc-lead">RMC <%= cust.recurring_monthly_charge rescue nil %>
-              <span class="pull-right"><%= cust.user.name rescue nil %></span>
+          <div class="lead-card-meta-row">
+            <% if outreach_enabled? %>
+              <%= link_to customers_path(request.query_parameters.merge(id: cust.id, outreach_open: "1")),
+                    class: "lead-card-outreach-btn",
+                    title: "Outreach" do %>
+                Outreach
+              <% end %>
+            <% end %>
+            <span class="lead-card-manager pull-right"><%= cust.user.name rescue nil %></span>
           </div>
-
-          <%# if cust.active_proposal === true && cust.active === true %>
-            <%# <p class="blue-text-7"> Existing Customer Lead</p> %>
-          <%# end %>
-          <%# if cust.active_proposal === false && cust.active === false %>
-            <%# <p class="yellow-text-7"> New Lead</p> %>
-          <%# end %>
-          <%# if cust.active_proposal === true && cust.active === false %>
-            <%# <p class="yellow-text-7"> New Lead + Proposal</p> %>
-          <%# end %>
-
-          <%# <p>Status</p> %>
-        <%# </div> %>
+        </div>
         <div class="icon-buttons-lead">
           <div class="dark-edit-button-lead">
-            <%= link_to edit_customer_path(cust.id), class: "", data: { turbo_frame: "modal" } do %>
-              <%= image_tag("icon-list-white.png", alt: "Edit", class: "icon-edit tag-lead-card-btn") %>
+            <%= link_to edit_customer_path(cust.id), class: "lead-card-edit-btn", data: { turbo_frame: "modal" }, title: "Edit" do %>
+              <span class="lead-card-edit-icon"
+                    style="--lead-edit-icon: url('<%= image_path("icon-edit-black.png") %>')"
+                    role="img"
+                    aria-label="Edit"></span>
             <% end %>
           </div>
 

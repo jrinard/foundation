@@ -1,0 +1,92 @@
+<div class="outreach-header-wrap discovery-header-wrap shift-down30">
+  <div class="discovery-page outreach-page discovery-header support-white-card-theme">
+    <div class="discovery-header-top outreach-header-top">
+      <div class="discovery-header-title">
+        <h1 class="settings-title"><%= @campaign.name %></h1>
+        <p class="theme-text outreach-subtitle">
+          <%= @enrollments.size %> enrolled
+          · <span class="outreach-pill <%= outreach_campaign_status_badge_class(@campaign) %>"><%= @campaign.status.humanize %></span>
+        </p>
+      </div>
+      <div class="outreach-header-actions">
+        <%= link_to "Edit", edit_outreach_campaign_path(@campaign), class: "btn btn-default theme-text" %>
+        <% unless @campaign.completed? %>
+          <%= button_to "Close campaign",
+                close_outreach_campaign_path(@campaign),
+                method: :post,
+                class: "btn btn-default theme-text",
+                data: { turbo_confirm: "Close #{@campaign.name}? Enrollments and history are kept; no new prospects can be added." } %>
+        <% end %>
+        <% if @campaign.enrollments.none? %>
+          <%= button_to "Delete",
+                outreach_campaign_path(@campaign),
+                method: :delete,
+                class: "btn btn-default theme-text outreach-btn-danger",
+                data: { turbo_confirm: "Delete #{@campaign.name}? This cannot be undone." } %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="outreach-campaigns-wrap discovery-captured-wrap shift-down30">
+  <div class="discovery-page outreach-page support-white-card-theme outreach-card-pad">
+    <%= render "outreach/shared/context_nav", campaign: @campaign %>
+
+    <% if params[:tab] == "plan" %>
+      <%= render "campaign_plan_panel", plan: @campaign.outreach_plan %>
+    <% else %>
+      <% unless @campaign.open_for_enrollment? %>
+        <p class="theme-text outreach-muted outreach-campaign-closed-note">This campaign is closed. Enrollments and history are preserved below.</p>
+      <% end %>
+
+      <div class="outreach-enrollments-head">
+        <h2 class="theme-text h4 outreach-enrollments-title">Enrollments</h2>
+        <% if @campaign.open_for_enrollment? %>
+          <%= render "enroll_prospect_modal",
+                campaign: @campaign,
+                enrollable_potentials: @enrollable_potentials %>
+        <% end %>
+      </div>
+
+      <% if @enrollments.any? %>
+        <div class="table-responsive">
+          <table class="table theme-text outreach-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>CRM</th>
+                <th>Step</th>
+                <th>Outreach</th>
+                <th>Enrolled</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @enrollments.each do |enrollment| %>
+                <tr class="outreach-table-row--clickable"
+                    data-controller="outreach-campaign-row"
+                    data-action="click->outreach-campaign-row#visit"
+                    data-outreach-campaign-row-url-value="<%= outreach_enrollment_path(enrollment) %>">
+                  <td><span class="outreach-link-strong"><%= enrollment.customer.name %></span></td>
+                  <td><span class="outreach-pill <%= customer_crm_stage_badge_class(enrollment.customer) %>"><%= customer_crm_stage_label(enrollment.customer) %></span></td>
+                  <td>
+                    <% if enrollment.plan_complete? %>
+                      Complete
+                    <% else %>
+                      Step <%= enrollment.current_step_position %> of <%= enrollment.total_steps %> —
+                      <%= enrollment.current_step_name %>
+                    <% end %>
+                  </td>
+                  <td><span class="outreach-pill <%= outreach_status_badge_class(enrollment.status) %>"><%= enrollment.status_label %></span></td>
+                  <td><%= enrollment.enrolled_at.strftime("%b %d, %Y") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="theme-text outreach-empty">No prospects enrolled yet.</p>
+      <% end %>
+    <% end %>
+  </div>
+</div>

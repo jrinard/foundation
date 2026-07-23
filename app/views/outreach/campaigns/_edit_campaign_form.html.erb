@@ -1,0 +1,40 @@
+<% campaign = local_assigns.fetch(:campaign) %>
+
+<%= form_with model: campaign,
+      url: outreach_campaign_path(campaign),
+      local: true,
+      class: "theme-text outreach-campaign-edit-form" do |f| %>
+  <%= hidden_field_tag :return_to, "index" %>
+
+  <% if campaign.errors.any? %>
+    <div class="alert alert-danger theme-text-error"><%= campaign.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :name, class: "h3-grey" %>
+    <%= f.text_field :name, class: "form-control theme-field", required: true %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :description, class: "h3-grey" %>
+    <%= f.text_area :description, rows: 3, class: "form-control theme-field" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :cohort_goal, "Cohort goal (optional)", class: "h3-grey" %>
+    <%= f.number_field :cohort_goal, class: "form-control theme-field", min: 1 %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :status, class: "h3-grey" %>
+    <%= f.select :status,
+          OutreachCampaign::STATUSES.map { |s| [s.humanize, s] },
+          {},
+          class: "form-control theme-field" %>
+  </div>
+
+  <div class="outreach-form-actions outreach-campaign-edit-form-actions">
+    <%= f.submit "Save campaign", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary" %>
+    <%= foundation_modal_close_button "Cancel", class: "btn btn-default theme-text" %>
+  </div>
+<% end %>

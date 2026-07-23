@@ -1,0 +1,8 @@
+<nav class="outreach-section-tabs theme-text" aria-label="Campaign sections">
+  <%= link_to "Campaigns",
+        outreach_campaign_path(campaign),
+        class: outreach_campaign_tab_class("outreach") %>
+  <%= link_to "Plans",
+        outreach_campaign_path(campaign, tab: "plan"),
+        class: outreach_campaign_tab_class("plan") %>
+</nav>

@@ -1,0 +1,63 @@
+<div class="outreach-enroll-block">
+  <% if customer_promotable_to_lead?(customer) %>
+    <p class="h3-grey">Add to campaign</p>
+    <%= form_with url: outreach_enrollments_path, method: :post, local: true, class: "outreach-enroll-form" do %>
+      <%= hidden_field_tag :customer_id, customer.id %>
+
+      <div class="form-group">
+        <%= label_tag :outreach_campaign_id, "Campaign", class: "h3-grey" %>
+        <%= select_tag :outreach_campaign_id,
+              options_from_collection_for_select(@outreach_campaigns, :id, :name),
+              include_blank: "Select campaign…",
+              class: "form-control theme-field outreach-select",
+              required: true %>
+      </div>
+
+      <%= submit_tag "Add to campaign", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary btn-block" %>
+    <% end %>
+  <% else %>
+    <p class="theme-text outreach-empty outreach-dock-stage-note">
+      Enroll new campaigns from <strong>Prospects</strong>. Outreach for this <%= customer_crm_stage_label(customer).downcase %> continues below.
+    </p>
+  <% end %>
+</div>
+
+<hr>
+
+<% enrollments = @outreach_enrollments.presence || [] %>
+<% if enrollments.any? %>
+  <% outreach_enrollment_groups(enrollments).each do |group| %>
+    <% if group[:active] %>
+      <%= render "shared/outreach_enrollment_card", enrollment: group[:active] %>
+      <% group[:prior].each do |prior| %>
+        <%= render "shared/outreach_enrollment_card", enrollment: prior, prior_attempt: true %>
+      <% end %>
+    <% else %>
+      <%= render "shared/outreach_enrollment_card", enrollment: group[:prior].first %>
+      <% group[:prior].drop(1).each do |prior| %>
+        <%= render "shared/outreach_enrollment_card", enrollment: prior, prior_attempt: true %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% else %>
+  <p class="theme-text outreach-empty">Not in a campaign yet<% if customer_promotable_to_lead?(customer) %> — select a Plan above<% end %>.</p>
+<% end %>
+
+<% if customer_promotable_to_lead?(customer) && @promote_lists.present? %>
+  <hr>
+  <div class="outreach-promote-block">
+    <p class="h3-grey">Promote to Leads</p>
+    <p class="theme-text outreach-promote-help">Move to Leads Board when pursuit is hot. Outreach enrollments keep running.</p>
+    <%= form_with url: outreach_promote_customer_path(customer_id: customer.id), method: :post, local: true, class: "outreach-promote-form" do %>
+      <div class="form-group">
+        <%= label_tag :list_id, "Kanban list", class: "h3-grey" %>
+        <%= select_tag :list_id,
+              options_for_select(@promote_lists, @default_promote_list_id),
+              class: "form-control theme-field outreach-select",
+              required: true %>
+      </div>
+      <%= submit_tag "Promote to Leads", class: "btn btn-warning discovery-split-btn-main btn-block",
+            data: { turbo_confirm: "Move #{customer.name} to the Lead Pipeline?" } %>
+    <% end %>
+  </div>
+<% end %>

@@ -83,4 +83,10 @@
       </div> <!-- Closing id="lists" -->
     </div> <!-- Closing id="lists-wrapper" -->
   </div> <!-- Closing col-sm-4 shift-down30 -->
+
+  <% if outreach_enabled? && @chosen_customer.present? %>
+    <%= render "shared/outreach_dock",
+          customer: @chosen_customer,
+          expand: params[:outreach_open].present? %>
+  <% end %>
 </div> <!-- Closing desk-marg -->

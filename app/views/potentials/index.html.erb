@@ -1,6 +1,6 @@
 <%# Current Clients %>
 
-  <div class="desk-marg">
+  <div class="desk-marg potentials-page">
     <div class="shrink">
       <div class="pull-left mobile-hide letters letter-shift shift-down30">
         <%= link_to "A", {:sort_by => "letter",:params => {:l => "A"}}, :class => "btn btn-xs" %><br>
@@ -181,4 +181,8 @@
                         </div>
 
                         </div>
+
+                        <% if outreach_enabled? && @chosen_customer.present? %>
+                          <%= render "potentials/outreach_dock", customer: @chosen_customer %>
+                        <% end %>
                         <!-- desk-marg end -->

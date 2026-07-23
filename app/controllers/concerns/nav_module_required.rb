@@ -28,7 +28,8 @@ module NavModuleRequired
       current_clients: "Current Clients",
       archived: "Archived",
       activity: "Activity",
-      discovery: "Discovery"
+      discovery: "Discovery",
+      outreach: "Outreach"
     }.fetch(module_name.to_sym, module_name.to_s.humanize)
   end
 end

@@ -1,0 +1,46 @@
+<div class="outreach-prospect-picker theme-text<%= " outreach-prospect-picker--modal" if local_assigns[:in_modal] %>">
+  <%= search_field_tag :prospect_filter,
+        nil,
+        placeholder: "Filter prospects…",
+        autocomplete: "off",
+        class: "form-control theme-field outreach-prospect-picker-search",
+        data: {
+          outreach_prospect_picker_target: "query",
+          action: "input->outreach-prospect-picker#filter"
+        } %>
+
+  <% if enrollable_potentials.any? %>
+    <div class="outreach-prospect-picker-list">
+      <% enrollable_potentials.each do |prospect| %>
+        <% filter_bits = [prospect.name, prospect.city, prospect.domain, prospect.email].compact %>
+        <div class="outreach-prospect-picker-row"
+             data-outreach-prospect-picker-target="row"
+             data-filter-text="<%= filter_bits.join(' ').downcase %>">
+          <div class="outreach-prospect-picker-main">
+            <span class="outreach-prospect-picker-name"><%= prospect.name %></span>
+            <% if prospect.city.present? %>
+              <span class="outreach-prospect-picker-city"><%= prospect.city %></span>
+            <% end %>
+          </div>
+          <div class="outreach-prospect-picker-meta">
+            <span class="outreach-prospect-picker-date">Added <%= prospect.created_at.strftime("%b %d, %Y") %></span>
+            <%= button_to "Add",
+                  outreach_campaign_enrollments_path(campaign),
+                  method: :post,
+                  params: { customer_id: prospect.id },
+                  class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary outreach-prospect-picker-add" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <p class="theme-text outreach-empty outreach-prospect-picker-empty"
+       hidden
+       data-outreach-prospect-picker-target="noResults">
+      No prospects match your filter.
+    </p>
+  <% else %>
+    <p class="theme-text outreach-empty outreach-prospect-picker-empty-state">
+      All prospects are already in this campaign, or none on Prospects yet.
+    </p>
+  <% end %>
+</div>

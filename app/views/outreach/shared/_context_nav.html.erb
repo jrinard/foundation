@@ -1,0 +1,45 @@
+<% campaign = local_assigns[:enrollment]&.outreach_campaign || local_assigns[:campaign] %>
+<% enrollment = local_assigns[:enrollment] %>
+<% plan_tab = campaign.present? && !enrollment && params[:tab] == "plan" %>
+<% on_campaigns_index = controller_name == "campaigns" && action_name == "index" %>
+<% on_plans_index = controller_name == "plans" && action_name == "index" %>
+
+<nav class="outreach-context-nav theme-text" aria-label="Outreach navigation">
+  <ol class="outreach-breadcrumb">
+    <li class="outreach-breadcrumb-item">
+      <% if on_campaigns_index %>
+        <span class="outreach-breadcrumb-current">Campaigns</span>
+      <% else %>
+        <%= link_to "Campaigns", outreach_campaigns_path, class: "outreach-breadcrumb-link" %>
+      <% end %>
+    </li>
+
+    <% if campaign %>
+      <li class="outreach-breadcrumb-sep" aria-hidden="true">←</li>
+      <li class="outreach-breadcrumb-item">
+        <% if enrollment || plan_tab %>
+          <%= link_to campaign.name, outreach_campaign_path(campaign), class: "outreach-breadcrumb-link" %>
+        <% else %>
+          <span class="outreach-breadcrumb-current"><%= campaign.name %></span>
+        <% end %>
+      </li>
+    <% end %>
+
+    <% if plan_tab %>
+      <li class="outreach-breadcrumb-sep" aria-hidden="true">←</li>
+      <li class="outreach-breadcrumb-item">
+        <span class="outreach-breadcrumb-current">Plan</span>
+      </li>
+    <% elsif enrollment %>
+      <li class="outreach-breadcrumb-sep" aria-hidden="true">←</li>
+      <li class="outreach-breadcrumb-item">
+        <span class="outreach-breadcrumb-current"><%= enrollment.customer.name %></span>
+      </li>
+    <% elsif on_plans_index %>
+      <li class="outreach-breadcrumb-sep" aria-hidden="true">←</li>
+      <li class="outreach-breadcrumb-item">
+        <span class="outreach-breadcrumb-current">Plan Settings</span>
+      </li>
+    <% end %>
+  </ol>
+</nav>

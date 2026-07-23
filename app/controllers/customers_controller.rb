@@ -1,5 +1,6 @@
 class CustomersController < ApplicationController
   include NavModuleRequired
+  include OutreachCustomerLoading
   require_nav_module :leads
 
   load_and_authorize_resource
@@ -108,6 +109,7 @@ class CustomersController < ApplicationController
 
     if params[:id]
       @chosen_customer = Customer.find(params[:id])
+      load_outreach_for_customer!(@chosen_customer) if outreach_enabled?
     end
 
     if params[:active]

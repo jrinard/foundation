@@ -1,0 +1,16 @@
+<% campaign = local_assigns.fetch(:campaign) %>
+<% modal_id = "outreachEditCampaign#{campaign.id}" %>
+
+<%= foundation_modal_wrapper class: "outreach-edit-campaign-host" do %>
+  <%= foundation_modal_open_button modal_id,
+        "Edit",
+        class: "btn btn-xs btn-default theme-text",
+        data: { action: "click->outreach-campaign-row#stop click->foundation-modal#open" } %>
+
+  <%= foundation_modal modal_id: modal_id,
+        title: "Edit campaign",
+        size: :md,
+        dialog_class: "outreach-edit-campaign-modal discovery-page outreach-page support-white-card-theme" do %>
+    <%= render "edit_campaign_form", campaign: campaign %>
+  <% end %>
+<% end %>

@@ -1,0 +1,31 @@
+<div class="outreach-header-wrap discovery-header-wrap shift-down30">
+  <div class="discovery-page outreach-page discovery-header support-white-card-theme">
+    <div class="discovery-header-top outreach-header-top">
+      <div class="discovery-header-title">
+        <h1 class="settings-title"><%= @plan.name %></h1>
+        <p class="theme-text outreach-subtitle"><%= @plan.description.presence || "Outreach plan" %></p>
+      </div>
+      <div class="outreach-header-actions">
+        <%= link_to "Edit details", edit_outreach_plan_path(@plan), class: "btn btn-default theme-text" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="outreach-campaigns-wrap discovery-captured-wrap shift-down30">
+  <div class="discovery-page outreach-page support-white-card-theme outreach-card-pad">
+    <%= render "outreach/shared/context_nav" %>
+
+    <h2 class="theme-text h4">Steps</h2>
+    <ol class="outreach-step-list theme-text">
+      <% @steps.each do |step| %>
+        <li class="outreach-step-list-item">
+          <strong><%= step.position %>.</strong>
+          <%= step.name %>
+          <span class="outreach-step-type">— <%= step.step_type_label %></span>
+          <% if step.instructions.present? %><div class="outreach-step-instructions"><%= step.instructions %></div><% end %>
+        </li>
+      <% end %>
+    </ol>
+  </div>
+</div>

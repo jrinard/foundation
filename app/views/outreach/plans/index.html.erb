@@ -1,0 +1,36 @@
+<div class="outreach-header-wrap discovery-header-wrap shift-down30">
+  <div class="discovery-page outreach-page discovery-header support-white-card-theme">
+    <div class="discovery-header-top outreach-header-top">
+      <div class="discovery-header-title">
+        <h1 class="settings-title">Plan</h1>
+        <p class="theme-text outreach-subtitle">The step sequence used for every outreach list (V1 — one plan).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="outreach-campaigns-wrap discovery-captured-wrap shift-down30">
+  <div class="discovery-page outreach-page support-white-card-theme outreach-card-pad">
+    <%= render "outreach/shared/context_nav" %>
+
+    <% if @plans.any? %>
+      <% @plans.each do |plan| %>
+        <div class="outreach-plan-card">
+          <div class="outreach-plan-card-head">
+            <h2 class="theme-text h4"><%= link_to plan.name, outreach_plan_path(plan), class: "theme-text" %></h2>
+            <span class="outreach-pill outreach-pill-muted"><%= plan.step_count %> steps</span>
+            <% if plan.service_tag.present? %><span class="outreach-pill outreach-pill-active"><%= plan.service_tag %></span><% end %>
+          </div>
+          <% if plan.description.present? %><p class="theme-text outreach-plan-desc"><%= plan.description %></p><% end %>
+          <ol class="outreach-step-preview theme-text">
+            <% plan.steps.each do |step| %>
+              <li><%= step.name %> <span class="outreach-step-type">(<%= step.step_type_label %>)</span></li>
+            <% end %>
+          </ol>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="theme-text outreach-empty">No plan found. Run <code>db:seed</code> for your organization.</p>
+    <% end %>
+  </div>
+</div>

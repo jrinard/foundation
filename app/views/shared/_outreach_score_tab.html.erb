@@ -1,0 +1,16 @@
+<% linked_discovery = customer.linked_discovery_business %>
+
+<% if linked_discovery.present? %>
+  <div class="outreach-score-tab-inner">
+    <%= render "discovery/score_card",
+          business: linked_discovery,
+          score_preview: linked_discovery.live_score_preview,
+          show_actions: false,
+          modal: false %>
+    <p class="theme-text outreach-score-tab-foot">
+      <%= link_to "Open in Discovery", discovery_path(linked_discovery), class: "theme-text" %>
+    </p>
+  </div>
+<% else %>
+  <p class="theme-text outreach-empty">No Discovery scorecard linked to this customer.</p>
+<% end %>
