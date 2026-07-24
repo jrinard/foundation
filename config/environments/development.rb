@@ -1,10 +1,14 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
-  config.hosts << 'appcenter.intuit.com'
-  config.hosts << ENV['NGROK_DEV_SERVER'] if ENV['NGROK_DEV_SERVER'].present?
+  app_host = ENV.fetch("APP_HOST", "localhost:3000").sub(%r{\Ahttps?://}, "")
+
+  config.hosts << "appcenter.intuit.com"
+  config.hosts << "lifespring-foundation.herokuapp.com"
+  config.hosts << "foundation.lifespringdesign.com"
+  config.hosts << app_host if app_host.present?
+  config.hosts << ENV["NGROK_DEV_SERVER"] if ENV["NGROK_DEV_SERVER"].present?
   config.hosts << /.*\.herokuapp\.com/
-  config.hosts << ENV['APP_HOST'] if ENV['APP_HOST'].present?
 
   #Telling QB Sandbox Mode to be true in development
   Quickbooks.sandbox_mode = true

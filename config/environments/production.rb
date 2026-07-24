@@ -93,14 +93,17 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   
-  config.hosts << 'appcenter.intuit.com'
-  config.hosts << ENV['NGROK_DEV_SERVER'] if ENV['NGROK_DEV_SERVER'].present?
-  config.hosts << /.*\.herokuapp\.com/
-  config.hosts << ENV['APP_HOST'] if ENV['APP_HOST'].present?
+  app_host = ENV.fetch("APP_HOST", "foundation.lifespringdesign.com").sub(%r{\Ahttps?://}, "").split(":").first
 
-  app_host = ENV.fetch('APP_HOST', 'https://foundation.app')
-  config.action_mailer.default_url_options = { host: app_host }
-  Rails.application.routes.default_url_options[:host] = app_host
+  config.hosts << "appcenter.intuit.com"
+  config.hosts << "lifespring-foundation.herokuapp.com"
+  config.hosts << "foundation.lifespringdesign.com"
+  config.hosts << app_host if app_host.present?
+  config.hosts << ENV["NGROK_DEV_SERVER"] if ENV["NGROK_DEV_SERVER"].present?
+  config.hosts << /.*\.herokuapp\.com/
+
+  config.action_mailer.default_url_options = { host: app_host, protocol: "https" }
+  Rails.application.routes.default_url_options = { host: app_host, protocol: "https" }
 
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.perform_deliveries = true
