@@ -26,6 +26,11 @@
             <% qb_button_class = params[:qb] == 'qb' ? 'btn btn-xl btn-default settings-menu-button active' : 'btn btn-xl btn-default settings-menu-button' %>
             <%= link_to "Quickbooks", { :qb => "qb" }, class: qb_button_class %>
           <% end %>
+
+          <% if org_admin? && outreach_enabled? %>
+            <% outreach_button_class = params[:outreach] == 'outreach' ? 'btn btn-xl btn-default settings-menu-button active' : 'btn btn-xl btn-default settings-menu-button' %>
+            <%= link_to "Outreach", { outreach: "outreach" }, class: outreach_button_class %>
+          <% end %>
         </div>
         </div>
     
@@ -45,6 +50,9 @@
         <% end %>
          <% if params[:qb] && org_admin? && quickbooks_enabled_for_org? %>
           <%= render 'qb' %>
+        <% end %>
+         <% if params[:outreach] && org_admin? && outreach_enabled? %>
+          <%= render 'outreach' %>
         <% end %>
       </div>
     </div>

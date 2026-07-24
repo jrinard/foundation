@@ -142,6 +142,10 @@ Rails.application.routes.draw do
   patch '/settings/update_token', to: 'settings#update_token', as: :update_token
   patch '/settings/quickbooks_integration', to: 'settings#update_quickbooks_integration', as: :update_quickbooks_integration
   post '/settings/disconnect_quickbooks', to: 'settings#disconnect_quickbooks', as: :disconnect_quickbooks
+  patch '/settings/outreach_sms_channel', to: 'settings#update_outreach_sms_channel', as: :update_outreach_sms_channel
+  patch '/settings/outreach_sms_messages', to: 'settings#update_outreach_sms_messages', as: :update_outreach_sms_messages
+
+  post '/twilio/incoming_sms', to: 'twilio_webhooks#incoming_sms', as: :twilio_incoming_sms
 
   resources :home do
     post :start_fetch_invoices, on: :member

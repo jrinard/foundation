@@ -17,7 +17,8 @@ module Outreach
       @step_module = Outreach::StepModules.context_for(
         @enrollment,
         sms_recipient_key: sms_recipient_key_for(@enrollment),
-        dev_mode: outreach_dev_mode?
+        dev_mode: outreach_dev_mode?,
+        dev_tools_available: outreach_dev_tools_available?
       ) unless @enrollment.plan_complete?
       load_outreach_for_customer!(@enrollment.customer) if outreach_enabled?
     end
@@ -96,11 +97,17 @@ module Outreach
         return
       end
 
+      if Outreach::Sms::Compliance.opted_out?(@enrollment.customer) && !outreach_dev_mode?
+        redirect_back fallback_location: outreach_enrollment_path(@enrollment), alert: "This prospect has opted out of SMS."
+        return
+      end
+
       result = Outreach::Sms::SendMessage.call(
         enrollment: @enrollment,
         body: params[:message_body],
         recipient_key: params[:sms_recipient_key],
-        user: current_user
+        user: current_user,
+        dev_mode: outreach_dev_mode?
       )
 
       if result.error.present?

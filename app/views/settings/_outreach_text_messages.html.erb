@@ -1,0 +1,144 @@
+<% channel = @outreach_sms_channel || OutreachSmsChannel.integration_for(current_organization) %>
+<% webhook_url = twilio_incoming_sms_url(host: request.host_with_port, protocol: request.protocol) %>
+<% summary = @opt_list_summary || Outreach::Sms::OptListSummary.call(organization: current_organization) %>
+
+<p class="theme-text settings-outreach-intro">
+  Text messaging for Outreach — Twilio channel, compliance lists, and auto-reply copy when prospects text STOP or YES.
+</p>
+
+<div class="settings-outreach-text-messages-grid">
+  <%# Left column — Twilio + connection + ENV %>
+  <div class="settings-outreach-col settings-outreach-col--twilio">
+    <% if org_admin? %>
+      <%= form_with model: channel, url: update_outreach_sms_channel_path, method: :patch, local: true do |f| %>
+        <div class="qb-form-cont lead-card-dark theme-text settings-outreach-card">
+          <h3 class="h4-black theme-text">Twilio SMS</h3>
+          <p class="theme-text help-block settings-outreach-card-help">
+            Per-org <strong>from number</strong> for routing inbound SMS. Account SID and auth token live in server ENV only.
+            Live sends run when <strong>Text Message Sending</strong> is active and ENV + from number are set.
+          </p>
+
+          <div class="form-group">
+            <%= f.label :environment, "Environment" %>
+            <%= f.select :environment,
+                  options_for_select([["Sandbox (testing)", "sandbox"], ["Production (live)", "production"]], channel.environment),
+                  {},
+                  class: "form-control theme-field" %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :from_number, "From Number" %>
+            <%= f.text_field :from_number, class: "form-control theme-field", placeholder: "+15035551212", autocomplete: "off" %>
+          </div>
+
+          <div class="form-group settings-outreach-active-toggle">
+            <div class="settings-outreach-active-pill-wrap">
+              <label class="settings-outreach-active-pill theme-text">
+                <%= f.check_box :active, class: "settings-outreach-active-pill-input" %>
+                <span class="settings-outreach-active-pill-label settings-outreach-active-pill-label--active">Text Message Sending Active</span>
+                <span class="settings-outreach-active-pill-label settings-outreach-active-pill-label--inactive">Text Message Sending Inactive</span>
+              </label>
+            </div>
+          </div>
+
+          <%= f.submit "Save Text Message Settings", class: "btn btn-xl settings-menu-button settings-outreach-save-btn" %>
+        </div>
+      <% end %>
+
+      <div class="qb-form-cont lead-card-dark theme-text settings-outreach-card settings-outreach-status-card">
+        <h3 class="h4-black theme-text">Connection status</h3>
+        <dl class="settings-outreach-status-list theme-text">
+          <dt>Channel</dt><dd><%= channel.status_label %></dd>
+          <dt>Credentials</dt><dd><%= channel.credentials_source_label %></dd>
+          <dt>From Number</dt><dd><%= channel.effective_from_number.presence || "—" %></dd>
+          <dt>Inbound webhook</dt><dd class="settings-outreach-webhook-url"><%= webhook_url %></dd>
+        </dl>
+        <p class="help-block theme-text">Set the webhook URL in Twilio for your from number. Configure <code>TWILIO_*</code> in server ENV.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Right column — opt lists (top) + auto-reply (bottom) %>
+  <div class="settings-outreach-col settings-outreach-col--compliance">
+    <% if current_user.superadmin? %>
+      <div class="qb-form-cont lead-card-dark theme-text settings-outreach-card">
+        <h3 class="h4-black theme-text">Opt out / Opt in lists</h3>
+
+        <div class="settings-outreach-opt-columns">
+          <div class="settings-outreach-opt-column">
+            <div class="settings-outreach-opt-column-head">
+              <h4 class="settings-outreach-opt-column-title theme-text">Text blacklist</h4>
+              <span class="settings-outreach-opt-column-count theme-text"><%= summary[:opted_out_count] %></span>
+            </div>
+            <div class="settings-outreach-opt-list-scroll">
+              <% if summary[:opted_out].any? %>
+                <ul class="settings-outreach-opt-list">
+                  <% summary[:opted_out].each do |entry| %>
+                    <%= render "settings/outreach_opt_list_entry", entry: entry %>
+                  <% end %>
+                </ul>
+              <% else %>
+                <p class="theme-text outreach-muted settings-outreach-opt-empty">No opt-outs yet.</p>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="settings-outreach-opt-column">
+            <div class="settings-outreach-opt-column-head">
+              <h4 class="settings-outreach-opt-column-title theme-text">Text whitelist</h4>
+              <span class="settings-outreach-opt-column-count theme-text"><%= summary[:opted_in_count] %></span>
+            </div>
+            <div class="settings-outreach-opt-list-scroll">
+              <% if summary[:opted_in].any? %>
+                <ul class="settings-outreach-opt-list">
+                  <% summary[:opted_in].each do |entry| %>
+                    <%= render "settings/outreach_opt_list_entry", entry: entry %>
+                  <% end %>
+                </ul>
+              <% else %>
+                <p class="theme-text outreach-muted settings-outreach-opt-empty">No explicit opt-ins yet.</p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="qb-form-cont lead-card-dark theme-text settings-outreach-card">
+      <h3 class="h4-black theme-text">STOP / YES auto-reply messages</h3>
+
+
+      <% if current_user.superadmin? %>
+        <%= form_with model: channel, url: update_outreach_sms_messages_path, method: :patch, local: true do |f| %>
+          <div class="form-group">
+            <%= f.label :opt_out_reply_message, "Opt-out reply (after STOP)" %>
+            <%= f.text_area :opt_out_reply_message,
+                  rows: 3,
+                  class: "form-control theme-field",
+                  placeholder: OutreachSmsChannel::DEFAULT_OPT_OUT_REPLY %>
+            <p class="help-block theme-text">Default: <%= OutreachSmsChannel::DEFAULT_OPT_OUT_REPLY %></p>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :opt_in_reply_message, "Opt-in reply (after YES)" %>
+            <%= f.text_area :opt_in_reply_message,
+                  rows: 3,
+                  class: "form-control theme-field",
+                  placeholder: OutreachSmsChannel::DEFAULT_OPT_IN_REPLY %>
+            <p class="help-block theme-text">Default: <%= OutreachSmsChannel::DEFAULT_OPT_IN_REPLY %></p>
+          </div>
+
+          <%= f.submit "Save reply messages", class: "btn btn-xl btn-default settings-menu-button" %>
+        <% end %>
+      <% else %>
+        <dl class="settings-outreach-status-list theme-text">
+          <dt>Opt-out reply</dt>
+          <dd><%= channel.effective_opt_out_reply %></dd>
+          <dt>Opt-in reply</dt>
+          <dd><%= channel.effective_opt_in_reply %></dd>
+        </dl>
+        <p class="help-block theme-text outreach-muted">Only superadmin can edit reply copy.</p>
+      <% end %>
+    </div>
+  </div>
+</div>

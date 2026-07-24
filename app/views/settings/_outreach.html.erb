@@ -1,0 +1,17 @@
+<div class="row settings-outreach-page">
+  <br>
+  <div class="h3-black theme-text">Outreach — <%= current_organization.name %></div>
+  <br>
+
+  <div class="settings-outreach-subnav-section">
+    <div class="settings-outreach-subnav">
+      <%= link_to "Text Messages",
+            settings_path(outreach: "outreach", outreach_section: "text_messages"),
+            class: outreach_section_tab_class("text_messages") %>
+    </div>
+  </div>
+
+  <% if (@outreach_section || params[:outreach_section].presence || "text_messages") == "text_messages" %>
+    <%= render "outreach_text_messages" %>
+  <% end %>
+</div>

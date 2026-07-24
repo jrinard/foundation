@@ -9,6 +9,7 @@ class Organization < ApplicationRecord
   has_many :site_settings, class_name: "SiteSetting", dependent: :destroy
   has_many :quickbooks_tokens, dependent: :destroy
   has_one :quickbooks_token, dependent: :destroy
+  has_one :outreach_sms_channel, dependent: :destroy
   has_many :discovery_businesses, dependent: :destroy
   has_many :discovery_sources, dependent: :destroy
   has_many :discovery_runs, dependent: :destroy

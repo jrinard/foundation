@@ -162,7 +162,34 @@ class Customer < ApplicationRecord
     t < days.days.ago
   end
 
+  def sms_opted_out?
+    sms_opt_out_at.present? || sms_opt_in == false
+  end
+
+  def sms_opted_in?
+    sms_opt_in == true && !sms_opted_out?
+  end
+
+  def sms_opt_status_label
+    return "Opted out" if sms_opted_out?
+    return "Opted in" if sms_opt_in == true
+
+    "Not set"
+  end
+
+  before_save :sync_sms_compliance_fields, if: :will_save_change_to_sms_opt_in?
+
     private
+
+    def sync_sms_compliance_fields
+      if sms_opt_in == true
+        self.sms_opt_out_at = nil
+        self.sms_opt_out_note = nil
+        self.sms_opt_out_source = nil
+      elsif sms_opt_in == false && sms_opt_out_at.blank?
+        self.sms_opt_out_at = Time.current
+      end
+    end
 
     def reopen_linked_discovery_businesses!
       discovery_businesses.update_all(

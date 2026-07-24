@@ -16,7 +16,7 @@ module Outreach
       partial_for(step_type).present?
     end
 
-    def self.context_for(enrollment, sms_recipient_key: nil, dev_mode: false)
+    def self.context_for(enrollment, sms_recipient_key: nil, dev_mode: false, dev_tools_available: false)
       step_type = enrollment.current_step_type
       return nil unless registered?(step_type)
 
@@ -25,7 +25,8 @@ module Outreach
         Sms::StepContext.new(
           enrollment: enrollment,
           sms_recipient_key: sms_recipient_key,
-          dev_mode: dev_mode
+          dev_mode: dev_mode,
+          dev_tools_available: dev_tools_available
         )
       end
     end

@@ -7,7 +7,7 @@ module Outreach
       Group = Struct.new(:intent, :label, :entries, keyword_init: true)
 
       CALENDLY_LINK = "https://calendly.com/lifespring-design/intro"
-      OPT_OUT_FOOTER = "Reply STOP to opt out."
+      OPT_OUT_FOOTER = "Reply STOP at any time to opt out. Msg & data rates may apply."
 
       OPENING = :opening
       RESPONSE = :response
@@ -23,6 +23,15 @@ module Outreach
         "pricing" => "pricing",
         "no_thanks" => "no_thanks"
       }.freeze
+
+      def self.append_opt_out_footer(body)
+        normalized = body.to_s.strip
+        return normalized if normalized.blank?
+        return normalized if normalized.include?(OPT_OUT_FOOTER)
+        return normalized if normalized.match?(/reply\s+stop/i)
+
+        "#{normalized}\n\n#{OPT_OUT_FOOTER}"
+      end
 
       def self.for(customer:, user: nil)
         new(customer: customer, user: user)
@@ -122,7 +131,7 @@ module Outreach
       private
 
       def with_opt_out_footer(body)
-        "#{body}\n\n#{OPT_OUT_FOOTER}"
+        self.class.append_opt_out_footer(body)
       end
 
       def entry(key, label, body, intent)

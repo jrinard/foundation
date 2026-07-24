@@ -87,6 +87,8 @@
             <% end %>
           </div><br>
 
+          <%= render "customers/sms_opt_status" if outreach_enabled? %>
+
           <span class="h3-grey">Address</span><br>
           <!-- Javascript form toggle -->
           <div class="edit_family h4-black">

@@ -57,6 +57,45 @@
         <%= f.text_field :phone, class: "form-control mobile-form-control" %>
       </div>
 
+      <% if outreach_enabled? %>
+        <div class="field">
+          <label>SMS status</label>
+          <%= f.select :sms_opt_in,
+                options_for_select([
+                  ["Not set", ""],
+                  ["Opted in", true],
+                  ["Opted out", false]
+                ], customer.sms_opt_in),
+                {},
+                class: "form-control mobile-form-control" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :sms_opt_in_source, "SMS opt-in source" %>
+          <%= f.text_field :sms_opt_in_source,
+                class: "form-control mobile-form-control",
+                placeholder: "e.g. LifeSpring audit, LifeSpring contact form" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :sms_opt_out_source, "SMS opt-out source" %>
+          <%= f.text_field :sms_opt_out_source,
+                class: "form-control mobile-form-control",
+                placeholder: "Optional" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :sms_opt_out_note, "SMS opt-out note" %>
+          <%= f.text_field :sms_opt_out_note, class: "form-control mobile-form-control", placeholder: "Optional" %>
+        </div>
+
+        <% if customer.sms_opt_out_at.present? %>
+          <p class="theme-text outreach-muted" style="margin-top: -4px;">
+            Opted out <%= customer.sms_opt_out_at.strftime("%b %d, %Y") %>
+          </p>
+        <% end %>
+      <% end %>
+
       <div class="field">
         <%= f.label "One Time Payment " %>
         <%= f.text_field :one_time_payment, class: "form-control mobile-form-control" %>

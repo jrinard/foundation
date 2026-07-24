@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_07_23_160000) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_24_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -86,6 +86,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_23_160000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "organization_id", null: false
+    t.boolean "sms_opt_in"
+    t.datetime "sms_opt_out_at", precision: nil
+    t.text "sms_opt_out_note"
+    t.string "sms_opt_in_source"
+    t.string "sms_opt_out_source"
     t.index ["list_id"], name: "index_customers_on_list_id"
     t.index ["organization_id"], name: "index_customers_on_organization_id"
   end
@@ -457,6 +462,22 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_23_160000) do
     t.index ["organization_id"], name: "index_outreach_plans_on_organization_id"
   end
 
+  create_table "outreach_sms_channels", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "account_sid"
+    t.string "auth_token"
+    t.string "from_number"
+    t.string "environment", default: "sandbox", null: false
+    t.boolean "active", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "opt_out_reply_message"
+    t.text "opt_in_reply_message"
+    t.text "numbers_black_list", default: [], array: true
+    t.text "numbers_white_list", default: [], array: true
+    t.index ["organization_id"], name: "index_outreach_sms_channels_on_organization_id", unique: true
+  end
+
   create_table "outreach_text_messages", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "outreach_enrollment_id", null: false
@@ -614,6 +635,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_23_160000) do
   add_foreign_key "outreach_enrollments", "outreach_plans"
   add_foreign_key "outreach_plan_steps", "outreach_plans"
   add_foreign_key "outreach_plans", "organizations"
+  add_foreign_key "outreach_sms_channels", "organizations"
   add_foreign_key "outreach_text_messages", "customers"
   add_foreign_key "outreach_text_messages", "organizations"
   add_foreign_key "outreach_text_messages", "outreach_enrollments"

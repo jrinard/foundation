@@ -2,6 +2,7 @@ class SettingsController < ApplicationController
   before_action :authorize_settings_read!, only: [:index]
   before_action :authorize_settings_manage!, except: [:index]
   before_action :load_qb_integration, only: [:index, :update_token, :update_quickbooks_integration, :refresh_token, :disconnect_quickbooks]
+  before_action :load_outreach_sms_channel, only: [:index, :update_outreach_sms_channel, :update_outreach_sms_messages]
   before_action :require_valid_transfer_users!, only: [:transfer_customers]
 
   def index
@@ -11,6 +12,7 @@ class SettingsController < ApplicationController
 
     assign_account_manager_select_collections
     load_transfer_context
+    load_outreach_settings_context if params[:outreach].present? && outreach_enabled?
   end
 
   def transfer_customers
@@ -74,6 +76,30 @@ class SettingsController < ApplicationController
     redirect_to settings_path(discovery: "discovery")
   end
 
+  def update_outreach_sms_channel
+    authorize! :manage, :settings
+
+    attrs = outreach_sms_channel_params.to_h
+
+    if @outreach_sms_channel.update(attrs)
+      flash[:notice] = "Outreach Twilio settings saved for #{current_organization.name}."
+    else
+      flash[:alert] = @outreach_sms_channel.errors.full_messages.to_sentence
+    end
+    redirect_to settings_path(outreach: "outreach", outreach_section: "text_messages")
+  end
+
+  def update_outreach_sms_messages
+    require_superadmin!
+
+    if @outreach_sms_channel.update(outreach_sms_messages_params)
+      flash[:notice] = "SMS reply messages saved for #{current_organization.name}."
+    else
+      flash[:alert] = @outreach_sms_channel.errors.full_messages.to_sentence
+    end
+    redirect_to settings_path(outreach: "outreach", outreach_section: "text_messages")
+  end
+
   def toggle_customer_offerings_section
     unless current_user.admin? || current_user.superadmin?
       flash[:alert] = "You do not have permission to change that setting."
@@ -113,6 +139,17 @@ class SettingsController < ApplicationController
 
   def load_qb_integration
     @qb_integration = QuickbooksToken.integration_for(current_organization)
+  end
+
+  def load_outreach_sms_channel
+    @outreach_sms_channel = OutreachSmsChannel.integration_for(current_organization)
+  end
+
+  def load_outreach_settings_context
+    @outreach_section = params[:outreach_section].presence || "text_messages"
+    return unless @outreach_section == "text_messages"
+
+    @opt_list_summary = Outreach::Sms::OptListSummary.call(organization: current_organization)
   end
 
   def load_transfer_context
@@ -183,6 +220,14 @@ class SettingsController < ApplicationController
 
   def discovery_source_params
     params.require(:discovery_source).permit(:enabled)
+  end
+
+  def outreach_sms_channel_params
+    params.require(:outreach_sms_channel).permit(:from_number, :environment, :active)
+  end
+
+  def outreach_sms_messages_params
+    params.require(:outreach_sms_channel).permit(:opt_out_reply_message, :opt_in_reply_message)
   end
 
   def authorize_settings_read!

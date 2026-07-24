@@ -72,28 +72,15 @@ module Outreach
         reply_body = @body || REPLY_TYPES.fetch(@reply_type) { REPLY_TYPES["yes"] }
         recipient = resolved_recipient
 
-        message = nil
+        result = RecordInbound.call(
+          enrollment: @enrollment,
+          body: reply_body,
+          phone_number: recipient&.phone_normalized,
+          simulated: true,
+          reply_type: @reply_type
+        )
 
-        ActiveRecord::Base.transaction do
-          message = OutreachTextMessage.create!(
-            organization: @enrollment.organization,
-            outreach_enrollment: @enrollment,
-            customer: @customer,
-            user: @user,
-            direction: OutreachTextMessage::DIRECTION_INBOUND,
-            body: reply_body,
-            phone_number: recipient&.phone_normalized,
-            status: OutreachTextMessage::STATUS_RECORDED,
-            simulated: true
-          )
-
-          log_activity!(message)
-          @enrollment.update!(status: OutreachEnrollment::STATUS_CONVERSATION)
-        end
-
-        Result.new(enrollment: @enrollment.reload, message: message, error: nil)
-      rescue ActiveRecord::RecordInvalid => e
-        Result.new(enrollment: @enrollment, message: nil, error: e.record.errors.full_messages.to_sentence)
+        Result.new(enrollment: result.enrollment, message: result.message, error: result.error)
       end
 
       private
@@ -116,28 +103,6 @@ module Outreach
         end
 
         RecipientOptions.find(customer: @customer, key: @recipient_key)
-      end
-
-      def log_activity!(message)
-        step = @enrollment.current_step
-        OutreachActivity.create!(
-          organization: @enrollment.organization,
-          outreach_enrollment: @enrollment,
-          user: @user,
-          activity_type: "sms_replied",
-          summary: "Text replied — #{step&.dig('name') || 'SMS'}",
-          metadata: {
-            reply_body: message.body,
-            phone_number: message.phone_number,
-            outreach_text_message_id: message.id,
-            simulated: true,
-            reply_type: @reply_type,
-            sms_recipient_key: resolved_recipient&.key,
-            step_position: step&.dig("position"),
-            step_name: step&.dig("name"),
-            step_type: step&.dig("step_type")
-          }.compact
-        )
       end
     end
   end

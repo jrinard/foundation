@@ -1,0 +1,46 @@
+<% customer = local_assigns[:customer] || @chosen_customer %>
+<% return if customer.blank? %>
+
+<span class="h3-grey theme-text">SMS status</span><br>
+<div class="edit_family theme-text">
+  <%= customer.sms_opt_status_label %>
+  <% if customer.sms_opt_out_at.present? %>
+    <span class="theme-text outreach-muted"> · <%= customer.sms_opt_out_at.strftime("%b %d, %Y") %></span>
+  <% end %>
+  <% if customer.sms_opt_in_source.present? %>
+    <br><span class="theme-text outreach-muted">Opt-in source: <%= customer.sms_opt_in_source %></span>
+  <% end %>
+  <% if customer.sms_opt_out_source.present? %>
+    <br><span class="theme-text outreach-muted">Opt-out source: <%= customer.sms_opt_out_source %></span>
+  <% end %>
+  <% if customer.sms_opt_out_note.present? %>
+    <br><span class="theme-text outreach-muted"><%= customer.sms_opt_out_note %></span>
+  <% end %>
+</div>
+<div class="edit_f">
+  <%= form_for customer do |f| %>
+    <div class="input-group">
+      <%= f.select :sms_opt_in,
+            options_for_select([
+              ["Not set", ""],
+              ["Opted in", true],
+              ["Opted out", false]
+            ], customer.sms_opt_in),
+            {},
+            class: "form-control form-width theme-field" %>
+      <%= f.text_field :sms_opt_in_source,
+            placeholder: "Opt-in source (e.g. LifeSpring contact form)",
+            class: "form-control form-width theme-field" %>
+      <%= f.text_field :sms_opt_out_source,
+            placeholder: "Opt-out source",
+            class: "form-control form-width theme-field" %>
+      <%= f.text_field :sms_opt_out_note,
+            placeholder: "Opt-out note (optional)",
+            class: "form-control form-width theme-field" %>
+      <%= hidden_field_tag(:subaction, customer.id) %>
+      <div class="input-group-btn">
+        <%= f.submit "Save", name: nil, params: { id: customer.id }, class: "btn-sm btn-warning form-width" %>
+      </div>
+    </div>
+  <% end %>
+</div><br>

@@ -7,7 +7,7 @@ class Ability
   ].freeze
 
   ADMIN_ORG_MODELS = [
-    SiteSetting, QuickbooksToken
+    SiteSetting, QuickbooksToken, OutreachSmsChannel
   ].freeze
 
   def initialize(user, organization = Current.organization)

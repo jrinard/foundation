@@ -54,6 +54,7 @@ gem 'nio4r', '>= 2.6.0'
 gem "acts_as_list", "~> 1.0"
 gem "ranked-model", "~> 0.4.8"
 gem 'quickbooks-ruby'
+gem 'twilio-ruby'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

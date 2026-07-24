@@ -37,6 +37,7 @@ module Outreach
         step_being_completed = @enrollment.current_step
         @status_before = @enrollment.status
         apply_status!
+        apply_customer_sms_compliance!(step_being_completed)
         @status_after = @enrollment.status
         log_activity!(step_being_completed)
         advance_position!(step_being_completed) unless @outcome.in?(%w[follow_up_later not_interested])
@@ -169,6 +170,16 @@ module Outreach
 
     def sms_step?(step)
       step&.dig("step_type") == Outreach::PlanStepTypes::SEND_SMS
+    end
+
+    def apply_customer_sms_compliance!(step)
+      return unless sms_step?(step) && @sms_outcome == "opt_out"
+
+      Sms::Compliance.opt_out!(
+        customer: @enrollment.customer,
+        source: "Outreach log outcome",
+        note: @notes
+      )
     end
   end
 end

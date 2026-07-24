@@ -1,0 +1,115 @@
+# frozen_string_literal: true
+
+class OutreachSmsChannel < ApplicationRecord
+  include OrganizationScoped
+
+  ENVIRONMENTS = %w[sandbox production].freeze
+
+  DEFAULT_OPT_OUT_REPLY = "You have been unsubscribed. Reply YES to opt back in."
+  DEFAULT_OPT_IN_REPLY = "Thank you for opting in. Reply STOP to unsubscribe."
+
+  belongs_to :organization
+
+  validates :environment, presence: true, inclusion: { in: ENVIRONMENTS }
+  validates :organization_id, uniqueness: true
+
+  def self.integration_for(organization)
+    return nil unless organization
+
+    find_or_create_by!(organization: organization) do |record|
+      record.environment = "sandbox"
+      record.active = false
+    end
+  end
+
+  def self.find_active_by_from_number(raw_number)
+    normalized = Outreach::Sms::PhoneNumber.normalize(raw_number)
+    return nil if normalized.blank?
+
+    unscoped_by_organization
+      .where(active: true)
+      .find { |channel| Outreach::Sms::PhoneNumber.normalize(channel.from_number) == normalized }
+  end
+
+  def sandbox?
+    environment == "sandbox"
+  end
+
+  def production?
+    environment == "production"
+  end
+
+  def credentials_present?
+    effective_account_sid.present? && effective_auth_token.present? && effective_from_number.present?
+  end
+
+  def configured?
+    active? && credentials_present?
+  end
+
+  def ready_to_send?
+    configured?
+  end
+
+  def effective_account_sid
+    account_sid.presence || ENV["TWILIO_ACCOUNT_SID"].presence
+  end
+
+  def effective_auth_token
+    auth_token.presence || ENV["TWILIO_AUTH_TOKEN"].presence
+  end
+
+  def effective_from_number
+    from_number.presence || ENV["TWILIO_FROM_NUMBER"].presence
+  end
+
+  def env_account_sid_present?
+    ENV["TWILIO_ACCOUNT_SID"].present?
+  end
+
+  def env_auth_token_present?
+    ENV["TWILIO_AUTH_TOKEN"].present?
+  end
+
+  def env_from_number_present?
+    ENV["TWILIO_FROM_NUMBER"].present?
+  end
+
+  def credentials_source_label
+    if env_account_sid_present? && env_auth_token_present?
+      "Platform ENV"
+    else
+      "Set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in ENV"
+    end
+  end
+
+  def status_label
+    return "Active — ready to send" if configured?
+    return "Inactive — credentials present but channel not active" if credentials_present? && !active?
+
+    "Not configured"
+  end
+
+  def effective_opt_out_reply
+    opt_out_reply_message.presence || DEFAULT_OPT_OUT_REPLY
+  end
+
+  def effective_opt_in_reply
+    opt_in_reply_message.presence || DEFAULT_OPT_IN_REPLY
+  end
+
+  def opt_out_twiml
+    twiml_for(effective_opt_out_reply)
+  end
+
+  def opt_in_twiml
+    twiml_for(effective_opt_in_reply)
+  end
+
+  def twiml_for(body)
+    escaped = ERB::Util.html_escape(body.to_s)
+    <<~XML.squish
+      <?xml version="1.0" encoding="UTF-8"?><Response><Message>#{escaped}</Message></Response>
+    XML
+  end
+end

@@ -360,6 +360,8 @@ class CustomersController < ApplicationController
                                         :address, :city, :state, :zip, :email, :user_id,
                                         :followup, :last_note, :last_note_text,
                                         :quickbooks_customer_id,
+                                        :sms_opt_in, :sms_opt_out_note,
+                                        :sms_opt_in_source, :sms_opt_out_source,
                                         :active_proposal, :onBoard,
                                         contacts_attributes: [:id, :position, :firstname, :lastname, :phone, :phone2, :email, :note]
                                     )

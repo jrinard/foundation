@@ -15,7 +15,7 @@ class OutreachPlan < ApplicationRecord
   scope :active, -> { where(active: true) }
   scope :alphabetical, -> { order(:name) }
 
-  DEFAULT_PLAN_NAME = "LifeSpring Outreach Plan"
+  DEFAULT_PLAN_NAME = "Emerald Plan"
 
   def self.default_for_organization(organization = Current.organization)
     return nil unless organization

@@ -3,13 +3,17 @@
 module Outreach
   module Sms
     class Conversation
-      Message = Struct.new(:direction, :body, :occurred_at, :simulated, keyword_init: true) do
+      Message = Struct.new(:direction, :body, :occurred_at, :simulated, :status, keyword_init: true) do
         def outbound?
           direction == :outbound
         end
 
         def inbound?
           direction == :inbound
+        end
+
+        def failed?
+          status == OutreachTextMessage::STATUS_FAILED
         end
       end
 
@@ -56,7 +60,8 @@ module Outreach
           direction: record.outbound? ? :outbound : :inbound,
           body: record.body,
           occurred_at: record.created_at,
-          simulated: record.simulated?
+          simulated: record.simulated?,
+          status: record.status
         )
       end
     end

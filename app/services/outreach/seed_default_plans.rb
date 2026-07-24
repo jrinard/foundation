@@ -5,15 +5,18 @@ module Outreach
     PLAN_NAME = OutreachPlan::DEFAULT_PLAN_NAME
 
     LEGACY_PLAN_NAMES = [
+      "LifeSpring Outreach Plan",
       "SMS-only",
       "Email-only",
       "SMS-first mixed"
     ].freeze
 
+    LEGACY_DEFAULT_PLAN_NAME = "LifeSpring Outreach Plan"
+
     PLAN = {
       name: PLAN_NAME,
-      description: "Convert qualified Prospects into customers. One proven LifeSpring sequence — manual pacing in V1.",
-      service_tag: "LifeSpring",
+      description: "Convert qualified Prospects into customers. Emerald sequence — manual pacing in V1.",
+      service_tag: "Emerald",
       steps: [
         {
           position: 1,
@@ -100,7 +103,10 @@ module Outreach
     end
 
     def upsert_plan!(attrs)
-      plan = OutreachPlan.find_or_initialize_by(organization: @organization, name: attrs[:name])
+      plan = OutreachPlan.find_by(organization: @organization, name: attrs[:name])
+      plan ||= OutreachPlan.find_by(organization: @organization, name: LEGACY_DEFAULT_PLAN_NAME)
+      plan ||= OutreachPlan.new(organization: @organization)
+      plan.name = attrs[:name]
       plan.assign_attributes(
         description: attrs[:description],
         service_tag: attrs[:service_tag],

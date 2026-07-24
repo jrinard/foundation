@@ -20,7 +20,9 @@ export default class extends Controller {
     defaultTextTemplate: String,
     recipients: Array,
     selectedRecipientKey: String,
-    allowSendWithoutPhone: Boolean
+    allowSendWithoutPhone: Boolean,
+    liveMessagingEnabled: Boolean,
+    smsOptedOut: Boolean
   };
 
   connect() {
@@ -52,7 +54,7 @@ export default class extends Controller {
   updateRecipientUI() {
     const recipient = this.currentRecipient();
     if (!recipient) {
-      this.setSendEnabled(this.allowSendWithoutPhoneValue);
+      this.setSendEnabled(this.canSend());
       return;
     }
 
@@ -80,7 +82,23 @@ export default class extends Controller {
       pill.classList.toggle("is-active", pill.dataset.recipientKey === recipient.key);
     });
 
-    this.setSendEnabled(!!recipient.phone_normalized || this.allowSendWithoutPhoneValue);
+    this.setSendEnabled(this.canSend());
+  }
+
+  canSend() {
+    return this.sendDisabledReason() === "";
+  }
+
+  sendDisabledReason() {
+    if (this.allowSendWithoutPhoneValue) return "";
+
+    if (this.smsOptedOutValue) return "Prospect opted out";
+    if (!this.liveMessagingEnabledValue) return "Messaging Disabled";
+
+    const recipient = this.currentRecipient();
+    if (!recipient?.phone_normalized) return "Phone is missing";
+
+    return "";
   }
 
   setSendEnabled(canSend) {
@@ -89,7 +107,11 @@ export default class extends Controller {
     }
 
     if (this.hasSendHintTarget) {
+      const reason = this.sendDisabledReason();
       this.sendHintTarget.hidden = canSend;
+      if (!canSend && reason) {
+        this.sendHintTarget.textContent = reason;
+      }
     }
   }
 

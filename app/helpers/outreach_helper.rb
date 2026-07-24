@@ -138,6 +138,12 @@ module OutreachHelper
   end
 
   def outreach_activity_actor_label(activity)
+    if activity.activity_type == "sms_replied" && activity.user.blank?
+      meta = activity.metadata || {}
+      return meta["customer_name"].presence || meta[:customer_name].presence ||
+        activity.outreach_enrollment&.customer&.name.presence || "Customer"
+    end
+
     activity.user&.name.presence || "System"
   end
 
@@ -161,7 +167,7 @@ module OutreachHelper
     case activity.activity_type
     when "status_changed"
       render("outreach/enrollments/activity_status_change", activity: activity)
-    when "sms_sent", "sms_first_reachout", "sms_replied"
+    when "sms_sent", "sms_first_reachout", "sms_replied", "sms_opt_out"
       render("outreach/enrollments/activity_sms_message", activity: activity)
     when "step_completed"
       content_tag(:span, h(activity.summary), class: "outreach-activity-step-completed")

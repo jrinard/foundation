@@ -5,10 +5,11 @@ module Outreach
     class StepContext
       attr_reader :enrollment, :composer, :conversation
 
-      def initialize(enrollment:, sms_recipient_key: nil, dev_mode: false)
+      def initialize(enrollment:, sms_recipient_key: nil, dev_mode: false, dev_tools_available: false)
         @enrollment = enrollment
         @sms_recipient_key = sms_recipient_key
         @dev_mode = dev_mode
+        @dev_tools_available = dev_tools_available
         @composer = Composer.new(
           customer: enrollment.customer,
           user: Current.user,
@@ -36,13 +37,35 @@ module Outreach
           default_text_template_key: composer.default_text_template_key(set: template_set, reply_intent: reply_intent),
           follow_up_mode: follow_up_mode?,
           dev_mode: @dev_mode,
-          awaiting_simulated_reply: @dev_mode && awaiting_simulated_reply?,
+          dev_tools_available: @dev_tools_available,
+          sms_opted_out: Compliance.opted_out?(enrollment.customer),
+          live_messaging_enabled: live_messaging_enabled?,
+          send_enabled: send_enabled?,
+          send_disabled_reason: send_disabled_reason,
+          awaiting_simulated_reply: @dev_tools_available && @dev_mode && awaiting_simulated_reply?,
           simulate_reply_groups: SimulateInboundReply::REPLY_GROUPS,
           conversation_messages: conversation.messages
         }
       end
 
       private
+
+      def live_messaging_enabled?
+        OutreachSmsChannel.integration_for(enrollment.organization)&.ready_to_send?
+      end
+
+      def send_disabled_reason
+        return nil if @dev_mode
+        return "Prospect opted out" if Compliance.opted_out?(enrollment.customer)
+        return "Messaging Disabled" unless live_messaging_enabled?
+        return "Phone is missing" unless composer.phone_present?
+
+        nil
+      end
+
+      def send_enabled?
+        send_disabled_reason.nil?
+      end
 
       def follow_up_mode?
         conversation.follow_up_mode?

@@ -5,7 +5,9 @@
      data-outreach-sms-step-default-text-template-value="<%= default_text_template_key %>"
      data-outreach-sms-step-recipients-value="<%= recipient_options.to_json %>"
      data-outreach-sms-step-selected-recipient-key-value="<%= selected_recipient_key %>"
-     data-outreach-sms-step-allow-send-without-phone-value="<%= dev_mode %>">
+     data-outreach-sms-step-allow-send-without-phone-value="<%= dev_mode %>"
+     data-outreach-sms-step-live-messaging-enabled-value="<%= live_messaging_enabled %>"
+     data-outreach-sms-step-sms-opted-out-value="<%= sms_opted_out && !dev_mode %>">
   <% if recipient_options.any? %>
     <div class="outreach-sms-recipient-picker">
       <p class="outreach-sms-recipient-picker-hint theme-text">Send to</p>
@@ -29,7 +31,9 @@
       <span class="outreach-sms-step-phone" data-outreach-sms-step-target="phoneDisplay"><%= phone %></span>
     <% else %>
       <span class="outreach-sms-step-warning" data-outreach-sms-step-target="phoneDisplay">
-        <% if dev_mode %>
+        <% if sms_opted_out && !dev_mode %>
+          This prospect has opted out of SMS.
+        <% elsif dev_mode %>
           No phone on file yet — Dev Mode still records messages on this enrollment.
         <% else %>
           No phone on file — add one on the prospect profile before sending.
@@ -37,6 +41,10 @@
       </span>
     <% end %>
   </div>
+
+  <% if sms_opted_out && !dev_mode %>
+    <p class="outreach-sms-step-warning theme-text">Sending is blocked while SMS status is opted out. Update the prospect profile to opt back in.</p>
+  <% end %>
 
   <%= render "outreach/enrollments/step_modules/sms_conversation",
         conversation_messages: conversation_messages,
@@ -67,13 +75,13 @@
           <div class="outreach-sms-step-send-control">
             <%= button_tag "Send",
                   type: "submit",
-                  disabled: !phone_present && !dev_mode,
+                  disabled: !send_enabled,
                   class: "btn btn-warning discovery-split-btn-main outreach-btn-primary outreach-sms-step-send-btn",
                   data: { outreach_sms_step_target: "sendButton" } %>
             <p class="outreach-sms-step-send-hint theme-text outreach-muted"
                data-outreach-sms-step-target="sendHint"
-               <%= "hidden" if phone_present || dev_mode %>>
-              Phone is missing
+               <%= "hidden" if send_enabled %>>
+              <%= send_disabled_reason %>
             </p>
           </div>
         </div>
@@ -124,7 +132,7 @@
     </div>
   <% end %>
 
-  <% if awaiting_simulated_reply %>
+  <% if dev_tools_available && awaiting_simulated_reply %>
     <div class="outreach-sms-simulate-reply">
       <p class="outreach-sms-simulate-reply-hint theme-text">Waiting for their reply — dev shortcut:</p>
       <% simulate_reply_groups.each do |group| %>

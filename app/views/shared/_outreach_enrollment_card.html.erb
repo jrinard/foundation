@@ -32,18 +32,10 @@
               class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary",
               data: { turbo_confirm: "Start a fresh run in #{enrollment.outreach_campaign.name}? The previous attempt will stay in history." } %>
       <% elsif outreach_enrollment_dock_workable?(enrollment) %>
-        <% if outreach_enrollment_sms_step?(enrollment) %>
-          <%= link_to "Continue texting",
-                outreach_enrollment_path(enrollment),
-                class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary" %>
-        <% else %>
-          <%= form_with url: complete_step_outreach_enrollment_path(enrollment), method: :post, local: true, class: "outreach-mini-complete-form" do %>
-            <%= hidden_field_tag :outcome, "completed" %>
-            <%= submit_tag "Complete current step", class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary" %>
-          <% end %>
-        <% end %>
+        <%= link_to "Continue Outreach",
+              outreach_enrollment_path(enrollment),
+              class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary" %>
       <% end %>
-      <%= link_to "View enrollment", outreach_enrollment_path(enrollment), class: "btn btn-xs btn-default theme-text" %>
     </div>
   <% else %>
     <div class="outreach-enrollment-actions">

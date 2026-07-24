@@ -8,11 +8,14 @@
     <div class="outreach-sms-conversation-feed" data-outreach-sms-step-target="conversationFeed">
       <% conversation_messages.each_with_index do |message, index| %>
         <% needs_reply = index == last_index && message.inbound? %>
-        <div class="outreach-sms-conversation-message outreach-sms-conversation-message--<%= message.outbound? ? "outbound" : "inbound" %><%= " outreach-sms-conversation-message--needs-reply" if needs_reply %>">
+        <div class="outreach-sms-conversation-message outreach-sms-conversation-message--<%= message.outbound? ? "outbound" : "inbound" %><%= " outreach-sms-conversation-message--failed" if message.outbound? && message.failed? %><%= " outreach-sms-conversation-message--needs-reply" if needs_reply %>">
           <div class="outreach-sms-conversation-bubble">
             <p class="outreach-sms-conversation-body"><%= message.body %></p>
             <time class="outreach-sms-conversation-time" datetime="<%= message.occurred_at.iso8601 %>">
               <%= message.occurred_at.strftime("%b %d · %I:%M %p") %>
+              <% if message.outbound? && message.failed? %>
+                · <span class="outreach-sms-conversation-status">Failed to send</span>
+              <% end %>
               <% if dev_mode && message.simulated %>
                 · simulated
               <% end %>
