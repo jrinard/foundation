@@ -1,29 +1,35 @@
+<div class="login-page-title-row">
+  <h2 class="h2-white login-page-title">Forgot your password?</h2>
+</div>
 
-  <h2 class="h2-black theme-text">Forgot your password?</h2>
+<div class="form white-well login-form-panel">
+  <% if flash[:alert] %>
+    <div class="alert alert-danger theme-text-error">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
 
-  <div class="form white-well round">
+  <% if flash[:notice] %>
+    <div class="alert alert-info login-page-notice">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
 
-  <!-- Please Note: This password reset applies to non google accounts. If you logged in through google when you created your account then you will need to reset it
-  <br> -->
-  <%#= link_to 'Reset my Google Account', 'https://myaccount.google.com/security#signin', :class => "" %>
+  <p class="login-page-help">Enter your email and we&rsquo;ll send reset instructions.</p>
 
-  <hr>
-  <h3 class="theme-text">Reset Account</h3>
-  <%#= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-   <%# Due to the change in the previous route to get to this link this path had to be adjusted as well. Not sure why. %>
-   <%= form_for(resource, as: resource_name, url: user_password_path, html: { method: :post }) do |f| %>
-
+  <%= form_for(resource, as: resource_name, url: user_password_path, html: { method: :post }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
-    <div class="field theme-text">
-      <%#= f.label :email %>
-      <%= f.email_field :email, autofocus: true, :placeholder => "Email", :class => "form-control" %>
-    </div><br>
+    <div class="field">
+      <%= f.email_field :email, autofocus: true, class: "form-control input-lg", placeholder: "Email" %>
+    </div>
 
     <div class="actions">
-      <%= f.submit "Send reset password info", :class => "btn btn-lg btn-warning round" %>
+      <%= f.submit "Send reset password info", class: "btn btn-lg btn-warning btn-long btn-big" %>
     </div>
-  <% end %><br>
-  </div>
+  <% end %>
+</div>
 
-  <%= render "devise/shared/links" %>
+<div class="login-override center login-page-footer">
+  <%= link_to "Back to sign in", new_user_session_path, class: "login-page-forgot-link" %>
+</div>

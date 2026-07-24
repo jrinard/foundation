@@ -2275,6 +2275,15 @@ th {
   font-size: 1.35em;
 }
 
+.login-page-title--in-panel {
+  margin-bottom: 14px;
+  color: #222;
+}
+
+body#app-theme-body[data-dark].login-bg .login-form-panel .login-page-title--in-panel {
+  color: #fff;
+}
+
 .login-form-panel {
   display: block;
   width: 100%;
@@ -2283,6 +2292,17 @@ th {
   margin: 0;
   padding: 16px;
   border-radius: 10px;
+}
+
+body#app-theme-body[data-dark].login-bg .login-form-panel .alert-danger {
+  color: #ffb4b4;
+  background-color: #3d2020;
+  border-color: #6b3333;
+}
+
+body#app-theme-body[data-dark].login-bg .login-form-panel.white-well {
+  background-color: #222;
+  border: 1px solid #444;
 }
 
 .login-page .login-form-panel .actions {
@@ -2321,8 +2341,21 @@ th {
 .login-remember-label {
   margin: 0;
   font-size: 0.95em;
-  color: #333;
+  color: #999;
   font-weight: normal;
+}
+
+.login-page-help {
+  margin: 0 0 12px;
+  font-size: 0.95em;
+  line-height: 1.4;
+  color: #999;
+}
+
+body#app-theme-body[data-dark].login-bg .login-page-notice {
+  color: #cce5ff;
+  background-color: #1a2a3a;
+  border-color: #2a4a66;
 }
 
 .login-page-footer {

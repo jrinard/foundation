@@ -4,11 +4,33 @@
     <title>Foundation</title>
     <%= csrf_meta_tags %>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem("foundation-theme");
+          if (storedTheme === "dark") {
+            document.documentElement.style.backgroundColor = "#000";
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link href="https://fonts.googleapis.com/css?family=Bangers|Heebo|Passion+One|Open+Sans" rel="stylesheet">
     <%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload" %>
   </head>
-  <body class="login-bg">
+  <body id="app-theme-body" class="login-bg">
+    <script>
+      (function () {
+        try {
+          var storedTheme = localStorage.getItem("foundation-theme");
+          if (storedTheme === "dark") {
+            document.body.setAttribute("data-dark", "true");
+          } else {
+            document.body.removeAttribute("data-dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
     <div class="login-page-wrap">
       <div class="single-box login-page col-xs-12 col-sm-10 col-md-8 col-lg-5 col-centered center">
         <div class="logo login-logo-box">
