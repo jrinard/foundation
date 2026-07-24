@@ -19,6 +19,7 @@ class OutreachSmsChannel < ApplicationRecord
     find_or_create_by!(organization: organization) do |record|
       record.environment = "sandbox"
       record.active = false
+      record.notify_admin_on_website_opt_in = true
     end
   end
 

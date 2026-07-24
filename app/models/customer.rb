@@ -27,7 +27,51 @@ class Customer < ApplicationRecord
   scope :current_customers, -> { where(:active => true).not_archived }
   # scope :current_customers_with_no_proposals, -> { where(:active => true, :active_proposal => false).not_archived }
   scope :potential_customers, -> { where(active: false, onBoard: "The List").not_archived }
+
+  WEBSITE_CONTACT_FORM_SOURCE_FRAGMENT = "contact-form"
+  WEBSITE_REVIEW_SOURCE_FRAGMENT = "website-review"
+
+  scope :ordered_for_prospects_list, -> { order(Arel.sql("customers.sms_opt_in_at DESC NULLS LAST, customers.created_at DESC")) }
+  scope :from_website_contact_form, -> { where("customers.sms_opt_in_source ILIKE ?", "%#{WEBSITE_CONTACT_FORM_SOURCE_FRAGMENT}%") }
+  scope :from_website_review, -> { where("customers.sms_opt_in_source ILIKE ?", "%#{WEBSITE_REVIEW_SOURCE_FRAGMENT}%") }
+  scope :sms_opted_in_since, ->(time) { where.not(sms_opt_in_at: nil).where("customers.sms_opt_in_at >= ?", time) }
   scope :lead_customers, -> { where(onBoard: ["Lead on Board", "Current on Board"]).where.not(list_id: nil).not_archived }
+
+  PROSPECTS_SORTS = {
+    "created_at desc" => "created_at DESC",
+    "updated_at desc" => "updated_at DESC",
+    "name asc" => "name ASC"
+  }.freeze
+
+  PROSPECTS_SOURCE_FILTERS = {
+    "website_contact_form" => "Contact form",
+    "website_review" => "Website review",
+    "opted_in_today" => "Opt-in Today",
+    "opted_in_this_week" => "Opt-in Week"
+  }.freeze
+
+  def self.apply_prospects_source_filter(filter_key)
+    case filter_key.to_s
+    when "website_contact_form"
+      from_website_contact_form
+    when "website_review"
+      from_website_review
+    when "opted_in_today"
+      sms_opted_in_since(Time.zone.today.beginning_of_day)
+    when "opted_in_this_week"
+      sms_opted_in_since(Time.zone.today.beginning_of_week)
+    else
+      all
+    end
+  end
+
+  def website_contact_form_opt_in?
+    sms_opt_in_source.to_s.include?(WEBSITE_CONTACT_FORM_SOURCE_FRAGMENT)
+  end
+
+  def website_review_opt_in?
+    sms_opt_in_source.to_s.include?(WEBSITE_REVIEW_SOURCE_FRAGMENT)
+  end
 
   #Mainly used for stats in banav bar
   # scope :lead_customers, -> { where(:archived => false ).has_list } 
@@ -183,6 +227,7 @@ class Customer < ApplicationRecord
 
     def sync_sms_compliance_fields
       if sms_opt_in == true
+        self.sms_opt_in_at ||= Time.current
         self.sms_opt_out_at = nil
         self.sms_opt_out_note = nil
         self.sms_opt_out_source = nil

@@ -146,6 +146,8 @@ Rails.application.routes.draw do
   patch '/settings/outreach_sms_messages', to: 'settings#update_outreach_sms_messages', as: :update_outreach_sms_messages
 
   post '/twilio/incoming_sms', to: 'twilio_webhooks#incoming_sms', as: :twilio_incoming_sms
+  post '/webhooks/lifespring/contact_form_opt_in', to: 'lifespring_webhooks#contact_form_opt_in', as: :lifespring_contact_form_opt_in
+  post '/webhooks/lifespring/website_review', to: 'lifespring_webhooks#contact_form_opt_in', as: :lifespring_website_review
 
   resources :home do
     post :start_fetch_invoices, on: :member

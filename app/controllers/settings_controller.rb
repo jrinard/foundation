@@ -223,7 +223,7 @@ class SettingsController < ApplicationController
   end
 
   def outreach_sms_channel_params
-    params.require(:outreach_sms_channel).permit(:from_number, :environment, :active)
+    params.require(:outreach_sms_channel).permit(:from_number, :environment, :active, :notify_admin_on_website_opt_in)
   end
 
   def outreach_sms_messages_params

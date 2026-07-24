@@ -21,39 +21,7 @@ class PotentialsController < ApplicationController
         send_file "#{Rails.root}/app/assets/docs/a-customers.csv", type: "application/pdf", x_sendfile: true
       end
 
-      #Filter Sort v2
-      if params[:sort_by]
-        @potential_customers = Customer.potential_customers.includes(:contacts)
-                                .order(params[:sort_by])
-      elsif params[:sort_by_manager].present?
-        user_id = params[:sort_by_manager].to_i
-        @potential_customers = Customer.potential_customers.includes(:contacts)
-                               .joins(:user)
-                               .where(users: { id: user_id })
-                               .order('name asc')
-            @chosen_filter_category = "Manager"
-            account_manager = User.find_by(id: user_id)
-            if account_manager
-              @chosen_filter = "#{@chosen_filter_category} #{account_manager.name}"
-            end
-      else
-        @potential_customers = Customer.potential_customers.includes(:contacts)
-                               .order('name asc')
-      end
-    
-      if params[:sort_by_offering].present? || params[:sort_by_service].present?
-        specific_customers = Customer.potential_customers.includes(:contacts).joins(:offerings)
-        specific_customers = specific_customers.order(params[:sort_by]) if params[:sort_by].present?
-        @potential_customers = apply_offering_list_filter(specific_customers)
-      end
-
-      # @budget_check = false
-
-
-      if (params[:l])
-        @potential_customers = Customer.potential_customers.where("letter = ?", params[:l])
-        # @potential_customers = Customer.where("letter = ?", params[:l])
-      end
+      load_potential_customers
 
 
       if params[:search]
@@ -155,5 +123,49 @@ class PotentialsController < ApplicationController
 
   end
 
+  private
+
+  def load_potential_customers
+    @potential_customers = Customer.potential_customers.includes(:contacts)
+    apply_prospects_source_filter_to_list!
+
+    if params[:sort_by_offering].present? || params[:sort_by_service].present?
+      @potential_customers = @potential_customers.joins(:offerings)
+      @potential_customers = apply_offering_list_filter(@potential_customers)
+    end
+
+    if params[:l].present?
+      @potential_customers = @potential_customers.where(letter: params[:l])
+    end
+
+    apply_prospects_sort_to_list!
+  end
+
+  def apply_prospects_source_filter_to_list!
+    filter_key = params[:filter_by].to_s
+    return unless Customer::PROSPECTS_SOURCE_FILTERS.key?(filter_key)
+
+    @potential_customers = @potential_customers.merge(Customer.apply_prospects_source_filter(filter_key))
+    append_chosen_filter!(Customer::PROSPECTS_SOURCE_FILTERS[filter_key])
+  end
+
+  def apply_prospects_sort_to_list!
+    if params[:sort_by_manager].present?
+      user_id = params[:sort_by_manager].to_i
+      @potential_customers = @potential_customers.joins(:user).where(users: { id: user_id }).order("name ASC")
+      account_manager = User.find_by(id: user_id)
+      append_chosen_filter!("Manager #{account_manager.name}") if account_manager
+    elsif params[:sort_by].present? && Customer::PROSPECTS_SORTS.key?(params[:sort_by])
+      @potential_customers = @potential_customers.order(Customer::PROSPECTS_SORTS[params[:sort_by]])
+    else
+      @potential_customers = @potential_customers.ordered_for_prospects_list
+    end
+  end
+
+  def append_chosen_filter!(label)
+    @chosen_filters ||= []
+    @chosen_filters << label
+    @chosen_filter = @chosen_filters.join(" · ")
+  end
 
 end

@@ -141,4 +141,27 @@
       <% end %>
     </div>
   </div>
+
+  <%# Third column — admin opt-in alerts %>
+  <div class="settings-outreach-col settings-outreach-col--admin-alerts">
+    <% if org_admin? %>
+      <%= form_with model: channel, url: update_outreach_sms_channel_path, method: :patch, local: true do |f| %>
+        <div class="qb-form-cont lead-card-dark theme-text settings-outreach-card">
+          <h3 class="h4-black theme-text">Admin opt-in alerts</h3>
+          <p class="theme-text help-block settings-outreach-card-help">
+            Get a text when someone opts in from the LifeSpring website contact form or website review form.
+          </p>
+
+          <div class="form-group settings-outreach-admin-alert-toggle">
+            <label class="settings-outreach-admin-alert-label theme-text">
+              <%= f.check_box :notify_admin_on_website_opt_in, class: "settings-outreach-admin-alert-input" %>
+              Text Admin when new opt-ins happen
+            </label>
+          </div>
+
+          <%= f.submit "Save alert settings", class: "btn btn-xl settings-menu-button settings-outreach-save-btn" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 </div>

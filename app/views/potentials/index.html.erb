@@ -97,6 +97,7 @@
 <div class="dropdown toggle_contact theme-text">
   <% if @chosen_filter %>
     Filtering by <%= @chosen_filter %>
+    <%= link_to "Clear", potentials_path(prospects_list_params.except(:filter_by, :sort_by_manager)), class: "btn btn-xs btn-default theme-text margin-l-5" %>
   <% end %>
 
   <button class="btn dropdown-toggle pull-right theme-back" type="button" id="filterIconDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -108,16 +109,25 @@
       <br>
       Sort By
       <br>
-      <%= link_to "Newest", { sort_by: "created_at desc" }, class: "btn btn-md btn-default theme-text" %>
-      <%= link_to "Updated Recently", { sort_by: "updated_at desc" }, class: "btn btn-md btn-default theme-text" %>
-      <%= link_to "Name", { sort_by: "name asc" }, class: "btn btn-md btn-default theme-text" %>
+      <%= link_to "Newest", prospects_list_params(sort_by: "created_at desc"), class: "btn btn-md btn-default theme-text" %>
+      <%= link_to "Updated Recently", prospects_list_params(sort_by: "updated_at desc"), class: "btn btn-md btn-default theme-text" %>
+      <%= link_to "Name", prospects_list_params(sort_by: "name asc"), class: "btn btn-md btn-default theme-text" %>
       <%= render "shared/offering_list_filters" %>
       <br>
-      Account Manager 
+      Source
+      <br>
+      <%= link_to "Contact form", prospects_list_params(filter_by: "website_contact_form"), class: "btn btn-md btn-default theme-text" %>
+      <%= link_to "Website review", prospects_list_params(filter_by: "website_review"), class: "btn btn-md btn-default theme-text" %>
+      <%= link_to "Opt-in Today", prospects_list_params(filter_by: "opted_in_today"), class: "btn btn-md btn-default theme-text" %>
+      <%= link_to "Opt-in Week", prospects_list_params(filter_by: "opted_in_this_week"), class: "btn btn-md btn-default theme-text" %>
+      <%= link_to "All prospects", prospects_list_params.except(:filter_by), class: "btn btn-md btn-default theme-text" %>
+      <div class="prospects-filter-account-manager-section">
+      Account Manager
       <br>
       <%= form_tag("", method: "get") do %>
         <%= select_tag "sort_by_manager", options_for_select([["Filter by Account Manager", ""]] + @accountManagersByName.map { |manager| [manager[0], "#{manager[1]} desc"] }, params[:sort_by_manager]), class: "form-control cc-input-select-wide margin-r-20 theme-field", onchange: "this.form.submit();" %>
       <% end %>
+      </div>
     </div>
   </div>
 </div>

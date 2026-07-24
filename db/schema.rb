@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_07_24_110000) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_24_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -91,6 +91,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_24_110000) do
     t.text "sms_opt_out_note"
     t.string "sms_opt_in_source"
     t.string "sms_opt_out_source"
+    t.datetime "sms_opt_in_at", precision: nil
+    t.text "sms_opt_in_label"
     t.index ["list_id"], name: "index_customers_on_list_id"
     t.index ["organization_id"], name: "index_customers_on_organization_id"
   end
@@ -475,6 +477,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_24_110000) do
     t.text "opt_in_reply_message"
     t.text "numbers_black_list", default: [], array: true
     t.text "numbers_white_list", default: [], array: true
+    t.boolean "notify_admin_on_website_opt_in", default: true, null: false
     t.index ["organization_id"], name: "index_outreach_sms_channels_on_organization_id", unique: true
   end
 

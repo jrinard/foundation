@@ -1,3 +1,9 @@
-<div class="potentials">
-  <%= link_to "#{customer.name rescue nil}", potentials_path(id: customer.id, view_notes: "view_notes"), class: "h3-black customer-card btn btn-md btn-long" %>
+<div class="potentials prospects-list-item">
+  <%= link_to potentials_path(prospects_list_params(id: customer.id, view_notes: "view_notes")), class: "h3-black customer-card btn btn-md btn-long" do %>
+    <% badge = prospect_source_badge(customer) %>
+    <% if badge %>
+      <span class="prospects-source-badge <%= badge[:css_class] %>" title="<%= badge[:title] %>"><%= badge[:code] %></span>
+    <% end %>
+    <span class="prospects-card-name"><%= customer.name rescue nil %></span>
+  <% end %>
 </div>

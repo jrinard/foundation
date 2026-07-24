@@ -35,15 +35,17 @@ module Outreach
         OptListService.register_blacklist!(organization: customer.organization, phone: normalized) if normalized.present?
       end
 
-      def self.opt_in!(customer:, phone: nil, source: nil)
+  def self.opt_in!(customer:, phone: nil, source: nil, opted_in_at: nil, consent_label: nil)
         return unless customer
 
         customer.update!(
           sms_opt_in: true,
+          sms_opt_in_at: opted_in_at || Time.current,
+          sms_opt_in_source: source.presence || customer.sms_opt_in_source,
+          sms_opt_in_label: consent_label.presence || customer.sms_opt_in_label,
           sms_opt_out_at: nil,
           sms_opt_out_note: nil,
-          sms_opt_out_source: nil,
-          sms_opt_in_source: source.presence || customer.sms_opt_in_source
+          sms_opt_out_source: nil
         )
 
         normalized = PhoneNumber.normalize(phone) || PhoneNumber.for_customer(customer)
