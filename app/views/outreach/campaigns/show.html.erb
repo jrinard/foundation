@@ -51,12 +51,19 @@
 
       <% if @enrollments.any? %>
         <div class="table-responsive">
-          <table class="table theme-text outreach-table">
+          <table class="table theme-text outreach-table outreach-campaign-enrollments-table">
+            <colgroup>
+              <col class="outreach-campaign-col-customer">
+              <col class="outreach-campaign-col-crm">
+              <col class="outreach-campaign-col-step">
+              <col class="outreach-campaign-col-outreach">
+              <col class="outreach-campaign-col-enrolled">
+            </colgroup>
             <thead>
               <tr>
                 <th>Customer</th>
                 <th>CRM</th>
-                <th>Step</th>
+                <th class="outreach-campaign-col-step">Step</th>
                 <th>Outreach</th>
                 <th>Enrolled</th>
               </tr>
@@ -69,7 +76,7 @@
                     data-outreach-campaign-row-url-value="<%= outreach_enrollment_path(enrollment) %>">
                   <td><span class="outreach-link-strong"><%= enrollment.customer.name %></span></td>
                   <td><span class="outreach-pill <%= customer_crm_stage_badge_class(enrollment.customer) %>"><%= customer_crm_stage_label(enrollment.customer) %></span></td>
-                  <td>
+                  <td class="outreach-campaign-col-step">
                     <% if enrollment.plan_complete? %>
                       Complete
                     <% else %>

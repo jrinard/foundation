@@ -1,0 +1,192 @@
+<%# Renders when current step step_type is send_sms — works at any plan position. %>
+<div class="outreach-sms-step theme-text<%= " outreach-sms-step--follow-up" if follow_up_mode %>"
+     data-controller="outreach-sms-step"
+     data-outreach-sms-step-text-templates-value="<%= text_templates.to_json %>"
+     data-outreach-sms-step-default-text-template-value="<%= default_text_template_key %>"
+     data-outreach-sms-step-recipients-value="<%= recipient_options.to_json %>"
+     data-outreach-sms-step-selected-recipient-key-value="<%= selected_recipient_key %>"
+     data-outreach-sms-step-allow-send-without-phone-value="<%= dev_mode %>">
+  <% if recipient_options.any? %>
+    <div class="outreach-sms-recipient-picker">
+      <p class="outreach-sms-recipient-picker-hint theme-text">Send to</p>
+      <div class="outreach-sms-recipient-options" aria-label="SMS recipients">
+        <% recipient_options.each do |option| %>
+          <button type="button"
+                  class="outreach-sms-recipient-pill theme-text<%= " is-active" if option[:key] == selected_recipient_key %>"
+                  data-outreach-sms-step-target="recipientPill"
+                  data-recipient-key="<%= option[:key] %>"
+                  data-action="outreach-sms-step#selectRecipient">
+            <span class="outreach-sms-recipient-pill-label"><%= option[:label] %></span>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="outreach-sms-step-meta">
+    <span class="outreach-sms-step-label">To</span>
+    <% if phone_present %>
+      <span class="outreach-sms-step-phone" data-outreach-sms-step-target="phoneDisplay"><%= phone %></span>
+    <% else %>
+      <span class="outreach-sms-step-warning" data-outreach-sms-step-target="phoneDisplay">
+        <% if dev_mode %>
+          No phone on file yet — Dev Mode still records messages on this enrollment.
+        <% else %>
+          No phone on file — add one on the prospect profile before sending.
+        <% end %>
+      </span>
+    <% end %>
+  </div>
+
+  <%= render "outreach/enrollments/step_modules/sms_conversation",
+        conversation_messages: conversation_messages,
+        dev_mode: dev_mode %>
+
+  <%= form_with url: send_message_outreach_enrollment_path(enrollment),
+        method: :post,
+        local: true,
+        class: "outreach-sms-step-form" do %>
+    <%= hidden_field_tag :sms_recipient_key,
+          selected_recipient_key,
+          data: { outreach_sms_step_target: "recipientKey" } %>
+    <div class="outreach-sms-step-compose<%= " outreach-sms-step-compose--follow-up" if follow_up_mode %>">
+      <div class="outreach-sms-step-compose-main">
+        <label class="outreach-sms-step-field-label" for="outreach_sms_message_body">
+          <%= follow_up_mode ? "Your reply" : "Message" %>
+        </label>
+        <textarea id="outreach_sms_message_body"
+                  name="message_body"
+                  class="form-control theme-field outreach-sms-step-body"
+                  rows="<%= follow_up_mode ? 4 : 6 %>"
+                  data-outreach-sms-step-target="body"
+                  data-action="input->outreach-sms-step#handleInput"><%= message_body %></textarea>
+        <p class="outreach-sms-step-char-count theme-text outreach-muted"
+           data-outreach-sms-step-target="charCount">0 characters · 1 segment</p>
+
+        <div class="outreach-sms-step-send-actions">
+          <div class="outreach-sms-step-send-control">
+            <%= button_tag "Send",
+                  type: "submit",
+                  disabled: !phone_present && !dev_mode,
+                  class: "btn btn-warning discovery-split-btn-main outreach-btn-primary outreach-sms-step-send-btn",
+                  data: { outreach_sms_step_target: "sendButton" } %>
+            <p class="outreach-sms-step-send-hint theme-text outreach-muted"
+               data-outreach-sms-step-target="sendHint"
+               <%= "hidden" if phone_present || dev_mode %>>
+              Phone is missing
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="outreach-sms-templates-sidebar<%= " outreach-sms-templates-sidebar--follow-up" if follow_up_mode %>">
+        <% if follow_up_mode %>
+          <p class="outreach-sms-templates-sidebar-hint theme-text">Pick your response</p>
+          <div class="outreach-sms-templates-sidebar-columns">
+            <div class="outreach-sms-templates-sidebar-col">
+              <%= render "outreach/enrollments/step_modules/sms_template_groups", groups: response_template_columns[:left] %>
+            </div>
+            <div class="outreach-sms-templates-sidebar-col">
+              <%= render "outreach/enrollments/step_modules/sms_template_groups", groups: response_template_columns[:right] %>
+              <div class="outreach-sms-template-group">
+                <p class="outreach-sms-template-group-label theme-text">Custom</p>
+                <div class="outreach-sms-sidebar-templates" aria-label="Custom response">
+                  <div class="outreach-sms-sidebar-template-pill outreach-sms-text-template-pill--custom theme-text"
+                       data-outreach-sms-step-target="customPill"
+                       data-text-template-key="custom">
+                    <span class="outreach-sms-text-template-pill-label">Your edits</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <p class="outreach-sms-templates-sidebar-hint theme-text">Get started</p>
+          <div class="outreach-sms-sidebar-templates" aria-label="Text templates">
+            <div class="outreach-sms-sidebar-template-pill outreach-sms-text-template-pill--custom theme-text"
+                 data-outreach-sms-step-target="customPill"
+                 data-text-template-key="custom">
+              <span class="outreach-sms-text-template-pill-label">Custom</span>
+            </div>
+
+            <% text_templates.each do |text_template| %>
+              <button type="button"
+                      class="outreach-sms-sidebar-template-pill theme-text"
+                      data-outreach-sms-step-target="pill"
+                      data-text-template-key="<%= text_template[:key] %>"
+                      data-action="outreach-sms-step#selectTextTemplate">
+                <span class="outreach-sms-text-template-pill-label"><%= text_template[:label] %></span>
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if awaiting_simulated_reply %>
+    <div class="outreach-sms-simulate-reply">
+      <p class="outreach-sms-simulate-reply-hint theme-text">Waiting for their reply — dev shortcut:</p>
+      <% simulate_reply_groups.each do |group| %>
+        <div class="outreach-sms-simulate-reply-group">
+          <span class="outreach-sms-simulate-reply-group-label theme-text"><%= group[:label] %></span>
+          <div class="outreach-sms-simulate-reply-actions">
+            <% group[:types].each do |reply_type| %>
+              <%= form_with url: simulate_reply_outreach_enrollment_path(enrollment),
+                    method: :post,
+                    local: true,
+                    class: "outreach-sms-simulate-form" do %>
+                <%= hidden_field_tag :reply_type, reply_type %>
+                <%= hidden_field_tag :sms_recipient_key,
+                      selected_recipient_key,
+                      data: { outreach_sms_step_target: "simulateRecipientKey" } %>
+                <%= button_tag Outreach::Sms::SimulateInboundReply.simulate_button_label(reply_type),
+                      type: "submit",
+                      class: "btn btn-default btn-xs theme-text outreach-sms-simulate-reply-btn" %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= form_with url: complete_step_outreach_enrollment_path(enrollment),
+        method: :post,
+        local: true,
+        class: "outreach-sms-step-complete-form" do %>
+    <div class="outreach-sms-step-complete">
+      <div class="outreach-sms-step-complete-grid">
+        <div class="outreach-sms-step-complete-field outreach-sms-step-complete-field--status">
+          <label class="outreach-sms-step-field-label" for="outreach_sms_outcome">Status</label>
+          <%= select_tag :sms_outcome,
+                options_for_select([
+                  ["Replied", "replied"],
+                  ["No response", "no_response"],
+                  ["Opt-out", "opt_out"]
+                ]),
+                id: "outreach_sms_outcome",
+                class: "form-control theme-field outreach-select outreach-sms-step-complete-select" %>
+        </div>
+
+        <div class="outreach-sms-step-complete-field outreach-sms-step-complete-field--outcome">
+          <label class="outreach-sms-step-field-label" for="outreach_sms_outcome_notes">Outcome</label>
+          <%= text_field_tag :notes,
+                nil,
+                id: "outreach_sms_outcome_notes",
+                placeholder: "Paste their reply here (optional)",
+                class: "form-control theme-field outreach-sms-step-complete-notes" %>
+        </div>
+
+        <div class="outreach-sms-step-complete-actions">
+          <%= submit_tag "Log outcome", class: "btn btn-default theme-text outreach-sms-step-complete-btn" %>
+          <%= button_tag "Complete plan step",
+                type: "submit",
+                name: "advance_plan_step",
+                value: "1",
+                class: "btn btn-warning discovery-split-btn-main outreach-btn-primary outreach-sms-step-complete-btn" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

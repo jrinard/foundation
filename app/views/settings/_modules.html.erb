@@ -1,29 +1,27 @@
 <div class="row">
   <br>
-  <div class="h3-black theme-text">Navigation pages — <%= current_organization.name %></div>
+  <div class="h3-black theme-text">Features — <%= current_organization.name %></div>
   <br>
 
   <p class="theme-text">
-    Turn CRM sections on or off for this organization. Disabled pages are hidden from the sidebar and blocked if visited directly.
+    Each feature controls its menu item and related tools. When a feature is off, org users cannot reach it from the nav or by URL.
   </p>
 
   <%= form_with model: current_organization, url: update_organization_modules_path, method: :patch, local: true do |f| %>
     <div class="qb-form-cont lead-card-dark theme-text">
-      <h3 class="h4-black theme-text">Enabled pages</h3>
-
       <label class="org-admin-check">
         <%= f.check_box :discovery_enabled %>
         Discovery — automated business prospecting
       </label>
 
       <label class="org-admin-check">
-        <%= f.check_box :outreach_enabled %>
-        Outreach — campaign pursuit and plan steps
+        <%= f.check_box :potentials_enabled %>
+        Prospects — pre-pipeline list
       </label>
 
       <label class="org-admin-check">
-        <%= f.check_box :potentials_enabled %>
-        Potentials — pre-pipeline list
+        <%= f.check_box :outreach_enabled %>
+        Outreach — campaign pursuit and plan steps
       </label>
 
       <label class="org-admin-check">
@@ -47,13 +45,14 @@
       </label>
 
       <br>
-      <%= f.submit "Save navigation settings", class: "btn btn-xl btn-default settings-menu-button" %>
+      <%= f.submit "Save features", class: "btn btn-xl btn-default settings-menu-button" %>
     </div>
   <% end %>
 
   <br>
   <p class="theme-text help-block">
-    QuickBooks and Operations are platform modules configured on the Organizations tab (superadmin).
-    When QuickBooks is enabled for this org, its settings appear under the Quickbooks tab above.
+    QuickBooks and Operations are configured on the Organizations tab (superadmin only).
+    When QuickBooks is enabled, its settings appear under the Quickbooks tab above.
+    When Discovery is enabled, source settings appear under the Discovery tab above.
   </p>
 </div>

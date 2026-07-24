@@ -1,0 +1,17 @@
+<% meta = activity.metadata || {} %>
+<% from_label = meta["status_before_label"].presence || meta[:status_before_label].presence || meta["status_before"] %>
+<% to_label = meta["status_after_label"].presence || meta[:status_after_label].presence || meta["status_after"] %>
+<% outcome_label = meta["sms_outcome_label"].presence || meta[:sms_outcome_label].presence || "Reason" %>
+<% notes = meta["notes"].presence || meta[:notes].presence || meta["reply_body"].presence || meta[:reply_body].presence %>
+
+<span class="outreach-activity-status-change">
+  Status change from <%= from_label %> to <%= to_label %>.
+  <% if notes.present? %>
+    <details class="outreach-activity-reason-details">
+      <summary class="outreach-activity-reason-link theme-text">Reason</summary>
+      <div class="outreach-activity-reason-body theme-text"><%= simple_format(notes) %></div>
+    </details>
+  <% else %>
+    <span class="outreach-activity-reason-text"><%= outcome_label %>.</span>
+  <% end %>
+</span>

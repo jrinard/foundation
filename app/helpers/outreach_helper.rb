@@ -14,12 +14,10 @@ module OutreachHelper
     end
   end
 
-  def outreach_step_marker_glyph(marker)
-    case marker
-    when "done" then "✔"
-    when "current" then "▶"
-    else "○"
-    end
+  def outreach_step_returnable?(enrollment, step)
+    return false if enrollment.closed? || enrollment.paused?
+
+    step["position"].to_i < enrollment.current_step_position
   end
 
   def outreach_step_channel_label(step_type)
@@ -31,7 +29,7 @@ module OutreachHelper
     when Outreach::PlanStepTypes::INTERNAL_TASK,
          Outreach::PlanStepTypes::RESEARCH,
          Outreach::PlanStepTypes::REVIEW_WEBSITE then "Research"
-    when Outreach::PlanStepTypes::CLOSE then "Follow Up"
+    when Outreach::PlanStepTypes::CLOSE then "Final touch"
     when Outreach::PlanStepTypes::WAIT then "Wait"
     when Outreach::PlanStepTypes::DIRECT_MAIL then "Direct Mail"
     when Outreach::PlanStepTypes::FACEBOOK_MESSAGE then "Facebook"
@@ -131,7 +129,63 @@ module OutreachHelper
       .reverse
   end
 
+  def outreach_enrollment_sms_step?(enrollment)
+    enrollment.current_step_type == Outreach::PlanStepTypes::SEND_SMS
+  end
+
+  def outreach_enrollment_dock_workable?(enrollment)
+    !enrollment.plan_complete? && !enrollment.paused? && !enrollment.closed?
+  end
+
   def outreach_activity_actor_label(activity)
     activity.user&.name.presence || "System"
+  end
+
+  def outreach_activity_item_classes(activity)
+    classes = ["outreach-activity-item"]
+    classes << "outreach-activity-item--step-completed" if activity.activity_type == "step_completed"
+    classes << "outreach-activity-item--customer-replied" if outreach_activity_customer_replied?(activity)
+    classes.join(" ")
+  end
+
+  def outreach_activity_customer_replied?(activity)
+    return true if activity.activity_type == "sms_replied"
+
+    return false unless activity.activity_type == "status_changed"
+
+    meta = activity.metadata || {}
+    meta["sms_outcome"].to_s == "replied" || meta[:sms_outcome].to_s == "replied"
+  end
+
+  def outreach_activity_body(activity)
+    case activity.activity_type
+    when "status_changed"
+      render("outreach/enrollments/activity_status_change", activity: activity)
+    when "sms_sent", "sms_first_reachout", "sms_replied"
+      render("outreach/enrollments/activity_sms_message", activity: activity)
+    when "step_completed"
+      content_tag(:span, h(activity.summary), class: "outreach-activity-step-completed")
+    else
+      h(activity.summary)
+    end
+  end
+
+  def outreach_activity_sms_prefix(activity)
+    case activity.activity_type
+    when "sms_first_reachout" then "First reachout"
+    when "sms_sent" then "Text sent"
+    when "sms_replied" then "Text replied"
+    else activity.summary.to_s.split(" — ", 2).first
+    end
+  end
+
+  def outreach_activity_message_body(activity)
+    meta = activity.metadata || {}
+    meta["message_body"].presence || meta[:message_body].presence ||
+      meta["reply_body"].presence || meta[:reply_body].presence
+  end
+
+  def outreach_step_module_partial(enrollment)
+    Outreach::StepModules.partial_for(enrollment.current_step_type)
   end
 end

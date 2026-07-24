@@ -1,12 +1,20 @@
 <ol class="outreach-plan-progress theme-text">
   <% enrollment.plan_steps.each do |step| %>
     <% marker = outreach_step_marker(enrollment, step) %>
+    <% step_position = step["position"].to_i %>
     <li class="outreach-plan-progress-item outreach-plan-progress-item--<%= marker %>">
-      <div class="outreach-plan-progress-head">
-        <span class="outreach-plan-progress-glyph" aria-hidden="true"><%= outreach_step_marker_glyph(marker) %></span>
+      <div class="outreach-plan-progress-main">
+        <span class="outreach-plan-progress-glyph" aria-hidden="true"></span>
         <span class="outreach-plan-progress-title">
-          Step <%= step["position"] %> — <%= step["name"] %>
+          Step <%= step_position %> — <%= step["name"] %>
           <span class="outreach-plan-progress-channel">— <%= outreach_step_channel_label(step["step_type"]) %></span>
+          <% if outreach_step_returnable?(enrollment, step) %>
+            <%= button_to "Back to step",
+                  return_to_step_outreach_enrollment_path(enrollment, step_position: step_position),
+                  method: :post,
+                  class: "outreach-plan-progress-back-link",
+                  form: { class: "outreach-plan-progress-back-form" } %>
+          <% end %>
         </span>
       </div>
     </li>

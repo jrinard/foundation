@@ -41,6 +41,7 @@ class OutreachEnrollment < ApplicationRecord
   belongs_to :outreach_campaign
   belongs_to :outreach_plan
   has_many :activities, class_name: "OutreachActivity", dependent: :destroy
+  has_many :text_messages, class_name: "OutreachTextMessage", dependent: :destroy
 
   validates :current_step_position, :status, :enrolled_at, presence: true
   validates :status, inclusion: { in: STATUSES }
@@ -92,8 +93,26 @@ class OutreachEnrollment < ApplicationRecord
     Outreach::PlanStepTypes.label_for(current_step&.dig("step_type"))
   end
 
+  def current_step_type
+    current_step&.dig("step_type")
+  end
+
+  def current_step_module?
+    Outreach::StepModules.registered?(current_step_type)
+  end
+
   def plan_complete?
     total_steps.positive? && current_step_position > total_steps
+  end
+
+  def plan_progress_percent
+    return 100 if plan_complete?
+
+    steps = total_steps
+    return 0 if steps.zero?
+
+    completed_steps = [current_step_position.to_i - 1, 0].max
+    ((completed_steps.to_f / steps) * 100).round
   end
 
   def paused?

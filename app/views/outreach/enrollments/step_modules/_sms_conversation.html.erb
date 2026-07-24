@@ -1,0 +1,27 @@
+<% dev_mode = local_assigns.fetch(:dev_mode, false) %>
+<div class="outreach-sms-conversation" aria-label="Text conversation">
+  <div class="outreach-sms-conversation-head">
+    <span class="outreach-sms-conversation-title">Conversation</span>
+  </div>
+  <% if conversation_messages.any? %>
+    <% last_index = conversation_messages.length - 1 %>
+    <div class="outreach-sms-conversation-feed" data-outreach-sms-step-target="conversationFeed">
+      <% conversation_messages.each_with_index do |message, index| %>
+        <% needs_reply = index == last_index && message.inbound? %>
+        <div class="outreach-sms-conversation-message outreach-sms-conversation-message--<%= message.outbound? ? "outbound" : "inbound" %><%= " outreach-sms-conversation-message--needs-reply" if needs_reply %>">
+          <div class="outreach-sms-conversation-bubble">
+            <p class="outreach-sms-conversation-body"><%= message.body %></p>
+            <time class="outreach-sms-conversation-time" datetime="<%= message.occurred_at.iso8601 %>">
+              <%= message.occurred_at.strftime("%b %d · %I:%M %p") %>
+              <% if dev_mode && message.simulated %>
+                · simulated
+              <% end %>
+            </time>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="outreach-sms-conversation-empty theme-text outreach-muted">No messages yet — send your opening text below.</p>
+  <% end %>
+</div>

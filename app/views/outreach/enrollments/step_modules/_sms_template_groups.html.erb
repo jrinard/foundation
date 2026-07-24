@@ -1,0 +1,16 @@
+<% groups.each do |group| %>
+  <div class="outreach-sms-template-group">
+    <p class="outreach-sms-template-group-label theme-text"><%= group[:label] %></p>
+    <div class="outreach-sms-sidebar-templates" aria-label="<%= group[:label] %> responses">
+      <% group[:templates].each do |text_template| %>
+        <button type="button"
+                class="outreach-sms-sidebar-template-pill theme-text"
+                data-outreach-sms-step-target="pill"
+                data-text-template-key="<%= text_template[:key] %>"
+                data-action="outreach-sms-step#selectTextTemplate">
+          <span class="outreach-sms-text-template-pill-label"><%= text_template[:label] %></span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+<% end %>

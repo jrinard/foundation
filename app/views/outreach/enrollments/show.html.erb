@@ -30,17 +30,31 @@
           </div>
         <% else %>
           <div class="outreach-current-step-card">
-            <h2 class="theme-text h4">Current step</h2>
+            <div class="outreach-current-step-head">
+              <h2 class="theme-text h4">Current step</h2>
+              <% if outreach_dev_mode? && @enrollment.current_step_type == Outreach::PlanStepTypes::SEND_SMS %>
+                <%= button_to "Dev Reset",
+                      dev_reset_outreach_enrollment_path(@enrollment),
+                      method: :post,
+                      class: "btn btn-default btn-xs theme-text",
+                      form: { class: "outreach-current-step-dev-reset-form" } %>
+              <% end %>
+            </div>
             <p class="theme-text outreach-current-step-label">
               Step <%= @enrollment.current_step_position %> of <%= @enrollment.total_steps %> —
               <strong><%= @enrollment.current_step_name %></strong>
               (<%= @enrollment.current_step_type_label %>)
             </p>
-            <% if @enrollment.current_step&.dig("instructions").present? %>
-              <p class="theme-text outreach-step-instructions"><%= @enrollment.current_step["instructions"] %></p>
-            <% end %>
 
-            <% unless @enrollment.paused? %>
+            <% if @enrollment.paused? %>
+              <p class="theme-text outreach-muted">Enrollment is paused.</p>
+            <% elsif @step_module %>
+              <%= render outreach_step_module_partial(@enrollment), @step_module.partial_locals %>
+            <% else %>
+              <% if @enrollment.current_step&.dig("instructions").present? %>
+                <p class="theme-text outreach-step-instructions"><%= @enrollment.current_step["instructions"] %></p>
+              <% end %>
+
               <%= form_with url: complete_step_outreach_enrollment_path(@enrollment), method: :post, local: true, class: "outreach-complete-form theme-text" do %>
                 <div class="outreach-form-row outreach-form-row-wrap">
                   <%= select_tag :outcome,
@@ -57,8 +71,6 @@
                   <%= submit_tag "Complete step", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary" %>
                 </div>
               <% end %>
-            <% else %>
-              <p class="theme-text outreach-muted">Enrollment is paused.</p>
             <% end %>
           </div>
         <% end %>
@@ -80,6 +92,12 @@
               <% else %>
                 <%= button_to "Pause", pause_outreach_enrollment_path(@enrollment), method: :post, class: "btn btn-default btn-xs theme-text" %>
               <% end %>
+              <% if outreach_dev_tools_available? %>
+                <%= button_to (outreach_dev_mode? ? "Dev Mode: On" : "Dev Mode: Off"),
+                      toggle_dev_mode_outreach_enrollment_path(@enrollment),
+                      method: :post,
+                      class: "btn btn-default btn-xs theme-text outreach-dev-mode-btn#{' is-on' if outreach_dev_mode?}" %>
+              <% end %>
             </div>
           </div>
           <%= render "outreach/enrollments/step_checklist", enrollment: @enrollment %>
@@ -91,10 +109,10 @@
             <% if @activities.any? %>
               <ul class="outreach-activity-list theme-text">
                 <% @activities.each do |activity| %>
-                  <li>
+                  <li class="<%= outreach_activity_item_classes(activity) %>">
                     <span class="outreach-activity-time"><%= activity.created_at.strftime("%b %d %I:%M %p") %></span>
                     <span class="outreach-activity-actor"><%= outreach_activity_actor_label(activity) %></span>
-                    <%= activity.summary %>
+                    <%= outreach_activity_body(activity) %>
                   </li>
                 <% end %>
               </ul>
@@ -111,11 +129,17 @@
             <%= form_with url: outreach_promote_customer_path(customer_id: @enrollment.customer_id), method: :post, local: true, class: "outreach-promote-form theme-text" do %>
               <div class="outreach-form-row outreach-enrollment-promote-form-row">
                 <div class="outreach-enrollment-promote-control">
-                  <%= select_tag :list_id,
-                        options_for_select(@promote_lists, @default_promote_list_id),
-                        class: "form-control theme-field outreach-select outreach-enrollment-promote-select",
-                        required: true %>
-                  <%= submit_tag "Promote to Leads", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary outreach-enrollment-promote-submit",
+                  <div class="outreach-enrollment-promote-field">
+                    <label class="outreach-enrollment-promote-label theme-text" for="outreach_promote_list_id">Choose Lead List</label>
+                    <%= select_tag :list_id,
+                          options_for_select(@promote_lists, @default_promote_list_id),
+                          id: "outreach_promote_list_id",
+                          class: "form-control theme-field outreach-select outreach-enrollment-promote-select",
+                          required: true %>
+                  </div>
+                  <%= button_tag "Promote to Leads",
+                        type: "submit",
+                        class: "btn btn-warning discovery-split-btn-main outreach-btn-primary outreach-enrollment-promote-submit",
                         data: { turbo_confirm: "Move #{@enrollment.customer.name} to the Lead Pipeline?" } %>
                 </div>
               </div>

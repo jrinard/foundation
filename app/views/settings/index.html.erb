@@ -13,8 +13,8 @@
             <%= link_to "Transfer", { :transfer => "transfer" }, class: transfer_button_class %>
 
             <% if org_admin? %>
-            <% modules_button_class = params[:modules] == 'modules' ? 'btn btn-xl btn-default settings-menu-button active' : 'btn btn-xl btn-default settings-menu-button' %>
-            <%= link_to "Modules", { :modules => "modules" }, class: modules_button_class %>
+            <% features_button_class = params[:features] == 'features' ? 'btn btn-xl btn-default settings-menu-button active' : 'btn btn-xl btn-default settings-menu-button' %>
+            <%= link_to "Features", { features: "features" }, class: features_button_class %>
             <% end %>
 
             <% if org_admin? && discovery_enabled? %>
@@ -37,7 +37,7 @@
          <% if params[:transfer] %>  
           <%= render 'transfer', account_managers: @accountManagers, customers: @allCustomers %>
         <% end %>
-         <% if params[:modules] && org_admin? %>
+         <% if params[:features] && org_admin? %>
           <%= render 'modules' %>
         <% end %>
          <% if params[:discovery] && org_admin? && discovery_enabled? %>

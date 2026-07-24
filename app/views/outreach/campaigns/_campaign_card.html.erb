@@ -18,6 +18,17 @@
         <dt>Enrolled</dt>
         <dd><%= campaign.enrollment_count %></dd>
       </div>
+      <div class="outreach-campaign-card-meta-row">
+        <dt>Progress</dt>
+        <dd>
+          <% progress = campaign.aggregate_plan_progress_percent %>
+          <% if progress %>
+            <span class="outreach-campaign-card-progress"><%= progress %>%</span>
+          <% else %>
+            <span class="outreach-muted">—</span>
+          <% end %>
+        </dd>
+      </div>
     </dl>
   </div>
   <div class="outreach-campaign-card-actions" data-action="click->outreach-campaign-row#stop">

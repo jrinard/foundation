@@ -1,0 +1,18 @@
+<% body = outreach_activity_message_body(activity) %>
+<% prefix = outreach_activity_sms_prefix(activity) %>
+<% meta = activity.metadata || {} %>
+<% step_label = meta["step_name"].presence || meta[:step_name].presence %>
+
+<span class="outreach-activity-sms">
+  <%= prefix %> —
+  <% if body.present? %>
+    <details class="outreach-activity-reason-details">
+      <summary class="outreach-activity-reason-link theme-text">Message</summary>
+      <div class="outreach-activity-reason-body theme-text"><%= simple_format(body) %></div>
+    </details>
+  <% elsif step_label.present? %>
+    <%= step_label %>
+  <% else %>
+    <%= h(activity.summary.sub(/\A.*? — /, "")) %>
+  <% end %>
+</span>

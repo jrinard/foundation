@@ -40,7 +40,7 @@
     <% end %>
   <% end %>
 <% else %>
-  <p class="theme-text outreach-empty">Not in a campaign yet<% if customer_promotable_to_lead?(customer) %> — select a Plan above<% end %>.</p>
+  <p class="theme-text outreach-empty">Not in a campaign yet<% if customer_promotable_to_lead?(customer) %> — select a campaign above<% end %>.</p>
 <% end %>
 
 <% if customer_promotable_to_lead?(customer) && @promote_lists.present? %>
@@ -56,7 +56,7 @@
               class: "form-control theme-field outreach-select",
               required: true %>
       </div>
-      <%= submit_tag "Promote to Leads", class: "btn btn-warning discovery-split-btn-main btn-block",
+      <%= submit_tag "Promote to Leads", class: "btn btn-warning discovery-split-btn-main outreach-btn-primary btn-block",
             data: { turbo_confirm: "Move #{customer.name} to the Lead Pipeline?" } %>
     <% end %>
   </div>

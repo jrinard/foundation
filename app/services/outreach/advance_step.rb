@@ -2,16 +2,31 @@
 
 module Outreach
   class AdvanceStep
-    Result = Struct.new(:enrollment, :error, keyword_init: true)
-
-    def self.call(enrollment:, outcome:, notes: nil, user: Current.user)
-      new(enrollment: enrollment, outcome: outcome, notes: notes, user: user).call
+    Result = Struct.new(:enrollment, :error, keyword_init: true) do
+      def success?
+        error.blank?
+      end
     end
 
-    def initialize(enrollment:, outcome:, notes:, user:)
+    def self.call(enrollment:, outcome:, notes: nil, message_body: nil, sms_outcome: nil, force_advance: false, user: Current.user)
+      new(
+        enrollment: enrollment,
+        outcome: outcome,
+        notes: notes,
+        message_body: message_body,
+        sms_outcome: sms_outcome,
+        force_advance: force_advance,
+        user: user
+      ).call
+    end
+
+    def initialize(enrollment:, outcome:, notes:, message_body:, sms_outcome:, force_advance:, user:)
       @enrollment = enrollment
       @outcome = outcome.to_s
       @notes = notes
+      @message_body = message_body
+      @sms_outcome = sms_outcome
+      @force_advance = force_advance
       @user = user
     end
 
@@ -20,9 +35,11 @@ module Outreach
 
       ActiveRecord::Base.transaction do
         step_being_completed = @enrollment.current_step
+        @status_before = @enrollment.status
         apply_status!
+        @status_after = @enrollment.status
         log_activity!(step_being_completed)
-        advance_position! unless @outcome.in?(%w[follow_up_later not_interested])
+        advance_position!(step_being_completed) unless @outcome.in?(%w[follow_up_later not_interested])
       end
 
       Result.new(enrollment: @enrollment.reload, error: nil)
@@ -49,8 +66,9 @@ module Outreach
       end
     end
 
-    def advance_position!
+    def advance_position!(step)
       return if @outcome.in?(%w[follow_up_later not_interested])
+      return if sms_step?(step) && !@force_advance
 
       next_position = @enrollment.current_step_position + 1
       if next_position > @enrollment.total_steps
@@ -68,21 +86,89 @@ module Outreach
         organization: @enrollment.organization,
         outreach_enrollment: @enrollment,
         user: @user,
-        activity_type: "step_completed",
+        activity_type: activity_type_for(step),
         summary: step_summary(step),
-        metadata: {
-          outcome: @outcome,
-          notes: @notes,
-          step_position: step&.dig("position"),
-          step_name: step&.dig("name"),
-          step_type: step&.dig("step_type")
-        }.compact
+        metadata: activity_metadata(step)
       )
+    end
+
+    def activity_type_for(step)
+      return "status_changed" if status_change_activity?(step)
+      return "sms_replied" if sms_step?(step) && @sms_outcome == "replied"
+      return "sms_replied" if sms_step?(step) && @outcome == "conversation"
+      return "sms_sent" if sms_step?(step) && @sms_outcome == "sent"
+      return "sms_opt_out" if sms_step?(step) && @sms_outcome == "opt_out"
+
+      "step_completed"
+    end
+
+    def activity_metadata(step)
+      metadata = {
+        outcome: @outcome,
+        sms_outcome: @sms_outcome,
+        notes: @notes,
+        message_body: @message_body,
+        reply_body: (@sms_outcome == "replied" ? @notes : nil),
+        step_position: step&.dig("position"),
+        step_name: step&.dig("name"),
+        step_type: step&.dig("step_type")
+      }
+
+      if status_change_activity?(step)
+        metadata.merge!(
+          status_before: @status_before,
+          status_after: @status_after,
+          status_before_label: enrollment_status_label(@status_before),
+          status_after_label: enrollment_status_label(@status_after),
+          sms_outcome_label: sms_outcome_label
+        )
+      end
+
+      metadata.compact
     end
 
     def step_summary(step)
       label = step&.dig("name") || "Step"
+
+      if status_change_activity?(step)
+        return status_change_summary
+      end
+
+      if sms_step?(step) && @sms_outcome == "sent"
+        return "Text sent — #{label}"
+      end
+      if sms_step?(step) && @sms_outcome == "replied"
+        return "Text replied — #{label}"
+      end
+      if sms_step?(step) && @sms_outcome == "opt_out"
+        return "Text opt-out — #{label}"
+      end
+
       "#{label} — #{@outcome.tr('_', ' ')}"
+    end
+
+    def status_change_activity?(step)
+      sms_step?(step) && @sms_outcome.present? && @sms_outcome.in?(%w[replied no_response opt_out])
+    end
+
+    def status_change_summary
+      "Status change from #{enrollment_status_label(@status_before)} to #{enrollment_status_label(@status_after)}. #{sms_outcome_label}."
+    end
+
+    def sms_outcome_label
+      {
+        "replied" => "Replied",
+        "no_response" => "No response",
+        "opt_out" => "Opt-out"
+      }.fetch(@sms_outcome, @sms_outcome.humanize)
+    end
+
+    def enrollment_status_label(status)
+      OutreachEnrollment::STATUS_LABELS.fetch(status.to_s, status.to_s.humanize)
+    end
+
+    def sms_step?(step)
+      step&.dig("step_type") == Outreach::PlanStepTypes::SEND_SMS
     end
   end
 end

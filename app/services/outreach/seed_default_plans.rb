@@ -17,17 +17,14 @@ module Outreach
       steps: [
         {
           position: 1,
-          name: "Personalized SMS",
+          name: "Open the Door",
           step_type: "send_sms",
           suggested_day_offset: 1,
-          instructions: <<~TEXT.squish
-            Start a conversation — not a pitch. Personalize from Discovery (name, business, gaps).
-            Track: sent, reply, conversation started.
-          TEXT
+          instructions: nil
         },
         {
           position: 2,
-          name: "Professional email follow-up",
+          name: "Build Trust",
           step_type: "send_email",
           suggested_day_offset: 3,
           instructions: <<~TEXT.squish
@@ -37,7 +34,7 @@ module Outreach
         },
         {
           position: 3,
-          name: "Social research",
+          name: "Learn Their Story",
           step_type: "internal_task",
           suggested_day_offset: 5,
           instructions: <<~TEXT.squish
@@ -47,7 +44,7 @@ module Outreach
         },
         {
           position: 4,
-          name: "Phone call",
+          name: "Start the Conversation",
           step_type: "phone_call",
           suggested_day_offset: 7,
           instructions: <<~TEXT.squish
@@ -56,7 +53,7 @@ module Outreach
         },
         {
           position: 5,
-          name: "Value follow-up",
+          name: "Provide Value",
           step_type: "send_email",
           suggested_day_offset: 10,
           instructions: <<~TEXT.squish
@@ -66,7 +63,7 @@ module Outreach
         },
         {
           position: 6,
-          name: "Final follow-up",
+          name: "Keep the Connection",
           step_type: "close",
           suggested_day_offset: 14,
           instructions: <<~TEXT.squish

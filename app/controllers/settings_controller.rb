@@ -55,11 +55,11 @@ class SettingsController < ApplicationController
     authorize! :manage, :settings
 
     if current_organization.update(organization_modules_params)
-      flash[:notice] = "Navigation settings saved for #{current_organization.name}."
+      flash[:notice] = "Features saved for #{current_organization.name}."
     else
       flash[:alert] = current_organization.errors.full_messages.to_sentence
     end
-    redirect_to settings_path(modules: "modules")
+    redirect_to settings_path(features: "features")
   end
 
   def update_discovery
@@ -171,10 +171,10 @@ class SettingsController < ApplicationController
 
   def organization_modules_params
     params.require(:organization).permit(
-      :discovery_enabled,
-      :outreach_enabled,
       :potentials_enabled,
       :leads_enabled,
+      :discovery_enabled,
+      :outreach_enabled,
       :current_clients_enabled,
       :archived_enabled,
       :activity_enabled

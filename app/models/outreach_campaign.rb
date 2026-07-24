@@ -33,4 +33,12 @@ class OutreachCampaign < ApplicationRecord
   def enrollment_count
     enrollments.open.count
   end
+
+  def aggregate_plan_progress_percent
+    open_enrollments = enrollments.reject(&:closed?)
+    return nil if open_enrollments.empty?
+
+    total = open_enrollments.sum(&:plan_progress_percent)
+    (total.to_f / open_enrollments.size).round
+  end
 end

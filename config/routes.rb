@@ -27,9 +27,14 @@ Rails.application.routes.draw do
     resources :enrollments, only: [:show, :create] do
       member do
         post :complete_step
+        post :send_message
+        post :simulate_reply
         post :pause
         post :resume
         post :reenroll
+        post :dev_reset
+        post :toggle_dev_mode
+        post :return_to_step
       end
     end
     post "customers/:customer_id/promote_to_lead", to: "customer_promotions#create", as: :promote_customer

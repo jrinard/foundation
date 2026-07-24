@@ -3,7 +3,7 @@ class Ability
 
   CRM_MODELS = [
     Customer, Lead, List, Contact, Note, Offering, Stats, QbInvoice, DiscoveryBusiness,
-    OutreachPlan, OutreachCampaign, OutreachEnrollment, OutreachActivity
+    OutreachPlan, OutreachCampaign, OutreachEnrollment, OutreachActivity, OutreachTextMessage
   ].freeze
 
   ADMIN_ORG_MODELS = [

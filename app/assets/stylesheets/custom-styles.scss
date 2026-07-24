@@ -9793,9 +9793,53 @@ body#app-theme-body[data-dark] .customer-notes-empty {
   border-top: 1px solid rgba(196, 160, 207, 0.22);
 }
 
-.outreach-page {
-  @include discovery-card-purple-bg;
+@mixin outreach-bold-colors-light($interactive: false) {
+  border: 1px solid #d2d2d2;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 
+  @if $interactive {
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      background: #f8f8f8;
+      border-color: #c8c8c8;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+@mixin outreach-bold-colors-light-nested($interactive: false) {
+  border: 1px solid #d2d2d2;
+  border-radius: 8px;
+  background: #e0e0e0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+
+  @if $interactive {
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      background: #d6d6d6;
+      border-color: #c4c4c4;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+  }
+}
+
+@mixin outreach-bold-colors-divider-light {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+@mixin outreach-bold-colors-active-light {
+  border-color: $brand-purple-trial;
+  background: rgba(79, 38, 94, 0.08);
+  box-shadow: 0 0 0 1px rgba(79, 38, 94, 0.15);
+}
+
+.outreach-page {
   .outreach-btn-primary,
   .btn-warning.discovery-split-btn-main,
   input.btn-warning.discovery-split-btn-main,
@@ -9810,46 +9854,174 @@ body#app-theme-body[data-dark] .customer-notes-empty {
     align-items: center;
     justify-content: center;
   }
+
+  .outreach-sms-step-complete-btn.btn-warning,
+  .outreach-enrollment-promote-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    box-sizing: border-box;
+  }
 }
 
-// Outreach page headers — always dark (light theme .support-white-card-theme is #eee + white text)
-body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
-  @include discovery-card-purple-bg;
-  border: 1px solid purple-trial-alpha(0.4);
-  color: #fff;
+// Outreach purple cards — dark mode only (Discovery pattern)
+body#app-theme-body[data-dark] {
+  .outreach-page.support-white-card-theme {
+    @include discovery-card-purple-bg;
+    border: 1px solid #444;
+  }
 
-  .settings-title {
+  .outreach-page.discovery-header.support-white-card-theme {
+    border: 1px solid purple-trial-alpha(0.4);
     color: #fff;
-  }
 
-  .outreach-subtitle,
-  .theme-text {
-    color: rgba(255, 255, 255, 0.88);
-  }
-
-  .discovery-header-top {
-    border-bottom-color: rgba(255, 255, 255, 0.12);
-  }
-
-  a.theme-text {
-    color: $brand-purple-trial-on-dark;
-
-    &:hover,
-    &:focus {
+    .settings-title {
       color: #fff;
+    }
+
+    .outreach-subtitle,
+    .theme-text {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .discovery-header-top {
+      border-bottom-color: rgba(255, 255, 255, 0.12);
+    }
+
+    a.theme-text {
+      color: $brand-purple-trial-on-dark;
+
+      &:hover,
+      &:focus {
+        color: #fff;
+      }
+    }
+
+    .btn-default.theme-text {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.35);
+      background-color: rgba(255, 255, 255, 0.08);
+
+      &:hover,
+      &:focus {
+        color: #fff;
+        background-color: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+    }
+  }
+}
+
+// Outreach light mode — #eee page bg, white panels, grey nested cards
+body#app-theme-body:not([data-dark]) {
+  .outreach-page.support-white-card-theme {
+    color: #222;
+    background-color: #fff;
+    border-color: #d2d2d2;
+  }
+
+  .outreach-page.discovery-header.support-white-card-theme {
+    color: #222;
+
+    .outreach-subtitle,
+    .theme-text {
+      color: #111;
+    }
+
+    a.theme-text {
+      color: $brand-purple-trial;
+
+      &:hover,
+      &:focus {
+        color: $brand-purple-trial-hover;
+      }
     }
   }
 
-  .btn-default.theme-text {
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.35);
-    background-color: rgba(255, 255, 255, 0.08);
+  .outreach-page {
+    .outreach-campaign-card,
+    .outreach-current-step-card,
+    .outreach-plan-card {
+      @include outreach-bold-colors-light-nested($interactive: true);
+    }
 
-    &:hover,
-    &:focus {
-      color: #fff;
-      background-color: rgba(255, 255, 255, 0.14);
-      border-color: rgba(255, 255, 255, 0.5);
+    .outreach-current-step-card {
+      cursor: default;
+    }
+
+    .outreach-sms-recipient-pill,
+    .outreach-sms-sidebar-template-pill,
+    .outreach-sms-text-template-pill {
+      @include outreach-bold-colors-light($interactive: true);
+
+      &.is-active {
+        @include outreach-bold-colors-active-light;
+      }
+    }
+
+    .outreach-campaign-card-actions,
+    .outreach-enrollment-step-panel .outreach-complete-form,
+    .outreach-sms-step,
+    .outreach-sms-conversation,
+    .outreach-sms-step-form,
+    .outreach-sms-step-complete,
+    .outreach-enrollment-activity-panel,
+    .outreach-enrollment-promote-panel {
+      @include outreach-bold-colors-divider-light;
+    }
+
+    .outreach-sms-step--follow-up .outreach-sms-step-form {
+      border-top-color: rgba(0, 0, 0, 0.12);
+    }
+
+    .outreach-plan-progress-item {
+      border-bottom-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .outreach-prospect-picker-list {
+      border-color: #d2d2d2;
+      background: #fff;
+    }
+
+    .outreach-prospect-picker-row {
+      border-bottom-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .outreach-sms-conversation-bubble {
+      color: #222;
+      border-color: #d2d2d2;
+    }
+
+    .outreach-sms-conversation-message--outbound .outreach-sms-conversation-bubble {
+      background: rgba(79, 38, 94, 0.1);
+      border-color: purple-trial-alpha(0.35);
+    }
+
+    .outreach-sms-conversation-message--inbound .outreach-sms-conversation-bubble {
+      background: #f5f5f5;
+    }
+
+    .outreach-sms-conversation-body,
+    .outreach-sms-conversation-time {
+      color: inherit;
+    }
+
+    .outreach-activity-reason-body {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .outreach-btn-danger {
+      color: #a94442 !important;
+      border-color: rgba(169, 68, 66, 0.45) !important;
+
+      &:hover,
+      &:focus {
+        color: #fff !important;
+        background-color: rgba(169, 68, 66, 0.85) !important;
+        border-color: #a94442 !important;
+      }
     }
   }
 }
@@ -9885,6 +10057,7 @@ body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-right: 20px;
 }
 
 .outreach-plan-locked {
@@ -9977,23 +10150,42 @@ body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
 .outreach-breadcrumb-link {
   font-weight: 600;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(0, 0, 0, 0.55);
 
   &:hover,
   &:focus {
-    color: rgba(255, 255, 255, 0.82);
+    color: $brand-purple-trial;
     text-decoration: underline;
   }
 }
 
 .outreach-breadcrumb-current {
   font-weight: 600;
-  color: #fff;
+  color: #222;
 }
 
 .outreach-breadcrumb-sep {
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(0, 0, 0, 0.35);
   user-select: none;
+}
+
+body#app-theme-body[data-dark] .outreach-page {
+  .outreach-breadcrumb-link {
+    color: rgba(255, 255, 255, 0.55);
+
+    &:hover,
+    &:focus {
+      color: rgba(255, 255, 255, 0.82);
+    }
+  }
+
+  .outreach-breadcrumb-current {
+    color: #fff;
+  }
+
+  .outreach-breadcrumb-sep {
+    color: rgba(255, 255, 255, 0.38);
+  }
 }
 
 .outreach-context-nav-end {
@@ -10006,7 +10198,7 @@ body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
 .outreach-campaigns-toolbar {
   display: flex;
   justify-content: flex-end;
-  margin: -6px 0 14px;
+  margin: -6px 20px 14px 0;
 }
 
 .outreach-campaigns-filter-label {
@@ -10116,6 +10308,17 @@ body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
   }
 }
 
+.outreach-campaign-card-progress {
+  font-size: 1.55em;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #1b7a3d;
+}
+
+body#app-theme-body[data-dark] .outreach-page .outreach-campaign-card-progress {
+  color: #7dcea0;
+}
+
 .outreach-campaign-card-actions {
   display: flex;
   justify-content: flex-end;
@@ -10136,17 +10339,17 @@ body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
   }
 
   thead th {
-    background-color: #111;
-    color: #fff;
+    background-color: #f5f5f5;
+    color: #222;
     padding: 10px 12px;
     font-weight: 600;
     white-space: nowrap;
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #ddd;
   }
 
   tbody td {
     padding: 10px 12px;
-    border-bottom: 1px solid purple-trial-alpha(0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   tbody tr.outreach-table-row--clickable {
@@ -10154,19 +10357,70 @@ body#app-theme-body .outreach-page.discovery-header.support-white-card-theme {
     transition: background-color 0.15s ease;
 
     &:hover {
-      background-color: purple-trial-alpha(0.1);
+      background-color: rgba(0, 0, 0, 0.04);
     }
   }
 }
 
-body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clickable:hover {
-  background-color: rgba(255, 255, 255, 0.06);
+body#app-theme-body[data-dark] .outreach-table {
+  thead th {
+    background-color: #111;
+    color: #fff;
+    border-bottom-color: #333;
+  }
+
+  tbody td {
+    border-bottom-color: purple-trial-alpha(0.2);
+  }
+
+  tbody tr.outreach-table-row--clickable:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
 }
 
 .outreach-table-actions {
   width: 1%;
   white-space: nowrap;
   text-align: right;
+}
+
+.outreach-campaign-enrollments-table {
+  table-layout: fixed;
+
+  .outreach-campaign-col-customer {
+    width: 20%;
+  }
+
+  .outreach-campaign-col-crm {
+    width: 9%;
+  }
+
+  col.outreach-campaign-col-step,
+  .outreach-campaign-col-step {
+    width: 38%;
+  }
+
+  .outreach-campaign-col-step {
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  .outreach-campaign-col-outreach {
+    width: 16%;
+  }
+
+  .outreach-campaign-col-enrolled {
+    width: 17%;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(4),
+  td:nth-child(4),
+  th:nth-child(5),
+  td:nth-child(5) {
+    white-space: nowrap;
+  }
 }
 
 .outreach-edit-campaign-modal {
@@ -10378,17 +10632,104 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
   }
 }
 
-.outreach-plan-progress-head {
+.outreach-plan-progress-main {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
   line-height: 1.35;
+}
+
+.outreach-plan-progress-back-form {
+  display: inline;
+  margin: 0;
+}
+
+.outreach-plan-progress-back-link {
+  display: inline;
+  margin: 0 0 0 0.45em;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  font-size: inherit;
+  font-style: italic;
+  font-weight: 400;
+  line-height: inherit;
+  color: inherit;
+  opacity: 0.72;
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+  vertical-align: baseline;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+    color: inherit;
+    text-decoration: underline;
+    outline: none;
+  }
 }
 
 .outreach-plan-progress-glyph {
   flex-shrink: 0;
-  width: 1.1em;
-  text-align: center;
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.outreach-plan-progress-item--current {
+  .outreach-plan-progress-glyph {
+    border-color: #111;
+    background: #111;
+  }
+
+  .outreach-plan-progress-channel {
+    opacity: 0.85;
+  }
+}
+
+.outreach-plan-progress-item--done {
+  .outreach-plan-progress-glyph {
+    border-color: #1b7a3d;
+    background: #1b7a3d;
+  }
+
+  .outreach-plan-progress-title {
+    opacity: 0.58;
+  }
+}
+
+.outreach-plan-progress-item--upcoming {
+  .outreach-plan-progress-glyph {
+    opacity: 0.55;
+  }
+
+  .outreach-plan-progress-title {
+    opacity: 0.42;
+  }
+}
+
+body#app-theme-body[data-dark] .outreach-page {
+  .outreach-plan-progress-glyph {
+    border-color: rgba(255, 255, 255, 0.38);
+  }
+
+  .outreach-plan-progress-item--current .outreach-plan-progress-glyph {
+    border-color: #fff;
+    background: #fff;
+  }
+
+  .outreach-plan-progress-item--done .outreach-plan-progress-glyph {
+    border-color: #7dcea0;
+    background: #7dcea0;
+  }
 }
 
 .outreach-plan-progress-title {
@@ -10399,33 +10740,6 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
 .outreach-plan-progress-channel {
   font-weight: 500;
   opacity: 0.72;
-}
-
-.outreach-plan-progress-item--current {
-  .outreach-plan-progress-glyph {
-    color: $brand-purple-trial-on-dark;
-  }
-
-  .outreach-plan-progress-title {
-    color: #fff;
-  }
-
-  .outreach-plan-progress-channel {
-    opacity: 0.85;
-  }
-}
-
-.outreach-plan-progress-item--done {
-  .outreach-plan-progress-title {
-    opacity: 0.58;
-  }
-}
-
-.outreach-plan-progress-item--upcoming {
-  .outreach-plan-progress-glyph,
-  .outreach-plan-progress-title {
-    opacity: 0.42;
-  }
 }
 
 .outreach-step-preview,
@@ -10476,11 +10790,29 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
   }
 }
 
+.outreach-current-step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.outreach-current-step-dev-reset-form {
+  margin: 0;
+  flex-shrink: 0;
+}
+
 .outreach-enrollment-work-grid {
   display: grid;
   grid-template-columns: minmax(300px, 1.45fr) minmax(240px, 1fr);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
   margin-bottom: 24px;
 }
 
@@ -10490,11 +10822,16 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-height: 100%;
 }
 
 .outreach-enrollment-progress-panel,
 .outreach-enrollment-step-panel {
   min-width: 0;
+}
+
+.outreach-enrollment-progress-panel {
+  flex-shrink: 0;
 }
 
 .outreach-enrollment-progress-panel .outreach-plan-progress {
@@ -10515,8 +10852,19 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
 }
 
 .outreach-enrollment-progress-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
   margin: 0;
   flex-shrink: 0;
+}
+
+.outreach-dev-mode-btn.is-on {
+  border-color: rgba(229, 83, 83, 0.55);
+  background: rgba(229, 83, 83, 0.12);
+  color: #e55353;
 }
 
 .outreach-enrollment-step-panel .outreach-current-step-card {
@@ -10527,6 +10875,577 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
   margin-top: 14px;
   padding-top: 14px;
   @include outreach-bold-colors-divider;
+}
+
+.outreach-sms-step {
+  margin-top: 14px;
+  padding-top: 14px;
+  @include outreach-bold-colors-divider;
+}
+
+.outreach-sms-step-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.outreach-sms-recipient-picker {
+  margin-bottom: 14px;
+}
+
+.outreach-sms-recipient-picker-hint {
+  margin: 0 0 8px;
+  font-size: 0.82em;
+  opacity: 0.82;
+}
+
+.outreach-sms-recipient-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.outreach-sms-recipient-pill {
+  @include outreach-bold-colors($interactive: true);
+  margin: 0;
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  appearance: none;
+  font: inherit;
+  box-sizing: border-box;
+  max-width: 100%;
+
+  &.is-active {
+    border-color: rgba(196, 160, 207, 0.88);
+    background: linear-gradient(180deg, #2a1a34 0%, #16101c 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 0 1px rgba(196, 160, 207, 0.35);
+  }
+}
+
+.outreach-sms-recipient-pill-label {
+  display: block;
+  font-size: 0.82em;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.outreach-sms-simulate-form {
+  display: inline-block;
+  margin: 0;
+}
+
+.outreach-sms-conversation {
+  margin-top: 14px;
+  margin-bottom: 0;
+  padding-top: 14px;
+  padding-bottom: 0;
+  @include outreach-bold-colors-divider;
+}
+
+.outreach-sms-conversation-empty {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.outreach-sms-conversation-head {
+  margin-bottom: 10px;
+}
+
+.outreach-sms-conversation-title {
+  font-size: 0.85em;
+  opacity: 0.72;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+body#app-theme-body:not([data-dark]) .outreach-page .outreach-sms-conversation-title {
+  color: rgba(0, 0, 0, 0.55);
+  opacity: 1;
+}
+
+.outreach-sms-conversation-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.outreach-sms-conversation-message {
+  display: flex;
+
+  &--outbound {
+    justify-content: flex-end;
+  }
+
+  &--inbound {
+    justify-content: flex-start;
+  }
+}
+
+.outreach-sms-conversation-bubble {
+  max-width: min(88%, 420px);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(196, 160, 207, 0.28);
+  color: #fff;
+}
+
+.outreach-sms-conversation-message--outbound .outreach-sms-conversation-bubble {
+  background: linear-gradient(180deg, #2a1a34 0%, #1a1220 100%);
+  border-color: rgba(196, 160, 207, 0.45);
+  border-bottom-right-radius: 4px;
+}
+
+.outreach-sms-conversation-message--inbound .outreach-sms-conversation-bubble {
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom-left-radius: 4px;
+}
+
+$outreach-reply-yellow-text: #a89a45;
+$outreach-reply-yellow-text-dark: #f3e9b8;
+$outreach-reply-yellow-border: rgba(228, 210, 130, 0.72);
+$outreach-reply-yellow-glow: rgba(255, 248, 220, 0.45);
+$outreach-reply-yellow-glow-strong: rgba(255, 244, 200, 0.62);
+
+@keyframes outreach-sms-needs-reply-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px $outreach-reply-yellow-border,
+      0 0 10px $outreach-reply-yellow-glow;
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(235, 218, 145, 0.82),
+      0 0 16px $outreach-reply-yellow-glow-strong;
+  }
+}
+
+.outreach-sms-conversation-message--needs-reply .outreach-sms-conversation-bubble {
+  border-color: rgba(228, 210, 130, 0.88) !important;
+  animation: outreach-sms-needs-reply-pulse 2.6s ease-in-out infinite;
+}
+
+body#app-theme-body:not([data-dark]) .outreach-page {
+  .outreach-sms-conversation-message--needs-reply .outreach-sms-conversation-bubble {
+    background: rgba(255, 251, 235, 0.96);
+    color: #333;
+  }
+}
+
+body#app-theme-body[data-dark] .outreach-page {
+  .outreach-sms-conversation-message--needs-reply .outreach-sms-conversation-bubble {
+    background: rgba(255, 248, 215, 0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outreach-sms-conversation-message--needs-reply .outreach-sms-conversation-bubble {
+    animation: none;
+    box-shadow:
+      0 0 0 1px rgba(228, 210, 130, 0.85),
+      0 0 12px $outreach-reply-yellow-glow;
+  }
+}
+
+.outreach-sms-conversation-body {
+  margin: 0 0 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+  color: #fff;
+}
+
+body#app-theme-body:not([data-dark]) .outreach-page {
+  .outreach-sms-conversation-message--needs-reply .outreach-sms-conversation-bubble,
+  .outreach-sms-conversation-message--needs-reply .outreach-sms-conversation-bubble .outreach-sms-conversation-body,
+  .outreach-sms-conversation-message--needs-reply .outreach-sms-conversation-time {
+    color: #333;
+  }
+}
+
+body#app-theme-body[data-dark] .outreach-page .outreach-sms-conversation-bubble,
+body#app-theme-body[data-dark] .outreach-page .outreach-sms-conversation-bubble .outreach-sms-conversation-body {
+  color: #fff;
+}
+
+.outreach-sms-conversation-time {
+  display: block;
+  font-size: 0.72em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.outreach-sms-step-label {
+  font-size: 0.85em;
+  opacity: 0.72;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.outreach-sms-step-phone {
+  font-weight: 600;
+}
+
+.outreach-sms-step-warning {
+  color: #e55353;
+  font-size: 0.92em;
+}
+
+.outreach-sms-step-field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.85em;
+  opacity: 0.82;
+}
+
+.outreach-sms-step-compose {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  max-width: 100%;
+}
+
+.outreach-sms-step-form {
+  margin-top: 14px;
+  padding-top: 16px;
+  @include outreach-bold-colors-divider;
+}
+
+.outreach-sms-step--follow-up .outreach-sms-step-form {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top-color: rgba(196, 160, 207, 0.32);
+}
+
+.outreach-sms-step-compose-main {
+  flex: 0 1 300px;
+  max-width: min(300px, 100%);
+  min-width: 220px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.outreach-sms-templates-sidebar {
+  flex: 0 0 248px;
+  width: 248px;
+  max-width: 248px;
+  margin-left: auto;
+  max-height: min(520px, 70vh);
+  overflow-y: auto;
+  padding-right: 2px;
+
+  &--follow-up {
+    flex: 1 1 340px;
+    width: auto;
+    min-width: 320px;
+    max-width: min(400px, 100%);
+  }
+}
+
+.outreach-sms-templates-sidebar-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.outreach-sms-templates-sidebar-col {
+  min-width: 0;
+}
+
+.outreach-sms-templates-sidebar-hint {
+  margin: 0 0 10px;
+  font-size: 0.82em;
+  opacity: 0.82;
+}
+
+.outreach-sms-sidebar-templates {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.outreach-sms-sidebar-template-pill {
+  @include outreach-bold-colors($interactive: true);
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  appearance: none;
+  font: inherit;
+  box-sizing: border-box;
+
+  &.is-active {
+    border-color: rgba(196, 160, 207, 0.88);
+    background: linear-gradient(180deg, #2a1a34 0%, #16101c 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 0 1px rgba(196, 160, 207, 0.35);
+  }
+
+  .outreach-sms-text-template-pill-label {
+    margin-bottom: 0;
+    text-transform: none;
+    font-size: 0.82em;
+    letter-spacing: 0;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+}
+
+.outreach-sms-templates-sidebar .outreach-sms-text-template-pill--custom {
+  cursor: default;
+  opacity: 0.72;
+
+  &.is-active {
+    opacity: 1;
+  }
+}
+
+.outreach-sms-templates-sidebar .outreach-sms-template-group {
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.outreach-sms-templates-sidebar .outreach-sms-template-group-label {
+  margin: 0 0 6px;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.68;
+}
+
+.outreach-sms-text-template-pill {
+  @include outreach-bold-colors($interactive: true);
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 9px 11px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  appearance: none;
+  font: inherit;
+  box-sizing: border-box;
+
+  &.is-active {
+    border-color: rgba(196, 160, 207, 0.88);
+    background: linear-gradient(180deg, #2a1a34 0%, #16101c 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 0 1px rgba(196, 160, 207, 0.35);
+  }
+}
+
+.outreach-sms-text-template-pill--custom {
+  cursor: default;
+  opacity: 0.72;
+
+  &.is-active {
+    opacity: 1;
+  }
+}
+
+.outreach-sms-text-template-pill-label {
+  display: block;
+  font-size: 0.82em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.outreach-sms-text-template-pill-preview {
+  display: block;
+  font-size: 0.78em;
+  line-height: 1.35;
+  opacity: 0.72;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outreach-sms-step-body {
+  width: 100%;
+  min-height: 132px;
+  resize: vertical;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+body#app-theme-body .outreach-page textarea.outreach-sms-step-body.theme-field {
+  text-align: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.outreach-sms-step-char-count {
+  margin: 0 0 10px;
+  font-size: 0.85em;
+  text-align: left;
+}
+
+.outreach-sms-step-send-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 4px;
+}
+
+.outreach-sms-step-send-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.outreach-sms-step-send-hint {
+  margin: 0;
+  font-size: 0.72em;
+  font-style: italic;
+  line-height: 1.2;
+  opacity: 0.72;
+  text-align: right;
+}
+
+.outreach-sms-step-send-btn {
+  min-width: 120px;
+  min-height: 34px;
+  margin: 0;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  border-radius: 5px;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.outreach-sms-step-send-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.outreach-sms-simulate-reply {
+  margin: 12px 0 0;
+  max-width: min(480px, 100%);
+}
+
+.outreach-sms-simulate-reply-hint {
+  margin: 0 0 8px;
+  font-size: 0.88em;
+  opacity: 0.82;
+}
+
+.outreach-sms-simulate-reply-btn {
+  margin: 0;
+}
+
+.outreach-sms-simulate-reply-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.outreach-sms-simulate-reply-group {
+  margin-bottom: 10px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.outreach-sms-simulate-reply-group-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.outreach-sms-step-complete {
+  margin-top: 8px;
+  padding-top: 14px;
+  @include outreach-bold-colors-divider;
+}
+
+.outreach-sms-step-complete-grid {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr) auto;
+  gap: 12px 14px;
+  align-items: end;
+}
+
+.outreach-sms-step-complete-field {
+  min-width: 0;
+
+  .outreach-sms-step-field-label {
+    margin-bottom: 6px;
+  }
+}
+
+.outreach-sms-step-complete-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.outreach-sms-step-complete-notes {
+  width: 100%;
+  min-width: 0;
+}
+
+.outreach-sms-step-complete-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.outreach-sms-step-complete-btn {
+  white-space: nowrap;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .outreach-sms-step-complete-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .outreach-sms-step-complete-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
 }
 
 @media (max-width: 900px) {
@@ -10541,22 +11460,29 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
 }
 
 .outreach-enrollment-activity-panel {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
   padding-top: 20px;
   border-top: 1px solid purple-trial-alpha(0.25);
 
   h2 {
     margin-top: 0;
+    flex-shrink: 0;
   }
 }
 
 .outreach-enrollment-activity-feed {
-  max-height: 200px;
+  height: 350px;
+  max-height: 350px;
   overflow-y: auto;
   margin-top: 8px;
   padding-right: 4px;
 }
 
 .outreach-enrollment-promote-panel {
+  flex-shrink: 0;
+  margin-top: auto;
   padding-top: 20px;
   border-top: 1px solid purple-trial-alpha(0.25);
 
@@ -10566,15 +11492,32 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
 }
 
 .outreach-enrollment-promote-form-row {
-  justify-content: center;
+  width: 100%;
   flex-wrap: nowrap;
 }
 
 .outreach-enrollment-promote-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.outreach-enrollment-promote-field {
   display: inline-flex;
-  align-items: stretch;
-  gap: 6px;
-  max-width: 100%;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.outreach-enrollment-promote-label {
+  margin: 0;
+  font-size: 0.9em;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .outreach-enrollment-promote-select {
@@ -10590,10 +11533,8 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
 
 .outreach-enrollment-promote-submit {
   flex: 0 0 auto;
-  margin: 0;
+  margin: 0 0 0 auto;
   white-space: nowrap;
-  min-height: 34px;
-  border-radius: 4px;
 }
 
 .outreach-enrollment-activity-panel .outreach-activity-list {
@@ -10631,11 +11572,30 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
   font-size: 0.92em;
 }
 
+.outreach-enrollment-current-step {
+  margin: 0 0 10px;
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+
+.outreach-enrollment-current-step-type {
+  opacity: 0.72;
+  font-size: 0.92em;
+}
+
 .outreach-enrollment-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
   margin-top: 10px;
+}
+
+.outreach-enrollment-actions .discovery-split-btn-main {
+  min-height: 30px;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 5px;
 }
 
 .outreach-enrollment-card--prior {
@@ -10675,4 +11635,84 @@ body#app-theme-body[data-dark] .outreach-table tbody tr.outreach-table-row--clic
   opacity: 0.65;
   margin-right: 8px;
   font-size: 0.85em;
+}
+
+.outreach-activity-item {
+  margin-bottom: 8px;
+}
+
+.outreach-activity-item--step-completed {
+  .outreach-activity-actor,
+  .outreach-activity-step-completed {
+    color: #1b7a3d;
+  }
+}
+
+body#app-theme-body[data-dark] .outreach-page .outreach-activity-item--step-completed {
+  .outreach-activity-actor,
+  .outreach-activity-step-completed {
+    color: #7dcea0;
+  }
+}
+
+.outreach-activity-item--customer-replied {
+  .outreach-activity-actor,
+  .outreach-activity-sms,
+  .outreach-activity-status-change,
+  .outreach-activity-reason-text {
+    color: $outreach-reply-yellow-text;
+  }
+
+  .outreach-activity-reason-details summary {
+    color: $outreach-reply-yellow-text;
+  }
+}
+
+body#app-theme-body[data-dark] .outreach-page .outreach-activity-item--customer-replied {
+  .outreach-activity-actor,
+  .outreach-activity-sms,
+  .outreach-activity-status-change,
+  .outreach-activity-reason-text {
+    color: $outreach-reply-yellow-text-dark;
+  }
+
+  .outreach-activity-reason-details summary {
+    color: $outreach-reply-yellow-text-dark;
+  }
+}
+
+.outreach-activity-status-change {
+  display: inline;
+}
+
+.outreach-activity-reason-details {
+  display: inline;
+
+  summary {
+    display: inline;
+    cursor: pointer;
+    color: $brand-purple-trial;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+}
+
+.outreach-activity-reason-body {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid purple-trial-alpha(0.2);
+  font-size: 0.92em;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.outreach-activity-reason-text {
+  font-weight: 600;
 }

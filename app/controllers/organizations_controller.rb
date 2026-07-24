@@ -22,7 +22,7 @@ class OrganizationsController < ApplicationController
   end
 
   def new
-    @organization = Organization.new(sales_pipeline_enabled: true)
+    @organization = Organization.new(potentials_enabled: true, leads_enabled: true)
   end
 
   def create

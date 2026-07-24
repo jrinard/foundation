@@ -14,6 +14,14 @@
   <p class="outreach-enrollment-plan theme-text">Plan: <%= enrollment.outreach_plan.name %></p>
 
   <% unless local_assigns[:prior_attempt] %>
+    <% unless enrollment.plan_complete? %>
+      <p class="outreach-enrollment-current-step theme-text">
+        Step <%= enrollment.current_step_position %> of <%= enrollment.total_steps %> —
+        <strong><%= enrollment.current_step_name %></strong>
+        <span class="outreach-enrollment-current-step-type">(<%= enrollment.current_step_type_label %>)</span>
+      </p>
+    <% end %>
+
     <%= render "outreach/enrollments/step_checklist", enrollment: enrollment %>
 
     <div class="outreach-enrollment-actions">
@@ -21,15 +29,21 @@
         <%= button_to "Re-enroll",
               reenroll_outreach_enrollment_path(enrollment),
               method: :post,
-              class: "btn btn-xs btn-warning discovery-split-btn-main",
+              class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary",
               data: { turbo_confirm: "Start a fresh run in #{enrollment.outreach_campaign.name}? The previous attempt will stay in history." } %>
-      <% elsif !enrollment.plan_complete? && !enrollment.paused? %>
-        <%= form_with url: complete_step_outreach_enrollment_path(enrollment), method: :post, local: true, class: "outreach-mini-complete-form" do %>
-          <%= hidden_field_tag :outcome, "completed" %>
-          <%= submit_tag "Complete current step", class: "btn btn-xs btn-warning discovery-split-btn-main" %>
+      <% elsif outreach_enrollment_dock_workable?(enrollment) %>
+        <% if outreach_enrollment_sms_step?(enrollment) %>
+          <%= link_to "Continue texting",
+                outreach_enrollment_path(enrollment),
+                class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary" %>
+        <% else %>
+          <%= form_with url: complete_step_outreach_enrollment_path(enrollment), method: :post, local: true, class: "outreach-mini-complete-form" do %>
+            <%= hidden_field_tag :outcome, "completed" %>
+            <%= submit_tag "Complete current step", class: "btn btn-xs btn-warning discovery-split-btn-main outreach-btn-primary" %>
+          <% end %>
         <% end %>
       <% end %>
-      <%= link_to "View", outreach_enrollment_path(enrollment), class: "btn btn-xs btn-default theme-text" %>
+      <%= link_to "View enrollment", outreach_enrollment_path(enrollment), class: "btn btn-xs btn-default theme-text" %>
     </div>
   <% else %>
     <div class="outreach-enrollment-actions">

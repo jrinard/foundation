@@ -27,8 +27,8 @@ class Organization < ApplicationRecord
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
 
-  before_validation :apply_legacy_sales_pipeline_checkbox, if: :will_save_change_to_sales_pipeline_enabled?
   before_save :sync_legacy_sales_pipeline_flag
+  after_save :sync_toggled_module_provisioning
   before_validation :generate_slug, on: :create
   before_validation :normalize_slug, if: :will_save_change_to_slug?
 
@@ -90,15 +90,15 @@ class Organization < ApplicationRecord
 
   def module_badges
     badges = []
-    badges << "Potentials" if potentials_enabled?
+    badges << "Discovery" if discovery_enabled?
+    badges << "Prospects" if potentials_enabled?
+    badges << "Outreach" if outreach_enabled?
     badges << "Leads" if leads_enabled?
     badges << "Clients" if current_clients_enabled?
     badges << "Archived" if archived_enabled?
     badges << "Activity" if activity_enabled?
     badges << "QuickBooks" if quickbooks_enabled?
     badges << "Operations" if operations_enabled?
-    badges << "Discovery" if discovery_enabled?
-    badges << "Outreach" if outreach_enabled?
     badges
   end
 
@@ -121,22 +121,23 @@ class Organization < ApplicationRecord
       setting.show_customer_revenue_section = true
     end
     stats.find_or_create_by!(organization_id: id, main: true)
-    DiscoverySource.ensure_wa_sos!(self) if discovery_enabled?
-    Outreach::SeedDefaultPlans.call(organization: self) if outreach_enabled?
+    provision_toggled_modules!
   ensure
     Current.organization = previous_org
   end
 
+  def provision_toggled_modules!
+    DiscoverySource.ensure_wa_sos!(self) if discovery_enabled?
+    Outreach::SeedDefaultPlans.call(organization: self) if outreach_enabled?
+  end
+
   private
 
-  def apply_legacy_sales_pipeline_checkbox
-    if sales_pipeline_enabled?
-      self.potentials_enabled = true unless will_save_change_to_potentials_enabled?
-      self.leads_enabled = true unless will_save_change_to_leads_enabled?
-    else
-      self.potentials_enabled = false
-      self.leads_enabled = false
-    end
+  def sync_toggled_module_provisioning
+    return unless saved_change_to_discovery_enabled? || saved_change_to_outreach_enabled?
+
+    DiscoverySource.ensure_wa_sos!(self) if discovery_enabled? && saved_change_to_discovery_enabled?
+    Outreach::SeedDefaultPlans.call(organization: self) if outreach_enabled? && saved_change_to_outreach_enabled?
   end
 
   def sync_legacy_sales_pipeline_flag

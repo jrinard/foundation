@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_07_21_120000) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_23_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -457,6 +457,28 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_21_120000) do
     t.index ["organization_id"], name: "index_outreach_plans_on_organization_id"
   end
 
+  create_table "outreach_text_messages", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "outreach_enrollment_id", null: false
+    t.bigint "customer_id", null: false
+    t.bigint "user_id"
+    t.string "direction", null: false
+    t.text "body", null: false
+    t.string "phone_number"
+    t.string "status", default: "recorded", null: false
+    t.boolean "simulated", default: false, null: false
+    t.string "external_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id", "created_at"], name: "idx_outreach_text_msgs_customer"
+    t.index ["customer_id"], name: "index_outreach_text_messages_on_customer_id"
+    t.index ["organization_id", "phone_number"], name: "idx_outreach_text_msgs_org_phone"
+    t.index ["organization_id"], name: "index_outreach_text_messages_on_organization_id"
+    t.index ["outreach_enrollment_id", "created_at"], name: "idx_outreach_text_msgs_enrollment"
+    t.index ["outreach_enrollment_id"], name: "index_outreach_text_messages_on_outreach_enrollment_id"
+    t.index ["user_id"], name: "index_outreach_text_messages_on_user_id"
+  end
+
   create_table "qb_invoices", force: :cascade do |t|
     t.integer "customer_id"
     t.string "invoice_id"
@@ -592,6 +614,10 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_21_120000) do
   add_foreign_key "outreach_enrollments", "outreach_plans"
   add_foreign_key "outreach_plan_steps", "outreach_plans"
   add_foreign_key "outreach_plans", "organizations"
+  add_foreign_key "outreach_text_messages", "customers"
+  add_foreign_key "outreach_text_messages", "organizations"
+  add_foreign_key "outreach_text_messages", "outreach_enrollments"
+  add_foreign_key "outreach_text_messages", "users"
   add_foreign_key "qb_invoices", "organizations"
   add_foreign_key "quickbooks_tokens", "organizations"
   add_foreign_key "site_settings", "organizations"

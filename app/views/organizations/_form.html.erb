@@ -13,42 +13,41 @@
   <% end %>
 
   <fieldset class="org-admin-modules theme-text">
-    <legend class="org-admin-modules-legend">Navigation pages</legend>
+    <legend class="org-admin-modules-legend">Features</legend>
+
+    <label class="org-admin-check">
+      <%= f.check_box :discovery_enabled %>
+      Discovery — automated business prospecting
+    </label>
 
     <label class="org-admin-check">
       <%= f.check_box :potentials_enabled %>
-      Potentials
+      Prospects — pre-pipeline list
+    </label>
+
+    <label class="org-admin-check">
+      <%= f.check_box :outreach_enabled %>
+      Outreach — campaign pursuit and plan steps
     </label>
 
     <label class="org-admin-check">
       <%= f.check_box :leads_enabled %>
-      Leads (kanban + New Lead)
+      Leads — kanban board and New Lead
     </label>
 
     <label class="org-admin-check">
       <%= f.check_box :current_clients_enabled %>
-      Current Clients
+      Current Clients — active customer directory
     </label>
 
     <label class="org-admin-check">
       <%= f.check_box :archived_enabled %>
-      Archived
+      Archived — inactive customers
     </label>
 
     <label class="org-admin-check">
       <%= f.check_box :activity_enabled %>
-      Activity
-    </label>
-
-    <p class="help-block">Org admins can also change these under Settings → Modules.</p>
-  </fieldset>
-
-  <fieldset class="org-admin-modules theme-text">
-    <legend class="org-admin-modules-legend">Platform modules</legend>
-
-    <label class="org-admin-check">
-      <%= f.check_box :sales_pipeline_enabled %>
-      Sales pipeline shortcut (enables Potentials + Leads when checked)
+      Activity — account manager activity feed
     </label>
 
     <label class="org-admin-check">
@@ -58,18 +57,10 @@
 
     <label class="org-admin-check">
       <%= f.check_box :operations_enabled %>
-      Operations (Phase 3)
+      Operations
     </label>
 
-    <label class="org-admin-check">
-      <%= f.check_box :discovery_enabled %>
-      Discovery (Phase 2)
-    </label>
-
-    <label class="org-admin-check">
-      <%= f.check_box :outreach_enabled %>
-      Outreach (Phase 3)
-    </label>
+    <p class="help-block">Turning a feature off hides its nav item and blocks direct URLs. Org admins can change most features under Settings → Features.</p>
   </fieldset>
 
   <div class="actions org-admin-form-actions">
