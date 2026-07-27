@@ -6,7 +6,8 @@ class OutreachSmsChannel < ApplicationRecord
   ENVIRONMENTS = %w[sandbox production].freeze
 
   DEFAULT_OPT_OUT_REPLY = "You have been unsubscribed. Reply YES to opt back in."
-  DEFAULT_OPT_IN_REPLY = "Thank you for opting in. Reply STOP to unsubscribe."
+  DEFAULT_OPT_IN_REPLY = "Thank you for opting in. Reply STOP to unsubscribe or HELP for assistance."
+  DEFAULT_HELP_REPLY = "LifeSpring Design: For help email josh@lifespringdesign.com or call (208) 316-8338. Reply STOP to unsubscribe."
 
   belongs_to :organization
 
@@ -105,6 +106,14 @@ class OutreachSmsChannel < ApplicationRecord
 
   def opt_in_twiml
     twiml_for(effective_opt_in_reply)
+  end
+
+  def help_twiml
+    twiml_for(effective_help_reply)
+  end
+
+  def effective_help_reply
+    ENV["LIFESPRING_SMS_HELP_REPLY"].presence || DEFAULT_HELP_REPLY
   end
 
   def twiml_for(body)

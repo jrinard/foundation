@@ -43,6 +43,11 @@ module Outreach
           return Result.new(status: :opt_in, twiml: channel.opt_in_twiml, error: nil)
         end
 
+        if Compliance.keyword_help?(@body)
+          record_inbound_if_possible(organization: organization, phone: normalized_from)
+          return Result.new(status: :help, twiml: channel.help_twiml, error: nil)
+        end
+
         enrollment = FindEnrollmentByPhone.call(organization: organization, phone: normalized_from)
         unless enrollment
           return Result.new(status: :unmatched, twiml: nil, error: nil)

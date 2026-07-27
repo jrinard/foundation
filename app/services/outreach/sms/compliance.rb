@@ -5,6 +5,7 @@ module Outreach
     class Compliance
       OPT_OUT_KEYWORDS = %w[STOP STOPALL UNSUBSCRIBE CANCEL END QUIT].freeze
       OPT_IN_KEYWORDS = %w[YES START UNSTOP].freeze
+      HELP_KEYWORDS = %w[HELP INFO].freeze
 
       def self.opted_out?(customer)
         return false unless customer
@@ -58,6 +59,10 @@ module Outreach
 
       def self.keyword_opt_in?(body)
         OPT_IN_KEYWORDS.include?(body.to_s.strip.upcase)
+      end
+
+      def self.keyword_help?(body)
+        HELP_KEYWORDS.include?(body.to_s.strip.upcase)
       end
     end
   end
