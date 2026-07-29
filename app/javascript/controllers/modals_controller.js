@@ -99,7 +99,7 @@ export default class extends Controller {
 
       const responseData = await response.json();
 
-      if responseData.redirect) {
+      if (responseData.redirect) {
         const modal = document.getElementById("modal");
         if (modal) {
           modal.innerHTML = "";
