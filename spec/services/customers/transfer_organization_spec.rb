@@ -55,4 +55,29 @@ RSpec.describe Customers::TransferOrganization do
 
     expect(customer.reload.user_id).to eq(account_manager.id)
   end
+
+  it "only moves discovery businesses linked to the customer" do
+    other_business = DiscoveryBusiness.create!(
+      organization: source_org,
+      source: DiscoveryBusiness::SOURCE_WA_SOS,
+      external_id: "OTHER-UBI",
+      business_name: "Other Co",
+      office_address: "1 Main St",
+      status: DiscoveryBusiness::STATUS_DISCOVERY
+    )
+    linked_business = DiscoveryBusiness.create!(
+      organization: source_org,
+      customer: customer,
+      source: DiscoveryBusiness::SOURCE_WA_SOS,
+      external_id: "LINKED-UBI",
+      business_name: "Linked Co",
+      office_address: "2 Main St",
+      status: DiscoveryBusiness::STATUS_PROMOTED
+    )
+
+    described_class.call(customer: customer, organization: target_org)
+
+    expect(linked_business.reload.organization_id).to eq(target_org.id)
+    expect(other_business.reload.organization_id).to eq(source_org.id)
+  end
 end

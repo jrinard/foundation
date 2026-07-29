@@ -21,7 +21,9 @@ module Customers
         cascade_organization_id!(@customer.contacts)
         cascade_organization_id!(@customer.notes)
         cascade_organization_id!(@customer.offerings)
-        cascade_organization_id!(@customer.discovery_businesses.unscoped_by_organization)
+        cascade_organization_id!(
+          DiscoveryBusiness.unscoped_by_organization.where(customer_id: @customer.id)
+        )
         cascade_organization_id!(@customer.qb_invoices)
         cascade_organization_id!(OutreachEnrollment.unscoped_by_organization.where(id: enrollment_ids))
 

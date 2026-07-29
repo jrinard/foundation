@@ -1,0 +1,17 @@
+<% if current_user.admin? || current_user.superadmin? %>
+  <%= button_to local_assigns.fetch(:label, "Delete"),
+        customer_path(customer),
+        method: :delete,
+        class: "btn btn-default theme-text",
+        form: {
+          class: "prospect-archive-form",
+          data: {
+            turbo: false,
+            turbo_confirm: local_assigns.fetch(
+              :confirm,
+              "Permanently delete this customer? This cannot be undone."
+            ),
+            action: "submit->modals#handleSubmit"
+          }
+        } %>
+<% end %>

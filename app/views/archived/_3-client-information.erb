@@ -1,0 +1,167 @@
+<%# MIDDLE SECTION %>
+<div class="col-sm-5 shift-down30 max-w-370">
+  <% if @chosen_customer.present? %>
+    <div class="white-card mb-20 theme-card theme-text">
+      <div class="center">
+        <div class="center">
+          <div class="card-header-yellow-off">
+            <div class="prospect-client-actions" data-controller="modals">
+              <%= link_to "Edit", edit_customer_path(@chosen_customer.id), class: "btn btn-default theme-text", data: { turbo_frame: "modal" } %>
+
+              <%= render "shared/customer_unarchive_button", customer: @chosen_customer %>
+
+              <% if current_user.admin? || current_user.superadmin? %>
+                <%= render "shared/customer_destroy_button", customer: @chosen_customer %>
+              <% end %>
+            </div>
+          </div>
+          <hr>
+        </div>
+      </div>
+
+      <h2 class="theme-text">Client Information</h2>
+
+      <span class="h3-grey theme-text">Company</span><br>
+      <div class="edit_family-off h3-black theme-text"><%= @chosen_customer.name %></div>
+      <div class="edit_f">
+        <%= form_for @chosen_customer do |f| %>
+          <div class="input-group">
+            <%= f.text_field :name, placeholder: "Name", class: "form-control form-width theme-field theme-text" %>
+            <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+            <div class="input-group-btn">
+              <%= f.submit "Save", name: nil, params: { id: @chosen_customer.id }, class: "btn-sm btn-warning form-width theme-field" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <br>
+
+      <span class="h3-grey theme-text">Domain</span><br>
+      <div class="edit_family-off h3-black theme-text"><%= @chosen_customer.domain %></div>
+      <div class="edit_f">
+        <%= form_for @chosen_customer do |f| %>
+          <div class="input-group">
+            <%= f.text_field :domain, placeholder: "Domain", class: "form-control form-width theme-field theme-text" %>
+            <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+            <div class="input-group-btn">
+              <%= f.submit "Save", name: nil, params: { id: @chosen_customer.id }, class: "btn-sm btn-warning form-width" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <br>
+
+      <span class="h3-grey theme-text">Phone</span><br>
+      <div class="edit_family-off h3-black theme-text"><%= @chosen_customer.phone %></div>
+      <div class="edit_f">
+        <%= form_for @chosen_customer do |f| %>
+          <div class="input-group">
+            <%= f.text_field :phone, minlength: 10, maxlength: 10, placeholder: "208-123-4565", class: "form-control form-width theme-field theme-text" %>
+            <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+            <div class="input-group-btn">
+              <%= f.submit "Save", name: nil, params: { id: @chosen_customer.id }, class: "btn-sm btn-warning form-width" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <br>
+
+      <span class="h3-grey theme-text">Address</span><br>
+      <div class="edit_family-off h4-black theme-text">
+        <%= @chosen_customer.address %><br>
+        <%= @chosen_customer.city %>
+        <%= @chosen_customer.state %>
+        <%= @chosen_customer.zip %>
+      </div>
+      <div class="edit_f">
+        <%= form_for @chosen_customer do |f| %>
+          <div class="input-group">
+            <%= f.text_field :address, placeholder: "Street", class: "form-control form-width theme-field" %>
+            <%= f.text_field :city, placeholder: "City", class: "form-control form-width theme-field" %>
+            <%= f.text_field :state, placeholder: "State", class: "form-control form-width theme-field" %>
+            <%= f.text_field :zip, placeholder: "Zip", class: "form-control form-width theme-field" %>
+            <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+            <div class="input-group-btn">
+              <%= f.submit "Save", name: nil, params: { id: @chosen_customer.id }, class: "btn-sm btn-warning form-width theme-back-color" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <br>
+
+      <div class="dropdown toggle_contact">
+        <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownContacts" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          + Contacts.
+        </button>
+        <div class="dropdown-menu edit_form_contact hide" aria-labelledby="dropdownContacts">
+          <%= form_for(@contact) do |f| %>
+            <div class="field theme-text">
+              <%= f.label "Position" %>*
+              <%= f.text_field :position, placeholder: "Owner", class: "form-control input-lg", required: false %>
+            </div>
+            <div class="field theme-text">
+              <%= f.label "First Name" %>*
+              <%= f.text_field :firstname, placeholder: "First Name", class: "form-control input-lg", required: true %>
+            </div>
+            <div class="field theme-text">
+              <%= f.label "Last Name" %>
+              <%= f.text_field :lastname, placeholder: "Last Name", class: "form-control input-lg" %>
+            </div>
+            <div class="field theme-text">
+              <%= f.label "Phone" %>
+              <%= f.text_field :phone, minlength: 10, maxlength: 10, placeholder: "10 Digit Phone Number", class: "form-control input-lg", required: false %>
+            </div>
+            <div class="field theme-text">
+              <%= f.label "Email" %>
+              <%= f.text_field :email, placeholder: "Email", class: "form-control input-lg", required: false %>
+            </div>
+
+            <%= f.hidden_field :customer_id, value: @chosen_customer.id %>
+            <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+            <%= f.submit "Save", name: nil, params: { id: @chosen_customer.id }, class: "btn btn-md btn-warning form-width round" %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex-box-left">
+        <div class="flex-box-horizontal-limit">
+          <% if @indiv_contacts.any? %>
+            <% @indiv_contacts.each do |c| %>
+              <div class="white-contact-card customer-card">
+                <div class="edit_family">
+                  <%= link_to "X", c, class: "btn-default pull-right btn-clean", data: { turbo_method: "delete", turbo_confirm: "Are you sure you want to delete the contact?" }, params: { subaction: @chosen_customer.id } %>
+                  <span class="p center theme-text"><%= c.position %></span><br>
+                  <span class="h3-black theme-text"><%= c.firstname %> <%= c.lastname %></span><br>
+                  <span class="h4-grey center theme-text"><%= number_to_phone(c.phone, area_code: true) %></span><br>
+                  <span class="h3-grey center theme-text"><%= c.email %></span>
+                </div>
+                <div class="edit_f">
+                  <%= form_for c do |f| %>
+                    <div class="input-group">
+                      <%= f.text_field :position, placeholder: "Position", class: "form-control form-width theme-text" %>
+                      <%= f.text_field :firstname, placeholder: "First", class: "form-control form-width theme-text" %>
+                      <%= f.text_field :lastname, placeholder: "Last", class: "form-control form-width theme-text" %>
+                      <%= f.text_field :phone, minlength: 10, maxlength: 10, placeholder: "phone", class: "form-control form-width theme-text" %>
+                      <%= f.text_field :email, placeholder: "Email", class: "form-control form-width theme-text" %>
+                      <%= hidden_field_tag(:subaction, @chosen_customer.id) %>
+                      <%= link_to "Cancel", { params: { id: @chosen_customer.id } }, class: "btn-sm btn-default form-width pull-right" %>
+                      <%= f.submit "Save", name: nil, params: { id: @chosen_customer.id }, class: "btn-sm btn-warning form-width pull-right" %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <h3 class="h4-black center theme-text">No Contacts Yet</h3><br>
+          <% end %>
+        </div>
+      </div>
+
+      <% if current_user.admin? || current_user.superadmin? %>
+        <span class="center"><br>
+          Last Updated on <%= @chosen_customer.updated_at.strftime("%b %d, %Y %I:%M %p") rescue nil %>
+        </span><br>
+      <% end %>
+    </div>
+  <% end %>
+</div>

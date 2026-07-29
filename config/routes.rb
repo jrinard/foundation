@@ -96,6 +96,8 @@ Rails.application.routes.draw do
     member do
       patch :move
       put :sort
+      post :archive
+      post :unarchive
       get 'invoices_modal', to: 'home#show_invoices_modal', as: 'invoices_modal'
       get :invoices
       post :start_fetch_invoices

@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
       include CanCan::ControllerAdditions
+      include CustomerLoading
 
       protect_from_forgery unless: -> { request.format.json? }
       # protect_from_forgery with: :exception
@@ -35,6 +36,10 @@ class ApplicationController < ActionController::Base
 
   # Nav badge counts + shared customer scopes (org-scoped in §12.1).
   def get_customers
+    refresh_customer_scope_ivars!
+  end
+
+  def refresh_customer_scope_ivars!
     @current_customers = Customer.current_customers.includes(:contacts)
     @potential_customers = Customer.potential_customers.includes(:contacts)
     @archived_customers = Customer.archived_customers.includes(:contacts)
@@ -106,6 +111,10 @@ class ApplicationController < ActionController::Base
     return customers_path({ id: customer.id }.merge(opts)) unless customer.active?
 
     home_index_path({ id: customer.id }.merge(opts))
+  end
+
+  def customer_detail_url(customer, **opts)
+    customer_detail_path(customer, **opts).then { |path| "#{request.base_url}#{path}" }
   end
 
   def quickbooks_enabled_for_org?

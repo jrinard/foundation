@@ -3,7 +3,8 @@ class CustomersController < ApplicationController
   include OutreachCustomerLoading
   require_nav_module :leads
 
-  load_and_authorize_resource
+  load_and_authorize_resource except: [:show, :edit, :update, :destroy, :move, :sort, :existing_edit, :archive, :unarchive]
+  before_action :load_authorized_customer, only: [:show, :edit, :update, :destroy, :move, :sort, :existing_edit, :archive, :unarchive]
   before_action :assign_superadmin_organization_options, only: [:edit, :update, :existing_edit]
   # before_action :set_customer, only: [:show, :edit, :update, :destroy, :move]
 
@@ -155,19 +156,13 @@ class CustomersController < ApplicationController
   end
 
   def sort
-    @customer = Customer.find(params[:id])
     @customer.update(row_order_position: params[:row_order_position], list_id: params[:list_id])
     head :no_content
   end
 
 
   def show
-    @customer = Customer.find(params[:id])
-
-    if params[:id]
-      @chosen_customer = Customer.find(params[:id])
-    end
-
+    @chosen_customer = @customer
   end
 
   def new
@@ -183,7 +178,6 @@ class CustomersController < ApplicationController
   
 
   def edit
-    @customer = Customer.find(params[:id])
     #Hard setting 1 contact
     @contacts = @customer.contacts.limit(1).all
     #TEMP Correct to limit
@@ -198,8 +192,6 @@ class CustomersController < ApplicationController
   end
 
   def existing_edit
-    @customer = Customer.find(params[:id])
-
     @contacts = @customer.contacts.limit(1).first
     #TEMP Correct to limit
     # @accounts = User.where.not(role: "superadmin").order("created_at desc").pluck(:email, :id)
@@ -242,7 +234,6 @@ class CustomersController < ApplicationController
   end
 
   def update
-    @customer = Customer.find(params[:id])
     puts "Received Parameters: #{params.inspect}"
     referrer = request.referrer
     attrs = customer_params.to_h
@@ -251,8 +242,8 @@ class CustomersController < ApplicationController
     if @customer.update(attrs.except("organization_id"))
       if target_organization
         Customers::TransferOrganization.call(customer: @customer, organization: target_organization)
-        session[:organization_id] = target_organization.id if current_user.superadmin?
         flash[:notice] = "Customer moved to #{target_organization.name}."
+        render json: org_transfer_redirect_for(@customer.reload, view_notes: "view_notes") and return
       end
 
       #* Simplified so it stays in kanban or details page
@@ -292,40 +283,38 @@ class CustomersController < ApplicationController
     end
   end
 
+  def archive
+    if Customers::Archive.call(customer: @customer)
+      flash[:notice] = "#{@customer.name} archived."
+      render json: { redirect: customer_archive_redirect_url }
+    else
+      flash[:alert] = "Could not archive customer."
+      render json: { error: "Could not archive customer." }, status: :unprocessable_entity
+    end
+  end
+
+  def unarchive
+    if Customers::Unarchive.call(customer: @customer)
+      flash[:notice] = "#{@customer.name} restored."
+      render json: { redirect: customer_detail_url(@customer.reload) }
+    else
+      flash[:alert] = "Could not restore customer."
+      render json: { error: "Could not restore customer." }, status: :unprocessable_entity
+    end
+  end
+
   def destroy
-    @customer = Customer.find(params[:id])
     referrer = request.referrer
     if @customer.destroy
-        flash[:notice] = "Customer has been deleted!"
-        #TODO json was not needed the redirect works in this case
-        # #Use the referrer to see the location things came from /customers
-        if referrer.present? && referrer.include?('customers')
-          puts "=== Routing to Leads Page"
-          # redirect_to customers_path
-          render json: { redirect: customers_path } 
-        elsif referrer.present? && referrer.include?('archived')
-          puts "=== Routing to Archived"
-          redirect_to archived_index_path
-          # render json: { redirect: archived_index_path }
-        elsif referrer.present? && referrer.include?('potentials')
-          puts "=== Routing to The List Page"
-          render json: { redirect: potentials_path }
-        else
-          puts "=== Routing to Home Path"
-          redirect_to root_path
-          # render json: { redirect: root_path }
-        end
-       
-        # render json: { redirect: root_path }
+      flash[:notice] = "Customer has been deleted!"
+      render json: { redirect: customer_destroy_redirect_url(referrer) }
     else
-      flash[:notice] = "Error customer has NOT been deleted!"
-      redirect_to root_path
-      # render json: { redirect: root_path }
+      flash[:alert] = "Error customer has NOT been deleted!"
+      render json: { error: "Could not delete customer." }, status: :unprocessable_entity
     end
   end
 
   def move
-    @customer = Customer.find(params[:id])
     @customer.insert_at(params[:position].to_i)
 
     # Get the current value of the 'active' attribute
@@ -354,8 +343,34 @@ class CustomersController < ApplicationController
   private
   
   def set_customer
-    @customer = Customer.find(params[:id])
+    @customer = find_customer_by_id(params[:id])
   end
+
+    def load_authorized_customer
+      @customer = find_customer_by_id(params[:id])
+      raise ActiveRecord::RecordNotFound, "Couldn't find Customer with 'id'=#{params[:id]}" if @customer.nil?
+
+      authorize! action_name.to_sym, @customer
+    end
+
+    def customer_archive_redirect_url
+      referrer = request.referrer.to_s
+      return potentials_path if referrer.include?("potentials")
+      return customers_path if referrer.include?("customers")
+      return home_index_path if referrer.include?("home")
+
+      org_default_path
+    end
+
+    def customer_destroy_redirect_url(referrer)
+      referrer = referrer.to_s
+      return customers_path if referrer.include?("customers")
+      return archived_index_path if referrer.include?("archived")
+      return potentials_path if referrer.include?("potentials")
+      return home_index_path if referrer.include?("home")
+
+      root_path
+    end
 
     def customer_import_params
       params.require(:customer_import).permit(:file)

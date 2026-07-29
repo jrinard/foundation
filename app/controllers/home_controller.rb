@@ -72,10 +72,10 @@ class HomeController < ApplicationController
 
 
       if params[:active]
-        @chosen_customer.update(:active => true)
+        @chosen_customer&.update(:active => true)
       end
       if params[:inactive]
-        @chosen_customer.update(:active => false)
+        @chosen_customer&.update(:active => false)
       end
 
 
@@ -96,29 +96,30 @@ class HomeController < ApplicationController
         end
 
         apply_offering_slot_toggles!(@cs) if @cs
+
+        if params[:archive].present?
+          Customers::Archive.call(customer: @chosen_customer)
+          redirect_to home_index_path and return
+        end
       end
 
       if params[:custom]
-        @chosen_customer.update(:custom_project => true)
+        @chosen_customer&.update(:custom_project => true)
       end
       if params[:custom_false]
-        @chosen_customer.update(:custom_project => false)
+        @chosen_customer&.update(:custom_project => false)
       end
 
 
       if params[:mtm_true]
-        @chosen_customer.update(:monthtomonth => true)
+        @chosen_customer&.update(:monthtomonth => true)
       end
       if params[:mtm_false]
-        @chosen_customer.update(:monthtomonth => false)
+        @chosen_customer&.update(:monthtomonth => false)
       end
 
-
-      if params[:archive]
-        @chosen_customer.update(:onBoard => "Archive")
-      end
       if params[:onBoard]
-        @chosen_customer.update(:onBoard => "Current Not on Board")
+        @chosen_customer&.update(:onBoard => "Current Not on Board")
       end
 
 

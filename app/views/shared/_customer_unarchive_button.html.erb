@@ -1,0 +1,15 @@
+<%= button_to local_assigns.fetch(:label, "Unarchive"),
+      unarchive_customer_path(customer),
+      method: :post,
+      class: "btn btn-default theme-text",
+      form: {
+        class: "prospect-archive-form",
+        data: {
+          turbo: false,
+          turbo_confirm: local_assigns.fetch(
+            :confirm,
+            "Restore this client to Prospects or Current Clients?"
+          ),
+          action: "submit->modals#handleSubmit"
+        }
+      } %>

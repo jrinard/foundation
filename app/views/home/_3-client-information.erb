@@ -15,16 +15,17 @@
                     <%#= link_to "Move to Leads", { :inactive => "inactive",:id => @chosen_customer.id }, :class => "btn btn-default" %>
                   <%# end %>
 
+                  <div class="prospect-client-actions" data-controller="modals">
                   <%= link_to 'Edit', edit_customer_path(@chosen_customer.id), :class => "btn btn-default theme-text", data: { turbo_frame: "modal" } %>
 
                   <% if @chosen_customer.onBoard != "Archive"  %>
                      <%#= link_to 'Archive Client', { :archive => "archive",:id => @chosen_customer.id }, :class => "btn btn-default theme-text",:data => {:confirm => "Archiving will move Client to the Archived pages"} %>
                   <% end %>
 
-                  <% if current_user.admin? || current_user.superadmin? %>
-                     <%# turbo with confirmation %>
-                      <%= link_to 'Delete', @chosen_customer, class: "btn btn-default theme-text", id: "delete-test", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this customer?" }, remote: true %>
-                  <% end %>
+                  <%= render "shared/customer_archive_button",
+                        customer: @chosen_customer,
+                        confirm: "Delete this client? They will move to Archived." %>
+                  </div>
 
                   <%# <div class="h3-grey "><br>
                      Account Manager %>

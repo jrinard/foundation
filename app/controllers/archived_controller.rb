@@ -7,28 +7,15 @@ class ArchivedController < ApplicationController
     @user = current_user
 
     if params[:id]
-      @chosen_customer = Customer.find(params[:id]) rescue nil
+      @chosen_customer = find_customer_by_id(params[:id], sync_superadmin_org: true)
     end
 
-    if (params[:l])
-      # @customers = Customer.where("letter = ?", params[:l])
-      @archived_customers = Customer.archived_customers.where("letter = ?", params[:l])
+    if params[:l].present?
+      @archived_customers = Customer.archived_customers.where(letter: params[:l])
     end
 
-   
-    if params[:archive]
-      @chosen_customer.update(:onBoard => "Archive")
-    end
-    if params[:onBoard]
-      @chosen_customer.update(:onBoard => "Current Not on Board")
-    end
-
-
-    
     @contact = Contact.new
     @indiv_contacts = Contact.where("customer_id = ?", params[:id]).order("id ASC").all
-    @note = Note.new
-    @indiv_notes = Note.where("customer_id = ?", params[:id]).order("id ASC").all
 
 
   end #index end

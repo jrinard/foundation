@@ -1,0 +1,14 @@
+<% if current_user.admin? || current_user.superadmin? %>
+  <%= button_to local_assigns.fetch(:label, "Delete"),
+        archive_customer_path(customer),
+        method: :post,
+        class: "btn btn-default theme-text",
+        form: {
+          class: "prospect-archive-form",
+          data: {
+            turbo: false,
+            turbo_confirm: local_assigns.fetch(:confirm, "Delete this client? They will move to Archived."),
+            action: "submit->modals#handleSubmit"
+          }
+        } %>
+<% end %>

@@ -4067,10 +4067,19 @@ body#app-theme-body[data-dark] .discovery-header-top {
     border-radius: 6px;
   }
 
-  form.discovery-split-btn-cog-form {
+  form.discovery-split-btn-cog-form,
+  form.prospect-archive-form {
     display: inline-flex;
     align-items: center;
     margin: 0;
+  }
+
+  form.prospect-archive-form .btn {
+    padding: 5px 12px;
+    font-size: 13px;
+    line-height: 1.3;
+    border: 1px solid var(--prospect-action-border) !important;
+    border-radius: 6px;
   }
 
   .discovery-prospect-discovery-btn.discovery-split-btn {

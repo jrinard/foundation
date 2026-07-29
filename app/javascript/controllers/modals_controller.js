@@ -83,6 +83,10 @@ export default class extends Controller {
       const response = await fetch(form.action, {
         method: form.method,
         body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+        credentials: "same-origin",
       });
 
       if (!response.ok) {
@@ -95,9 +99,14 @@ export default class extends Controller {
 
       const responseData = await response.json();
 
-      if (responseData.redirect) {
-        window.location.href = responseData.redirect;
-        console.log("=== handleSubmit Fired", responseData);
+      if responseData.redirect) {
+        const modal = document.getElementById("modal");
+        if (modal) {
+          modal.innerHTML = "";
+          modal.removeAttribute("src");
+          modal.removeAttribute("complete");
+        }
+        window.location.replace(responseData.redirect);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -108,34 +117,37 @@ export default class extends Controller {
   async handleDelete(event) {
     event.preventDefault();
 
-    const url = event.currentTarget.getAttribute("href");
+    const link = event.currentTarget;
+    const url = link.getAttribute("href");
+    const method = (
+      link.getAttribute("data-turbo-method") ||
+      (url.includes("/archive") ? "post" : "delete")
+    ).toUpperCase();
 
     try {
       const response = await fetch(url, {
-        method: "DELETE",
+        method,
         headers: {
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')
             .content,
-          "Content-Type": "application/json",
+          Accept: "application/json",
         },
+        credentials: "same-origin",
       });
 
       if (!response.ok) {
-        const errorMessage = await response.json();
+        const errorMessage = await response.json().catch(() => ({}));
         console.error("Error:", errorMessage);
-        // Handle error messages or other actions for failed deletions
         return;
       }
 
       const responseData = await response.json();
 
       if (responseData.redirect) {
-        window.location.href = responseData.redirect;
-        console.log("=== handleDelete Fired", responseData);
+        window.location.replace(responseData.redirect);
       }
     } catch (error) {
       console.error("Error:", error);
-      // Handle errors
     }
   }
 }
