@@ -60,7 +60,7 @@
 
         <span class="h3-grey">Domain</span><br>
         <!-- Javascript form toggle -->
-        <div class="edit_family-off h3-black theme-text"><%= @chosen_customer.domain %></div>
+        <div class="edit_family-off theme-text text-14"><%= @chosen_customer.domain %></div>
         <div class="edit_f">
           <%= form_for @chosen_customer do |f| %>
           <div class="input-group">
@@ -92,7 +92,7 @@
 
     <span class="h3-grey">Address</span><br>
     <!-- Javascript form toggle -->
-    <div class="edit_family-off h4-black theme-text">
+    <div class="edit_family-off theme-text text-14">
       <%= @chosen_customer.address %><br>
       <%= @chosen_customer.city %>
       <%= @chosen_customer.state %>

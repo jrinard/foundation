@@ -23,6 +23,8 @@ RSpec.describe Discovery::PromoteToPotential do
 
   describe ".call" do
     it "creates a potential customer and marks the discovery business promoted" do
+      discovery_business.update!(registered_agent_name: "Jane Doe")
+
       result = described_class.call(discovery_business: discovery_business)
 
       expect(result.created).to be(true)
@@ -40,6 +42,11 @@ RSpec.describe Discovery::PromoteToPotential do
       expect(customer.zip).to eq("98660")
       expect(customer.extra_notes).to include("WA SOS Discovery")
       expect(customer.extra_notes).to include("605249629")
+
+      contact = customer.contacts.first
+      expect(contact.firstname).to eq("Jane")
+      expect(contact.lastname).to eq("Doe")
+      expect(contact.position).to eq("Registered Agent")
 
       discovery_business.reload
       expect(discovery_business.status).to eq(DiscoveryBusiness::STATUS_PROMOTED)

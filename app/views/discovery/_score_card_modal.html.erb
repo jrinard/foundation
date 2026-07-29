@@ -1,8 +1,15 @@
-<%# locals: business, score_preview (optional) %>
+<%# locals: business, score_preview (optional), toolbar (optional) %>
 <%
   business = local_assigns[:business]
   score_preview = local_assigns[:score_preview] || business.live_score_preview
   modal_id = "discoveryScoreCard#{business.id}"
+  toolbar = local_assigns.fetch(:toolbar, false)
+  open_button_label =
+    if toolbar
+      business.scored? ? "Score (#{business.score})" : "Score"
+    else
+      business.scored? ? "Opportunity score (#{business.score})" : "Opportunity score"
+    end
 %>
 <%= foundation_modal_wrapper class: "discovery-score-modal-host",
       controllers: "discovery-score-modal",
@@ -11,13 +18,28 @@
         discovery_score_modal_score_card_url_value: score_card_discovery_path(business)
       } do %>
   <%= foundation_modal_open_button modal_id,
-        business.scored? ? "Opportunity score (#{business.score})" : "Opportunity score",
-        class: "btn btn-md btn-wide-full discovery-opportunity-score-btn" %>
+        open_button_label,
+        class: token_list(
+          "btn btn-md",
+          ("discovery-opportunity-score-btn btn-wide-full" unless toolbar),
+          ("btn-default theme-text prospect-client-toolbar-btn" if toolbar)
+        ) %>
 
   <%= foundation_modal modal_id: modal_id,
         title: "Opportunity score",
         size: :lg,
         dialog_class: "discovery-score-card-modal" do %>
+    <div class="discovery-score-modal-actions">
+      <%= link_to "Open in Discovery",
+            discovery_path(business),
+            class: "btn btn-dark theme-text" %>
+      <button type="button"
+              class="btn btn-warning theme-text"
+              data-action="click->discovery-score-modal#persistScore">
+        <%= business.scored? ? "Update score" : "Score" %>
+      </button>
+    </div>
+
     <p class="theme-text discovery-score-modal-status"
        data-discovery-score-modal-target="status"></p>
 
@@ -28,17 +50,5 @@
             show_actions: false,
             modal: true %>
     </div>
-
-    <%= foundation_modal_footer do %>
-      <%= link_to "Open in Discovery",
-            discovery_path(business),
-            class: "btn btn-dark theme-text" %>
-      <button type="button"
-              class="btn btn-warning theme-text"
-              data-action="click->discovery-score-modal#persistScore">
-        <%= business.scored? ? "Update score" : "Score" %>
-      </button>
-      <%= foundation_modal_close_button %>
-    <% end %>
   <% end %>
 <% end %>

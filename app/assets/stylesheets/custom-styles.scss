@@ -4005,6 +4005,131 @@ body#app-theme-body[data-dark] .discovery-header-top {
       border-color: rgba($brand-purple-trial-border, 0.55);
     }
   }
+
+  &.is-default-theme {
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    box-shadow: none;
+
+    .discovery-split-btn-main {
+      border-right: 1px solid rgba(0, 0, 0, 0.12);
+      text-decoration: none;
+
+      &:hover,
+      &:focus {
+        text-decoration: none;
+      }
+    }
+
+    .discovery-split-btn-cog {
+      font-size: 16px;
+
+      &:hover,
+      &:focus {
+        background-color: rgba(0, 0, 0, 0.06);
+        color: inherit;
+      }
+    }
+
+    form.discovery-split-btn-cog-form {
+      display: inline-flex;
+      margin: 0;
+    }
+  }
+}
+
+.discovery-prospect-discovery-btn {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.prospect-client-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  --prospect-action-border: #ccc;
+
+  > .btn,
+  > .discovery-split-btn,
+  > a.btn {
+    flex: 0 0 auto;
+    float: none;
+  }
+
+  > .btn,
+  > a.btn {
+    padding: 5px 12px;
+    font-size: 13px;
+    line-height: 1.3;
+    border: 1px solid var(--prospect-action-border) !important;
+    border-radius: 6px;
+  }
+
+  form.discovery-split-btn-cog-form {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  .discovery-prospect-discovery-btn.discovery-split-btn {
+    vertical-align: middle;
+    border-radius: 6px;
+
+    &.is-default-theme {
+      border: 1px solid var(--prospect-action-border);
+      box-shadow: none;
+
+      .discovery-split-btn-main,
+      .discovery-split-btn-cog {
+        padding: 5px 12px;
+        font-size: 13px;
+        line-height: 1.3;
+        min-height: 0;
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none !important;
+      }
+
+      .discovery-split-btn-main {
+        border-right: 1px solid var(--prospect-action-border) !important;
+      }
+
+      .discovery-split-btn-cog {
+        padding: 5px 10px;
+        min-width: 32px;
+      }
+
+      .discovery-sync-icon {
+        display: inline-block;
+        font-size: 15px;
+        line-height: 1;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+body#app-theme-body[data-dark] .prospect-client-actions {
+  --prospect-action-border: rgba(255, 255, 255, 0.35);
+}
+
+body#app-theme-body[data-dark] .discovery-split-btn.is-default-theme {
+  border-color: rgba(255, 255, 255, 0.22);
+
+  .discovery-split-btn-main {
+    border-right-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .discovery-split-btn-cog {
+    &:hover,
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
 }
 
 .discovery-cadence-buttons {
@@ -5210,10 +5335,18 @@ body#app-theme-body[data-dark] .discovery-score-card {
   font-size: 0.9em;
 }
 
+.discovery-score-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
 .discovery-prospect-score-entry {
   margin-top: 8px;
 
   .discovery-opportunity-score-btn {
+    border-radius: 6px !important;
     background-color: #0a55a2 !important;
     border-color: #084a8f !important;
     color: #fff !important;
@@ -5225,6 +5358,65 @@ body#app-theme-body[data-dark] .discovery-score-card {
       color: #fff !important;
     }
   }
+}
+
+.prospect-client-toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 8px;
+  margin: 12px 0 20px;
+  width: 100%;
+
+  > .prospect-client-toolbar-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto !important;
+    max-width: none;
+    text-align: center;
+  }
+
+  .prospect-client-toolbar-score {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    margin: 0;
+  }
+
+  .discovery-score-modal-host {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    display: flex;
+  }
+
+  .prospect-client-toolbar-btn {
+    width: 100% !important;
+    max-width: none;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+.prospect-client-meta {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body#app-theme-body[data-dark] .prospect-client-meta {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.prospect-client-last-updated {
+  display: block;
+  font-size: 0.85em;
+  margin-top: 12px;
 }
 
 .discovery-score-donut-wrap {
@@ -7535,12 +7727,12 @@ body#app-theme-body .theme-card2 {
 .btn-warning {
   background-color: #0a55a2;
   border-color: #084a8f;
-  border-radius: 2px;
+  border-radius: 6px;
   color: #fff;
 }
 .btn-default {
   color: #333;
-  border-radius: 2px;
+  border-radius: 6px;
   background-color: rgba(0, 0, 0, 0) !important;
   border-color: #ccc;
 }
@@ -7583,6 +7775,7 @@ body#app-theme-body .theme-card2 {
   width: 100%;
   display: flex;
   justify-content: center;
+  border-radius: 6px;
 }
 
 .contact-card {
@@ -10025,6 +10218,7 @@ body#app-theme-body[data-dark] .customer-notes-panel.theme-card {
   .btn {
     max-width: 100%;
     white-space: normal;
+    border-radius: 6px;
   }
 }
 

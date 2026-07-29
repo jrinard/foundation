@@ -4,6 +4,7 @@ class CustomersController < ApplicationController
   require_nav_module :leads
 
   load_and_authorize_resource
+  before_action :assign_superadmin_organization_options, only: [:edit, :update, :existing_edit]
   # before_action :set_customer, only: [:show, :edit, :update, :destroy, :move]
 
     require 'will_paginate/array'
@@ -244,7 +245,15 @@ class CustomersController < ApplicationController
     @customer = Customer.find(params[:id])
     puts "Received Parameters: #{params.inspect}"
     referrer = request.referrer
-    if @customer.update(customer_params)
+    attrs = customer_params.to_h
+    target_organization = resolve_customer_transfer_organization(attrs)
+
+    if @customer.update(attrs.except("organization_id"))
+      if target_organization
+        Customers::TransferOrganization.call(customer: @customer, organization: target_organization)
+        session[:organization_id] = target_organization.id if current_user.superadmin?
+        flash[:notice] = "Customer moved to #{target_organization.name}."
+      end
 
       #* Simplified so it stays in kanban or details page
         # if @customer.archived === false
@@ -353,19 +362,44 @@ class CustomersController < ApplicationController
     end
 
     def customer_params
-      params.require(:customer).permit(:name, :letter, :domain, :email, :phone, :list_id,
-                                        :position, :recurring_monthly_charge, :one_time_payment,
-                                        :extra_notes, :sales_person,
-                                        :active, :archived, :contract_start, :contract_end,
-                                        :address, :city, :state, :zip, :email, :user_id,
-                                        :followup, :last_note, :last_note_text,
-                                        :quickbooks_customer_id,
-                                        :sms_opt_in, :sms_opt_out_note,
-                                        :sms_opt_in_source, :sms_opt_out_source,
-                                        :sms_opt_in_at, :sms_opt_in_label,
-                                        :active_proposal, :onBoard,
-                                        contacts_attributes: [:id, :position, :firstname, :lastname, :phone, :phone2, :email, :note]
-                                    )
+      permitted = [
+        :name, :letter, :domain, :email, :phone, :list_id,
+        :position, :recurring_monthly_charge, :one_time_payment,
+        :extra_notes, :sales_person,
+        :active, :archived, :contract_start, :contract_end,
+        :address, :city, :state, :zip, :email, :user_id,
+        :followup, :last_note, :last_note_text,
+        :quickbooks_customer_id,
+        :sms_opt_in, :sms_opt_out_note,
+        :sms_opt_in_source, :sms_opt_out_source,
+        :sms_opt_in_at, :sms_opt_in_label,
+        :active_proposal, :onBoard
+      ]
+      permitted << :organization_id if current_user.superadmin?
+
+      params.require(:customer).permit(
+        *permitted,
+        contacts_attributes: [:id, :position, :firstname, :lastname, :phone, :phone2, :email, :note]
+      )
+    end
+
+    def assign_superadmin_organization_options
+      return unless current_user&.superadmin?
+
+      @organizations = Organization.active.order(:name)
+    end
+
+    def resolve_customer_transfer_organization(attrs)
+      return nil unless current_user.superadmin?
+
+      org_id = attrs["organization_id"].presence || attrs[:organization_id].presence
+      return nil if org_id.blank?
+
+      target = Organization.find_by(id: org_id)
+      return nil unless target
+      return nil if target.id == @customer.organization_id
+
+      target
     end
 
     DAYS_OF_WEEK = {

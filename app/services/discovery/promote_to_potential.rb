@@ -23,7 +23,10 @@ module Discovery
         customer = find_existing_customer
         created = customer.nil?
 
-        customer ||= Customer.create!(customer_attributes)
+        customer ||= Customer.create!(
+          PotentialCustomerFields.customer_attributes(@discovery_business, organization: @organization)
+        )
+        ensure_registered_agent_contact!(customer)
         @discovery_business.update!(
           status: DiscoveryBusiness::STATUS_PROMOTED,
           customer: customer,
@@ -57,51 +60,15 @@ module Discovery
               .first
     end
 
-    def customer_attributes
-      address_fields = parse_office_address(@discovery_business.office_address)
+    def ensure_registered_agent_contact!(customer)
+      return if PotentialCustomerFields.registered_agent_full_name(@discovery_business).blank?
+      return if customer.contacts.exists?
 
-      {
-        organization: @organization,
-        name: @discovery_business.business_name,
-        phone: @discovery_business.phone,
-        email: @discovery_business.email,
-        address: address_fields[:address],
-        city: address_fields[:city].presence || @discovery_business.city,
-        state: address_fields[:state].presence || "WA",
-        zip: address_fields[:zip],
-        active: false,
-        archived: false,
-        onBoard: "The List",
-        list_id: nil,
-        extra_notes: discovery_extra_notes
-      }
-    end
-
-    def discovery_extra_notes
-      parts = ["WA SOS Discovery"]
-      parts << "UBI #{@discovery_business.external_id}" if @discovery_business.external_id.present?
-      parts.join(" · ")
-    end
-
-    def parse_office_address(office_address)
-      return { address: nil, city: nil, state: nil, zip: nil } if office_address.blank?
-
-      parts = office_address.split(",").map(&:strip).reject(&:blank?)
-      state_index = parts.index { |part| part.match?(/\AWA\b/i) }
-
-      return { address: office_address, city: nil, state: "WA", zip: nil } unless state_index
-
-      street_parts = parts[0...state_index]
-      city = state_index.positive? ? parts[state_index - 1] : nil
-      zip_part = parts[state_index + 1]
-      zip = zip_part&.match(/\d{5}/)&.to_s
-
-      {
-        address: street_parts.join(", ").presence,
-        city: city,
-        state: "WA",
-        zip: zip
-      }
+      PotentialCustomerFields.sync_registered_agent_contact!(
+        @discovery_business,
+        customer,
+        organization: @organization
+      )
     end
   end
 end

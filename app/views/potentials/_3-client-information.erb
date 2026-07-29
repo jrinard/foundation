@@ -15,6 +15,32 @@
                     <%#= link_to "Move to Leads", { :inactive => "inactive",:id => @chosen_customer.id }, :class => "btn btn-default" %>
                   <%# end %>
 
+                  <% linked_discovery = @chosen_customer&.linked_discovery_business %>
+                  <div class="prospect-client-actions">
+                  <% if discovery_enabled? && linked_discovery.present? %>
+                    <div class="discovery-split-btn is-default-theme discovery-prospect-discovery-btn">
+                      <%= link_to "Discovery",
+                            discovery_path(linked_discovery),
+                            class: "btn btn-default theme-text discovery-split-btn-main" %>
+                      <% if potentials_enabled? && linked_discovery.customer_id.present? %>
+                        <%= button_to sync_to_potential_discovery_path(
+                              linked_discovery,
+                              return_to: potentials_path(id: @chosen_customer.id)
+                            ),
+                            method: :post,
+                            form: {
+                              class: "discovery-split-btn-cog-form",
+                              data: { turbo_confirm: "Pull the latest discovery data into this prospect? Activity notes will be kept." }
+                            },
+                            class: "btn btn-default theme-text discovery-split-btn-cog",
+                            title: "Discovery sync",
+                            aria: { label: "Discovery sync" } do %>
+                          <span class="discovery-sync-icon" aria-hidden="true">↻</span>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  <% end %>
+
                   <%= link_to 'Edit', edit_customer_path(@chosen_customer.id), :class => "btn btn-default theme-text", data: { turbo_frame: "modal" } %>
 
                   <% if @chosen_customer.onBoard != "Archive"  %>
@@ -25,6 +51,7 @@
                      <%# turbo with confirmation %>
                       <%= link_to 'Delete', @chosen_customer, class: "btn btn-default theme-text", id: "delete-test", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this customer?" }, remote: true %>
                   <% end %>
+                  </div>
 
                   <%# <div class="h3-grey "><br>
                      Account Manager %>
@@ -60,7 +87,7 @@
 
         <span class="h3-grey">Domain</span><br>
         <!-- Javascript form toggle -->
-        <div class="edit_family-off h3-black theme-text"><%= @chosen_customer.domain %></div>
+        <div class="edit_family-off theme-text text-14"><%= @chosen_customer.domain %></div>
         <div class="edit_f">
           <%= form_for @chosen_customer do |f| %>
           <div class="input-group">
@@ -92,7 +119,7 @@
 
     <span class="h3-grey">Address</span><br>
     <!-- Javascript form toggle -->
-    <div class="edit_family-off h4-black theme-text">
+    <div class="edit_family-off theme-text text-14">
       <%= @chosen_customer.address %><br>
       <%= @chosen_customer.city %>
       <%= @chosen_customer.state %>
@@ -112,16 +139,6 @@
       </div>
     <% end %>
   </div><br>
-
-  <span class="h3-grey">Followup</span><br>
-  <div class="h4-black theme-text">
-    <%= { "30" => "1 month", "60" => "2 months", "90" => "3 months", "120" => "4 months", "150" => "5 months", "180" => "6 months", "365" => "12 months" }[@chosen_customer.followup.to_s].presence || "—" %>
-  </div>
-
-    <div class="h3-grey theme-text"><br>
-      Account Manager:
-      <span class="h4-black theme-text"><%= @chosen_customer.user.name rescue "NA" %></span>
-    </div>
 
   <br><br>
 
@@ -230,14 +247,6 @@
 
 <br>
 
-<% linked_discovery = @chosen_customer&.linked_discovery_business %>
-<% if discovery_enabled? && linked_discovery.present? %>
-  <div class="discovery-prospect-score-entry">
-    <%= render "discovery/score_card_modal", business: linked_discovery %>
-  </div>
-  <br>
-<% end %>
-
 <!-- Offerings V2 -->
 <% if SiteSetting.customer_offerings_section_visible? %>
 <% if @customer_offerings_find.any? %>
@@ -277,18 +286,40 @@
 
 
            <div class="service-card-off">
-         <br>
-         <%= link_to 'Invoices', invoices_modal_home_path(@chosen_customer.id), class: "btn btn-md btn-default theme-text", data: { turbo_frame: "modal" } %>
-
-         <% if current_user.admin? || current_user.superadmin? %>
-           <% if @chosen_customer.present? %>
-             <br><br>
-             <span class="center text-muted" style="font-size: 0.85em;">
-               Last Updated on
-               <%= @chosen_customer.updated_at.strftime("%b %d, %Y %I:%M %p") rescue nil %>
-             </span>
+         <% linked_discovery = @chosen_customer&.linked_discovery_business %>
+         <div class="prospect-client-toolbar">
+           <%= link_to "Invoices",
+                 invoices_modal_home_path(@chosen_customer.id),
+                 class: "btn btn-md btn-default theme-text prospect-client-toolbar-btn",
+                 data: { turbo_frame: "modal" } %>
+           <% if discovery_enabled? && linked_discovery.present? %>
+             <div class="prospect-client-toolbar-score">
+               <%= render "discovery/score_card_modal", business: linked_discovery, toolbar: true %>
+             </div>
            <% end %>
-         <% end %>
+         </div>
+
+         <div class="prospect-client-meta">
+           <span class="h3-grey">Followup</span><br>
+           <div class="h4-black theme-text">
+             <%= { "30" => "1 month", "60" => "2 months", "90" => "3 months", "120" => "4 months", "150" => "5 months", "180" => "6 months", "365" => "12 months" }[@chosen_customer.followup.to_s].presence || "—" %>
+           </div>
+
+           <div class="h3-grey theme-text">
+             Account Manager:
+             <span class="h4-black theme-text"><%= @chosen_customer.user.name rescue "NA" %></span>
+           </div>
+
+           <% if current_user.admin? || current_user.superadmin? %>
+             <% if @chosen_customer.present? %>
+               <br>
+               <span class="center text-muted prospect-client-last-updated">
+                 Last Updated on
+                 <%= @chosen_customer.updated_at.strftime("%b %d, %Y %I:%M %p") rescue nil %>
+               </span>
+             <% end %>
+           <% end %>
+         </div>
 
 </div>   <!-- Possible Extra div  -->
 

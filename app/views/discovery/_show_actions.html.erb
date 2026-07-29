@@ -4,6 +4,11 @@
     <%= link_to "View in Potentials",
           potentials_path(id: business.customer_id),
           class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text" %>
+    <%= button_to "Sync to Prospect",
+          sync_to_potential_discovery_path(business),
+          method: :post,
+          class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text",
+          form: { data: { turbo_confirm: "Update the linked prospect with the latest discovery data? Activity notes and other prospect history will be kept." } } %>
   <% elsif business.promotable? && potentials_enabled? %>
     <%= button_to "Promote to Potentials",
           promote_to_potential_discovery_path(business),

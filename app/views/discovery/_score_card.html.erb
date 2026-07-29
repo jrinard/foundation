@@ -12,7 +12,9 @@
 <div class="<%= card_classes %>" aria-label="Opportunity score">
   <div class="discovery-score-card-header">
     <div>
-      <h2 class="discovery-score-card-title theme-text">Opportunity score</h2>
+      <% unless modal %>
+        <h2 class="discovery-score-card-title theme-text">Opportunity score</h2>
+      <% end %>
       <p class="discovery-score-card-note theme-text">
         <% if business&.scored? %>
           Last saved <%= l(business.scored_at, format: :short) %>

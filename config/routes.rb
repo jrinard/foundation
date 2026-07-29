@@ -44,6 +44,7 @@ Rails.application.routes.draw do
     member do
       patch :update_captured_business
       post :promote_to_potential
+      post :sync_to_potential
       post :archive
       post :unarchive
       delete :destroy

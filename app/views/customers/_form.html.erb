@@ -35,6 +35,15 @@
         <%= f.select :user_id, @accountManagersByName.present? ? @accountManagersByName : [[User.first.name, User.first.id]], {}, class: 'form-control mobile-form-control' %>
       </div>
     </div>
+
+    <% if current_user.superadmin? && @organizations.present? %>
+      <div class="col-sm-4 desktop-width-32" style="">
+        <div class="field">
+          <%= f.label :organization_id, "Organization" %>
+          <%= f.collection_select :organization_id, @organizations, :id, :name, {}, class: "form-control mobile-form-control" %>
+        </div>
+      </div>
+    <% end %>
   </div>
   <div class="row customer-edit-col-spacer" style=""></div> 
 

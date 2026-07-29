@@ -8,6 +8,7 @@ class DiscoveryController < ApplicationController
     :show,
     :update_captured_business,
     :promote_to_potential,
+    :sync_to_potential,
     :archive,
     :unarchive,
     :destroy,
@@ -280,6 +281,35 @@ class DiscoveryController < ApplicationController
       message: "Promote failed: #{e.message}",
       status: :internal_server_error,
       redirect_url: (@discovery_business && discovery_path(@discovery_business))
+    )
+  end
+
+  def sync_to_potential
+    authorize! :update, @discovery_business
+
+    unless current_organization.potentials_enabled?
+      return render_sync_response(
+        ok: false,
+        message: "Potentials is disabled for this organization.",
+        status: :unprocessable_entity
+      )
+    end
+
+    result = Discovery::SyncPotentialFromDiscovery.call(discovery_business: @discovery_business)
+    customer_url = potentials_path(id: result.customer.id) if result.customer
+
+    render_sync_response(
+      ok: result.success?,
+      message: sync_result_message(result),
+      customer_url: customer_url,
+      status: result.success? ? :ok : :unprocessable_entity
+    )
+  rescue StandardError => e
+    Rails.logger.error("[Discovery sync to potential] #{e.class}: #{e.message}")
+    render_sync_response(
+      ok: false,
+      message: "Sync failed: #{e.message}",
+      status: :internal_server_error
     )
   end
 
@@ -565,6 +595,24 @@ class DiscoveryController < ApplicationController
       "Added to Potentials."
     else
       "Linked to existing potential."
+    end
+  end
+
+  def sync_result_message(result)
+    return result.error if result.error.present?
+
+    "Synced discovery data to #{result.customer.name}."
+  end
+
+  def render_sync_response(ok:, message:, status: nil, customer_url: nil)
+    redirect_url = params[:return_to].presence || customer_url.presence || discovery_path(@discovery_business)
+
+    respond_to do |format|
+      format.json { render json: { ok: ok, message: message, customer_url: customer_url, redirect_url: redirect_url }, status: status || (ok ? :ok : :unprocessable_entity) }
+      format.html do
+        flash[ok ? :notice : :alert] = message
+        redirect_to redirect_url
+      end
     end
   end
 

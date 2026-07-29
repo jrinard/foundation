@@ -23,6 +23,7 @@ RSpec.describe Customer, type: :model do
       discovery_business.reload
       expect(discovery_business.status).to eq(DiscoveryBusiness::STATUS_DISCOVERY)
       expect(discovery_business.customer_id).to be_nil
+      expect(discovery_business.archived).to be(true)
       expect(discovery_business).to be_promotable
     end
   end
