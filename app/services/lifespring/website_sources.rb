@@ -43,7 +43,8 @@ module Lifespring
     end
 
     def badge_for(source)
-      BADGES[source.to_s]
+      canonical_source = canonical(source)
+      BADGES[canonical_source] if canonical_source
     end
 
     def intake_label_for(source)
@@ -56,6 +57,18 @@ module Lifespring
 
     def allowed_sources_sentence
       ALL.join(", ")
+    end
+
+    def select_options
+      [
+        ["None", ""],
+        [BADGES[CONTACT_FORM][:title], CONTACT_FORM],
+        [BADGES[WEBSITE_REVIEW][:title], WEBSITE_REVIEW]
+      ]
+    end
+
+    def selected_value_for(source)
+      canonical(source) || ""
     end
   end
 end

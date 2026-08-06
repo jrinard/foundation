@@ -11,6 +11,13 @@ module ApplicationHelper
     Lifespring::WebsiteSources.badge_for(customer.sms_opt_in_source)
   end
 
+  def sms_opt_in_source_options_for_select(customer)
+    options_for_select(
+      Lifespring::WebsiteSources.select_options,
+      Lifespring::WebsiteSources.selected_value_for(customer.sms_opt_in_source)
+    )
+  end
+
   def website_contact_form_prospect?(customer)
     customer.website_contact_form_opt_in?
   end

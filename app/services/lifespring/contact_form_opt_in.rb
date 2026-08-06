@@ -46,6 +46,9 @@ module Lifespring
         place_on_prospects!(customer)
         customer.save!
 
+        sync_web_form_contact!(customer)
+        record_opt_in_activity!(customer)
+
         Outreach::Sms::Compliance.opt_in!(
           customer: customer,
           phone: normalized_phone,
@@ -116,8 +119,51 @@ module Lifespring
     def contact_extra_notes
       parts = [WebsiteSources.intake_label_for(@sms_opt_in_source)]
       parts << @payload[:message].to_s.strip if @payload[:message].present?
-      parts << "Contact: #{@payload[:name].strip}" if @payload[:name].present? && @payload[:business_name].present?
       parts.compact.map { |part| part.to_s.encode("UTF-8", invalid: :replace, undef: :replace) }.join(" · ")
+    end
+
+    def sync_web_form_contact!(customer)
+      person_name = @payload[:name].to_s.strip
+      return if person_name.blank?
+
+      firstname, lastname = Discovery::PotentialCustomerFields.split_person_name(person_name)
+      contact_attrs = {
+        firstname: firstname,
+        lastname: lastname,
+        phone: ten_digit_phone.presence || @payload[:phone].to_s.strip.presence,
+        email: @payload[:email].to_s.strip.presence
+      }
+
+      contact = customer.contacts.find_by(position: "WebForm")
+      if contact
+        contact.update!(contact_attrs)
+      else
+        customer.contacts.create!(
+          contact_attrs.merge(organization: @organization, position: "WebForm")
+        )
+      end
+    end
+
+    def record_opt_in_activity!(customer)
+      opted_in_at = parsed_opt_in_at
+      note_lines = [
+        "Opted in to SMS via #{WebsiteSources.intake_label_for(@sms_opt_in_source)} on #{opted_in_at.strftime('%B %-d, %Y at %-I:%M %p')}.",
+        "Source: #{@sms_opt_in_source}"
+      ]
+      consent = @payload[:sms_opt_in_label].to_s.strip
+      note_lines << "Consent: #{consent}" if consent.present?
+      note_text = note_lines.join("\n\n")
+
+      customer.notes.create!(
+        organization: @organization,
+        name: "Website opt-in",
+        text: note_text,
+        account_note: false,
+        created_at: opted_in_at,
+        updated_at: opted_in_at
+      )
+
+      customer.update!(last_note: opted_in_at, last_note_text: note_text)
     end
 
     def normalized_phone

@@ -3,22 +3,14 @@
 
 <span class="h3-grey theme-text">SMS status</span><br>
 <div class="edit_family theme-text">
-  <%= customer.sms_opt_status_label %>
   <% if customer.sms_opt_in == true && customer.sms_opt_in_at.present? %>
-    <span class="theme-text outreach-muted"> · Opted in <%= customer.sms_opt_in_at.strftime("%b %d, %Y") %></span>
-  <% elsif customer.sms_opt_out_at.present? %>
-    <span class="theme-text outreach-muted"> · <%= customer.sms_opt_out_at.strftime("%b %d, %Y") %></span>
+    Opted in <%= customer.sms_opt_in_at.strftime("%b %d, %Y") %>
+  <% elsif customer.sms_opted_out? && customer.sms_opt_out_at.present? %>
+    Opted out <%= customer.sms_opt_out_at.strftime("%b %d, %Y") %>
+  <% else %>
+    <%= customer.sms_opt_status_label %>
   <% end %>
-  <% if customer.sms_opt_in_source.present? %>
-    <br><span class="theme-text outreach-muted sms-opt-audit-meta">Opt-in source: <%= customer.sms_opt_in_source %></span>
-  <% end %>
-  <% if customer.sms_opt_out_source.present? %>
-    <br><span class="theme-text outreach-muted sms-opt-audit-meta">Opt-out source: <%= customer.sms_opt_out_source %></span>
-  <% end %>
-  <% if customer.sms_opt_in_label.present? %>
-    <br><span class="theme-text outreach-muted sms-opt-audit-meta">Consent: <%= customer.sms_opt_in_label %></span>
-  <% end %>
-  <% if customer.sms_opt_out_note.present? %>
+  <% if customer.sms_opt_out_note.present? && customer.sms_opted_out? %>
     <br><span class="theme-text outreach-muted sms-opt-audit-meta"><%= customer.sms_opt_out_note %></span>
   <% end %>
 </div>
@@ -33,8 +25,9 @@
             ], customer.sms_opt_in),
             {},
             class: "form-control form-width theme-field" %>
-      <%= f.text_field :sms_opt_in_source,
-            placeholder: "Opt-in source (e.g. LifeSpring contact form)",
+      <%= f.select :sms_opt_in_source,
+            sms_opt_in_source_options_for_select(customer),
+            {},
             class: "form-control form-width theme-field" %>
       <%= f.text_field :sms_opt_out_source,
             placeholder: "Opt-out source",

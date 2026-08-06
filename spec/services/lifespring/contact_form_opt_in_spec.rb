@@ -35,6 +35,21 @@ RSpec.describe Lifespring::ContactFormOptIn do
       expect(customer.sms_opt_in_source).to eq("lifespringdesign.com/contact-form")
       expect(customer.sms_opt_in_at).to eq(Time.zone.parse("2026-07-24T20:15:00.000Z"))
       expect(customer.sms_opt_in_label).to include("text messages")
+
+      contact = customer.contacts.find_by(position: "WebForm")
+      expect(contact).to be_present
+      expect(contact.firstname).to eq("John")
+      expect(contact.lastname).to eq("Smith")
+      expect(contact.phone).to eq("3605551234")
+      expect(contact.email).to eq("john@acme.com")
+
+      note = customer.notes.find_by(name: "Website opt-in")
+      expect(note).to be_present
+      expect(note.text).to include("LifeSpring contact form")
+      expect(note.text).to include("July 24, 2026")
+      expect(note.text).to include("lifespringdesign.com/contact-form")
+      expect(note.text).to include("text messages")
+      expect(note.account_note).to be(false)
     end
 
     it "updates an existing customer matched by phone and moves them to Prospects" do
@@ -56,6 +71,41 @@ RSpec.describe Lifespring::ContactFormOptIn do
       expect(result.customer.list_id).to be_nil
       expect(result.customer.sms_opted_in?).to be(true)
       expect(result.customer.name).to eq("Acme Plumbing")
+
+      contact = result.customer.contacts.find_by(position: "WebForm")
+      expect(contact.firstname).to eq("John")
+      expect(contact.email).to eq("john@acme.com")
+
+      expect(result.customer.notes.where(name: "Website opt-in").count).to eq(1)
+    end
+
+    it "updates the WebForm contact and adds a new activity note on repeat submissions" do
+      existing = create(
+        :customer,
+        organization: organization,
+        name: "Acme Plumbing",
+        phone: "3605551234",
+        onBoard: "The List"
+      )
+      existing.contacts.create!(
+        organization: organization,
+        position: "WebForm",
+        firstname: "Old",
+        lastname: "Name",
+        email: "old@acme.com"
+      )
+
+      result = described_class.call(payload: payload, organization: organization)
+
+      contact = result.customer.contacts.find_by(position: "WebForm")
+      expect(contact.firstname).to eq("John")
+      expect(contact.lastname).to eq("Smith")
+      expect(result.customer.notes.where(name: "Website opt-in").count).to eq(1)
+
+      described_class.call(payload: payload.merge(name: "John Smith Jr."), organization: organization)
+
+      expect(contact.reload.lastname).to eq("Smith Jr.")
+      expect(result.customer.notes.where(name: "Website opt-in").count).to eq(2)
     end
 
     it "creates a website review prospect with review notes" do

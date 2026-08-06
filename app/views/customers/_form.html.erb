@@ -81,9 +81,10 @@
 
         <div class="field">
           <%= f.label :sms_opt_in_source, "SMS opt-in source" %>
-          <%= f.text_field :sms_opt_in_source,
-                class: "form-control mobile-form-control",
-                placeholder: "e.g. LifeSpring audit, LifeSpring contact form" %>
+          <%= f.select :sms_opt_in_source,
+                sms_opt_in_source_options_for_select(customer),
+                {},
+                class: "form-control mobile-form-control" %>
         </div>
 
         <div class="field">
