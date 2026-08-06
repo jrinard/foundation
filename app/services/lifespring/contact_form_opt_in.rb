@@ -25,7 +25,9 @@ module Lifespring
       return Result.new(customer: nil, created: false, error: "sms_opt_in must be true.") unless ActiveModel::Type::Boolean.new.cast(@payload[:sms_opt_in])
       return Result.new(customer: nil, created: false, error: "phone is required.") if normalized_phone.blank?
       return Result.new(customer: nil, created: false, error: "sms_opt_in_source is required.") if @payload[:sms_opt_in_source].blank?
-      unless WebsiteSources.known?(@payload[:sms_opt_in_source])
+
+      @sms_opt_in_source = WebsiteSources.canonical(@payload[:sms_opt_in_source])
+      unless @sms_opt_in_source
         return Result.new(
           customer: nil,
           created: false,
@@ -47,7 +49,7 @@ module Lifespring
         Outreach::Sms::Compliance.opt_in!(
           customer: customer,
           phone: normalized_phone,
-          source: @payload[:sms_opt_in_source],
+          source: @sms_opt_in_source,
           opted_in_at: parsed_opt_in_at,
           consent_label: @payload[:sms_opt_in_label]
         )
@@ -108,11 +110,11 @@ module Lifespring
     def customer_name
       @payload[:business_name].presence ||
         @payload[:name].presence ||
-        WebsiteSources.default_customer_name_for(@payload[:sms_opt_in_source])
+        WebsiteSources.default_customer_name_for(@sms_opt_in_source)
     end
 
     def contact_extra_notes
-      parts = [WebsiteSources.intake_label_for(@payload[:sms_opt_in_source])]
+      parts = [WebsiteSources.intake_label_for(@sms_opt_in_source)]
       parts << @payload[:message].to_s.strip if @payload[:message].present?
       parts << "Contact: #{@payload[:name].strip}" if @payload[:name].present? && @payload[:business_name].present?
       parts.compact.map { |part| part.to_s.encode("UTF-8", invalid: :replace, undef: :replace) }.join(" · ")

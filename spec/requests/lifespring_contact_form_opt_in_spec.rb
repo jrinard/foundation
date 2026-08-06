@@ -72,4 +72,18 @@ RSpec.describe "LifeSpring contact form opt-in webhook", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body["error"]).to include("sms_opt_in_source must be one of")
   end
+
+  it "accepts sms_opt_in_source with https URL prefix" do
+    post lifespring_contact_form_opt_in_path,
+         params: payload.merge(
+           phone: "3605551111",
+           email: "url-test@example.com",
+           sms_opt_in_source: "https://lifespringdesign.com/contact-form"
+         ),
+         headers: { "Authorization" => "Bearer #{token}" },
+         as: :json
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body["sms_opt_in_source"]).to eq("lifespringdesign.com/contact-form")
+  end
 end

@@ -14,21 +14,20 @@
         <div class="qb-form-cont lead-card-dark theme-text settings-outreach-card">
           <h3 class="h4-black theme-text">Twilio SMS</h3>
           <p class="theme-text help-block settings-outreach-card-help">
-            Per-org <strong>from number</strong> for routing inbound SMS. Account SID and auth token live in server ENV only.
-            Live sends run when <strong>Text Message Sending</strong> is active and ENV + from number are set.
+            Per-org <strong>from number</strong> for routing inbound SMS — each org needs its own Twilio number;
+            shared numbers cannot route replies to the correct org. Save it here (not in server ENV).
+            Account SID and auth token live in server ENV only.
+            Live sends run when <strong>Text Message Sending</strong> is active and from number is set.
           </p>
 
           <div class="form-group">
-            <%= f.label :environment, "Environment" %>
-            <%= f.select :environment,
-                  options_for_select([["Sandbox (testing)", "sandbox"], ["Production (live)", "production"]], channel.environment),
-                  {},
-                  class: "form-control theme-field" %>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :from_number, "From Number" %>
-            <%= f.text_field :from_number, class: "form-control theme-field", placeholder: "+15035551212", autocomplete: "off" %>
+            <%= f.label :from_number, class: "theme-text" do %>
+              From Number <small class="outreach-muted">(Needs to be unique per org)</small>
+            <% end %>
+            <%= f.text_field :from_number,
+                  class: "form-control theme-field",
+                  placeholder: "+13602101996",
+                  autocomplete: "off" %>
           </div>
 
           <div class="form-group settings-outreach-active-toggle">
@@ -50,7 +49,7 @@
         <dl class="settings-outreach-status-list theme-text">
           <dt>Channel</dt><dd><%= channel.status_label %></dd>
           <dt>Credentials</dt><dd><%= channel.credentials_source_label %></dd>
-          <dt>From Number</dt><dd><%= channel.effective_from_number.presence || "—" %></dd>
+          <dt>From Number</dt><dd><%= channel.from_number.presence || "—" %></dd>
           <dt>Inbound webhook</dt><dd class="settings-outreach-webhook-url"><%= webhook_url %></dd>
         </dl>
         <p class="help-block theme-text">Set the webhook URL in Twilio for your from number. Configure <code>TWILIO_*</code> in server ENV.</p>
@@ -142,9 +141,9 @@
     </div>
   </div>
 
-  <%# Third column — admin opt-in alerts %>
+  <%# Third column — admin opt-in alerts (superadmin only) %>
   <div class="settings-outreach-col settings-outreach-col--admin-alerts">
-    <% if org_admin? %>
+    <% if current_user.superadmin? %>
       <%= form_with model: channel, url: update_outreach_sms_channel_path, method: :patch, local: true do |f| %>
         <div class="qb-form-cont lead-card-dark theme-text settings-outreach-card">
           <h3 class="h4-black theme-text">Admin opt-in alerts</h3>

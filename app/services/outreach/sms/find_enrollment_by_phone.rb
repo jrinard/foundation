@@ -25,7 +25,7 @@ module Outreach
           .unscoped_by_organization
           .where(organization: @organization, phone_number: @normalized, direction: OutreachTextMessage::DIRECTION_OUTBOUND)
           .joins(:outreach_enrollment)
-          .merge(OutreachEnrollment.open)
+          .merge(OutreachEnrollment.unscoped_by_organization.open)
           .order(created_at: :desc)
           .first
           &.outreach_enrollment

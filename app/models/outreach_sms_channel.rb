@@ -3,7 +3,7 @@
 class OutreachSmsChannel < ApplicationRecord
   include OrganizationScoped
 
-  ENVIRONMENTS = %w[sandbox production].freeze
+  ENVIRONMENT = "production"
 
   DEFAULT_OPT_OUT_REPLY = "You have been unsubscribed. Reply YES to opt back in."
   DEFAULT_OPT_IN_REPLY = "Thank you for opting in. Reply STOP to unsubscribe or HELP for assistance."
@@ -11,14 +11,16 @@ class OutreachSmsChannel < ApplicationRecord
 
   belongs_to :organization
 
-  validates :environment, presence: true, inclusion: { in: ENVIRONMENTS }
+  before_validation :assign_production_environment
+
+  validates :environment, presence: true, inclusion: { in: [ENVIRONMENT] }
   validates :organization_id, uniqueness: true
 
   def self.integration_for(organization)
     return nil unless organization
 
     find_or_create_by!(organization: organization) do |record|
-      record.environment = "sandbox"
+      record.environment = ENVIRONMENT
       record.active = false
       record.notify_admin_on_website_opt_in = true
     end
@@ -33,16 +35,12 @@ class OutreachSmsChannel < ApplicationRecord
       .find { |channel| Outreach::Sms::PhoneNumber.normalize(channel.from_number) == normalized }
   end
 
-  def sandbox?
-    environment == "sandbox"
-  end
-
-  def production?
-    environment == "production"
-  end
-
   def credentials_present?
-    effective_account_sid.present? && effective_auth_token.present? && effective_from_number.present?
+    effective_account_sid.present? && effective_auth_token.present? && org_from_number_configured?
+  end
+
+  def org_from_number_configured?
+    from_number.present?
   end
 
   def configured?
@@ -62,7 +60,7 @@ class OutreachSmsChannel < ApplicationRecord
   end
 
   def effective_from_number
-    from_number.presence || ENV["TWILIO_FROM_NUMBER"].presence
+    from_number.presence
   end
 
   def env_account_sid_present?
@@ -71,10 +69,6 @@ class OutreachSmsChannel < ApplicationRecord
 
   def env_auth_token_present?
     ENV["TWILIO_AUTH_TOKEN"].present?
-  end
-
-  def env_from_number_present?
-    ENV["TWILIO_FROM_NUMBER"].present?
   end
 
   def credentials_source_label
@@ -88,6 +82,7 @@ class OutreachSmsChannel < ApplicationRecord
   def status_label
     return "Active — ready to send" if configured?
     return "Inactive — credentials present but channel not active" if credentials_present? && !active?
+    return "Set from number in Settings → Outreach → Text Messages" if active? && !org_from_number_configured?
 
     "Not configured"
   end
@@ -121,5 +116,11 @@ class OutreachSmsChannel < ApplicationRecord
     <<~XML.squish
       <?xml version="1.0" encoding="UTF-8"?><Response><Message>#{escaped}</Message></Response>
     XML
+  end
+
+  private
+
+  def assign_production_environment
+    self.environment = ENVIRONMENT
   end
 end

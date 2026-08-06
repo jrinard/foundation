@@ -3,6 +3,10 @@
 module Outreach
   module Sms
     class StepContext
+      FROM_NUMBER_REQUIRED_MESSAGE =
+        "Set this org's from number in Settings → Outreach → Text Messages before sending. " \
+        "Each org needs its own Twilio number — prospects reply to that number and inbound SMS routes by it."
+
       attr_reader :enrollment, :composer, :conversation
 
       def initialize(enrollment:, sms_recipient_key: nil, dev_mode: false, dev_tools_available: false)
@@ -40,6 +44,8 @@ module Outreach
           dev_tools_available: @dev_tools_available,
           sms_opted_out: Compliance.opted_out?(enrollment.customer),
           live_messaging_enabled: live_messaging_enabled?,
+          org_from_number_configured: org_from_number_configured?,
+          from_number_required_message: FROM_NUMBER_REQUIRED_MESSAGE,
           send_enabled: send_enabled?,
           send_disabled_reason: send_disabled_reason,
           awaiting_simulated_reply: @dev_tools_available && @dev_mode && awaiting_simulated_reply?,
@@ -51,14 +57,23 @@ module Outreach
       private
 
       def live_messaging_enabled?
-        OutreachSmsChannel.integration_for(enrollment.organization)&.ready_to_send?
+        sms_channel&.ready_to_send?
+      end
+
+      def org_from_number_configured?
+        sms_channel&.org_from_number_configured?
+      end
+
+      def sms_channel
+        @sms_channel ||= OutreachSmsChannel.integration_for(enrollment.organization)
       end
 
       def send_disabled_reason
         return nil if @dev_mode
         return "Prospect opted out" if Compliance.opted_out?(enrollment.customer)
-        return "Messaging Disabled" unless live_messaging_enabled?
-        return "Phone is missing" unless composer.phone_present?
+        return FROM_NUMBER_REQUIRED_MESSAGE unless org_from_number_configured?
+        return "Messaging disabled — turn on Text Message Sending in Settings → Outreach → Text Messages" unless live_messaging_enabled?
+        return "Phone is missing — add one on the prospect profile before sending." unless composer.phone_present?
 
         nil
       end

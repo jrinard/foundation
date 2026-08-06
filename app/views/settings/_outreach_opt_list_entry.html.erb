@@ -2,16 +2,14 @@
   <% if entry.customer.present? && entry.path.present? %>
     <%= link_to entry.path, class: "settings-outreach-opt-pill" do %>
       <span class="settings-outreach-opt-pill-name"><%= entry.customer.name %></span>
-      <span class="settings-outreach-opt-pill-id">#<%= entry.customer_id %></span>
+      <% if entry.phone_display.present? %>
+        <span class="settings-outreach-opt-pill-phone"><%= entry.phone_display %></span>
+      <% end %>
     <% end %>
   <% else %>
     <span class="settings-outreach-opt-pill settings-outreach-opt-pill--static">
-      <span class="settings-outreach-opt-pill-name"><%= entry.phone_display %></span>
+      <span class="settings-outreach-opt-pill-phone"><%= entry.phone_display %></span>
     </span>
-  <% end %>
-
-  <% if entry.phone_display.present? && entry.customer.present? %>
-    <span class="settings-outreach-opt-list-meta outreach-muted"><%= entry.phone_display %></span>
   <% end %>
 
   <% if entry.opted_at.present? %>

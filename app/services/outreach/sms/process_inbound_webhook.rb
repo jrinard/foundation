@@ -18,7 +18,13 @@ module Outreach
 
       def call
         channel = OutreachSmsChannel.find_active_by_from_number(@to)
-        return Result.new(status: :ignored, twiml: nil, error: nil) unless channel
+        unless channel
+          Rails.logger.info(
+            "Outreach Twilio inbound ignored — no active channel for To=#{@to.inspect} " \
+            "(set From Number in Settings → Outreach → Text Messages)"
+          )
+          return Result.new(status: :ignored, twiml: nil, error: nil)
+        end
 
         organization = channel.organization
         normalized_from = PhoneNumber.normalize(@from)
@@ -50,6 +56,10 @@ module Outreach
 
         enrollment = FindEnrollmentByPhone.call(organization: organization, phone: normalized_from)
         unless enrollment
+          Rails.logger.info(
+            "Outreach Twilio inbound unmatched — From=#{normalized_from.inspect} org=#{organization.id} " \
+            "(no open enrollment with recent outbound to this number)"
+          )
           return Result.new(status: :unmatched, twiml: nil, error: nil)
         end
 

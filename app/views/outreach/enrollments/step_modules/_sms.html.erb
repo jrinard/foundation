@@ -7,6 +7,8 @@
      data-outreach-sms-step-selected-recipient-key-value="<%= selected_recipient_key %>"
      data-outreach-sms-step-allow-send-without-phone-value="<%= dev_mode %>"
      data-outreach-sms-step-live-messaging-enabled-value="<%= live_messaging_enabled %>"
+     data-outreach-sms-step-org-from-number-configured-value="<%= org_from_number_configured %>"
+     data-outreach-sms-step-from-number-required-message-value="<%= from_number_required_message %>"
      data-outreach-sms-step-sms-opted-out-value="<%= sms_opted_out && !dev_mode %>">
   <% if recipient_options.any? %>
     <div class="outreach-sms-recipient-picker">
@@ -41,6 +43,19 @@
       </span>
     <% end %>
   </div>
+
+  <% if !dev_mode && !org_from_number_configured %>
+    <div class="outreach-sms-step-org-from-number-warning">
+      <p class="outreach-sms-step-warning">
+        <%= from_number_required_message %>
+      </p>
+      <% if org_admin? %>
+        <%= link_to "Open Text Message Settings",
+              settings_path(outreach: "outreach", outreach_section: "text_messages"),
+              class: "btn btn-default theme-text outreach-sms-step-settings-btn" %>
+      <% end %>
+    </div>
+  <% end %>
 
   <% if sms_opted_out && !dev_mode %>
     <p class="outreach-sms-step-warning theme-text">Sending is blocked while SMS status is opted out. Update the prospect profile to opt back in.</p>

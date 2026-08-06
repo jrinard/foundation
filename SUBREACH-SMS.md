@@ -58,8 +58,7 @@ When a rep hits an SMS step, they should be able to:
 |---------|--------|
 | `TWILIO_ACCOUNT_SID` | Server ENV |
 | `TWILIO_AUTH_TOKEN` | Server ENV |
-| `TWILIO_FROM_NUMBER` | ENV optional dev fallback |
-| **From number (per org)** | Settings → Outreach → Text Messages |
+| **From number (per org)** | Settings → Outreach → Text Messages only |
 | **Active flag** | Same — enables live send for that org |
 | **Inbound webhook (production)** | `POST` `https://foundation.lifespringdesign.com/twilio/incoming_sms` — set on Twilio number (Webhook, not TwiML App) |
 | **Contact form opt-in webhook** | See [`LIFESPRING-WEBSITE-WEBHOOKS.md`](LIFESPRING-WEBSITE-WEBHOOKS.md) — Contact form + Website review → Prospects |

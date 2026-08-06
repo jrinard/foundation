@@ -22,6 +22,8 @@ export default class extends Controller {
     selectedRecipientKey: String,
     allowSendWithoutPhone: Boolean,
     liveMessagingEnabled: Boolean,
+    orgFromNumberConfigured: Boolean,
+    fromNumberRequiredMessage: String,
     smsOptedOut: Boolean
   };
 
@@ -93,10 +95,15 @@ export default class extends Controller {
     if (this.allowSendWithoutPhoneValue) return "";
 
     if (this.smsOptedOutValue) return "Prospect opted out";
-    if (!this.liveMessagingEnabledValue) return "Messaging Disabled";
+    if (!this.orgFromNumberConfiguredValue) {
+      return this.fromNumberRequiredMessageValue || "Set this org from number in Settings before sending.";
+    }
+    if (!this.liveMessagingEnabledValue) {
+      return "Messaging disabled — turn on Text Message Sending in Settings → Outreach → Text Messages";
+    }
 
     const recipient = this.currentRecipient();
-    if (!recipient?.phone_normalized) return "Phone is missing";
+    if (!recipient?.phone_normalized) return "Phone is missing — add one on the prospect profile before sending.";
 
     return "";
   }

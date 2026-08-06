@@ -41,7 +41,7 @@ module Outreach
             return Result.new(
               enrollment: @enrollment,
               message: nil,
-              error: "Messaging is disabled. Turn on Active in Settings → Outreach → Text Messages."
+              error: "Messaging is disabled. Turn on Text Message Sending in Settings → Outreach → Text Messages."
             )
           end
 

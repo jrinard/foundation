@@ -29,8 +29,17 @@ module Lifespring
 
     module_function
 
+    def canonical(source)
+      raw = source.to_s.strip
+      return nil if raw.blank?
+
+      raw = raw.sub(/\Ahttps?:\/\/(www\.)?/i, "")
+      raw = raw.chomp("/")
+      ALL.find { |allowed| allowed.casecmp?(raw) }
+    end
+
     def known?(source)
-      ALL.include?(source.to_s)
+      canonical(source).present?
     end
 
     def badge_for(source)
