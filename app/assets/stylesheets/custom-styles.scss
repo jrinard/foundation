@@ -11573,16 +11573,25 @@ body#app-theme-body[data-dark] .outreach-page {
   align-items: baseline;
   gap: 8px;
   margin-bottom: 12px;
+
+  .outreach-sms-recipient-picker-hint {
+    flex-shrink: 0;
+  }
 }
 
 .outreach-sms-recipient-picker {
-  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .outreach-sms-recipient-picker-hint {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 0.82em;
   opacity: 0.82;
+  flex-shrink: 0;
 }
 
 .outreach-sms-recipient-options {

@@ -23,7 +23,12 @@ class OutreachSmsChannel < ApplicationRecord
       record.environment = ENVIRONMENT
       record.active = false
       record.notify_admin_on_website_opt_in = true
+      record.enrollment_sms_polling_enabled = true
     end
+  end
+
+  def enrollment_sms_polling_enabled?
+    enrollment_sms_polling_enabled
   end
 
   def self.find_active_by_from_number(raw_number)

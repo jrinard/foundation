@@ -83,21 +83,17 @@ module Outreach
       end
 
       def customer_label
-        name = @customer.name.presence || "Business"
-        phone = @customer.phone.to_s.strip
-        "#{name} : #{phone}"
+        @customer.name.presence || "Business"
       end
 
-      def contact_label(contact, phone, secondary: false)
+      def contact_label(contact, _phone, secondary: false)
         name = [contact.firstname, contact.lastname].map { |part| part.to_s.strip.presence }.compact.join(" ")
         name = "Contact" if name.blank?
-        name = "#{name} (alt)" if secondary
-        "#{name} : #{phone.to_s.strip}"
+        secondary ? "#{name} (alt)" : name
       end
 
       def discovery_label
-        phone = @discovery&.phone.to_s.strip
-        "Discovery listing : #{phone}"
+        "Discovery listing"
       end
     end
   end

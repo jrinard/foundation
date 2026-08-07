@@ -33,6 +33,22 @@ export default class extends Controller {
     this.updateRecipientUI();
     this.refresh();
     this.scrollConversationToBottom();
+    this.handleConversationUpdated = this.handleConversationUpdated.bind(this);
+    this.element.addEventListener(
+      "outreach-enrollment-poll:conversation-updated",
+      this.handleConversationUpdated
+    );
+  }
+
+  disconnect() {
+    this.element.removeEventListener(
+      "outreach-enrollment-poll:conversation-updated",
+      this.handleConversationUpdated
+    );
+  }
+
+  handleConversationUpdated() {
+    this.scrollConversationToBottom();
   }
 
   scrollConversationToBottom() {

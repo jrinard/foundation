@@ -5,7 +5,7 @@ module Outreach
     class StepContext
       FROM_NUMBER_REQUIRED_MESSAGE =
         "Set this org's from number in Settings → Outreach → Text Messages before sending. " \
-        "Each org needs its own Twilio number — prospects reply to that number and inbound SMS routes by it."
+        "Each org needs its own phone number — prospects reply to that number and inbound SMS routes by it."
 
       attr_reader :enrollment, :composer, :conversation
 
@@ -50,11 +50,18 @@ module Outreach
           send_disabled_reason: send_disabled_reason,
           awaiting_simulated_reply: @dev_tools_available && @dev_mode && awaiting_simulated_reply?,
           simulate_reply_groups: SimulateInboundReply::REPLY_GROUPS,
-          conversation_messages: conversation.messages
+          conversation_messages: conversation.messages,
+          poll_inbound_count: inbound_message_scope.count,
+          poll_last_inbound_id: inbound_message_scope.maximum(:id),
+          sms_polling_enabled: sms_channel&.enrollment_sms_polling_enabled?
         }
       end
 
       private
+
+      def inbound_message_scope
+        OutreachTextMessage.for_thread(enrollment: enrollment).inbound
+      end
 
       def live_messaging_enabled?
         sms_channel&.ready_to_send?

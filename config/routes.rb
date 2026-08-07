@@ -35,6 +35,7 @@ Rails.application.routes.draw do
         post :dev_reset
         post :toggle_dev_mode
         post :return_to_step
+        get :poll
       end
     end
     post "customers/:customer_id/promote_to_lead", to: "customer_promotions#create", as: :promote_customer

@@ -225,6 +225,7 @@ class SettingsController < ApplicationController
   def outreach_sms_channel_params
     permitted = [:from_number, :active]
     permitted << :notify_admin_on_website_opt_in if current_user.superadmin?
+    permitted << :enrollment_sms_polling_enabled if current_user.superadmin?
     params.require(:outreach_sms_channel).permit(*permitted)
   end
 

@@ -105,20 +105,8 @@
 
         <div class="outreach-enrollment-activity-panel">
           <h2 class="theme-text h4">Activity</h2>
-          <div class="outreach-enrollment-activity-feed">
-            <% if @activities.any? %>
-              <ul class="outreach-activity-list theme-text">
-                <% @activities.each do |activity| %>
-                  <li class="<%= outreach_activity_item_classes(activity) %>">
-                    <span class="outreach-activity-time"><%= activity.created_at.strftime("%b %d %I:%M %p") %></span>
-                    <span class="outreach-activity-actor"><%= outreach_activity_actor_label(activity) %></span>
-                    <%= outreach_activity_body(activity) %>
-                  </li>
-                <% end %>
-              </ul>
-            <% else %>
-              <p class="theme-text outreach-empty">No activity yet.</p>
-            <% end %>
+          <div id="outreach-enrollment-activity-feed" class="outreach-enrollment-activity-feed">
+            <%= render "outreach/enrollments/activity_feed", activities: @activities %>
           </div>
         </div>
 

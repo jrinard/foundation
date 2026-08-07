@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_07_29_180000) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_07_001000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -479,6 +479,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_29_180000) do
     t.text "numbers_black_list", default: [], array: true
     t.text "numbers_white_list", default: [], array: true
     t.boolean "notify_admin_on_website_opt_in", default: true, null: false
+    t.boolean "enrollment_sms_polling_enabled", default: true, null: false
     t.index ["organization_id"], name: "index_outreach_sms_channels_on_organization_id", unique: true
   end
 

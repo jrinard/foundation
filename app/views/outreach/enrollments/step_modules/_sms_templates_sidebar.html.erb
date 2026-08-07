@@ -1,0 +1,43 @@
+<div class="outreach-sms-templates-sidebar<%= " outreach-sms-templates-sidebar--follow-up" if follow_up_mode %>"
+     data-outreach-enrollment-poll-target="templatesSidebar">
+  <% if follow_up_mode %>
+    <p class="outreach-sms-templates-sidebar-hint theme-text">Pick your response</p>
+    <div class="outreach-sms-templates-sidebar-columns">
+      <div class="outreach-sms-templates-sidebar-col">
+        <%= render "outreach/enrollments/step_modules/sms_template_groups", groups: response_template_columns[:left] %>
+      </div>
+      <div class="outreach-sms-templates-sidebar-col">
+        <%= render "outreach/enrollments/step_modules/sms_template_groups", groups: response_template_columns[:right] %>
+        <div class="outreach-sms-template-group">
+          <p class="outreach-sms-template-group-label theme-text">Custom</p>
+          <div class="outreach-sms-sidebar-templates" aria-label="Custom response">
+            <div class="outreach-sms-sidebar-template-pill outreach-sms-text-template-pill--custom theme-text"
+                 data-outreach-sms-step-target="customPill"
+                 data-text-template-key="custom">
+              <span class="outreach-sms-text-template-pill-label">Your edits</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <p class="outreach-sms-templates-sidebar-hint theme-text">Get started</p>
+    <div class="outreach-sms-sidebar-templates" aria-label="Text templates">
+      <div class="outreach-sms-sidebar-template-pill outreach-sms-text-template-pill--custom theme-text"
+           data-outreach-sms-step-target="customPill"
+           data-text-template-key="custom">
+        <span class="outreach-sms-text-template-pill-label">Custom</span>
+      </div>
+
+      <% text_templates.each do |text_template| %>
+        <button type="button"
+                class="outreach-sms-sidebar-template-pill theme-text"
+                data-outreach-sms-step-target="pill"
+                data-text-template-key="<%= text_template[:key] %>"
+                data-action="outreach-sms-step#selectTextTemplate">
+          <span class="outreach-sms-text-template-pill-label"><%= text_template[:label] %></span>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+</div>

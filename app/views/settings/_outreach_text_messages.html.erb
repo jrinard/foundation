@@ -158,6 +158,16 @@
             </label>
           </div>
 
+          <div class="form-group settings-outreach-admin-alert-toggle">
+            <label class="settings-outreach-admin-alert-label theme-text">
+              <%= f.check_box :enrollment_sms_polling_enabled, class: "settings-outreach-admin-alert-input" %>
+              Auto-refresh enrollment SMS threads
+            </label>
+            <p class="help-block theme-text">
+              Polls open enrollment pages every 5 seconds for new inbound replies. Uncheck to pause polling while debugging in production (manual refresh still works).
+            </p>
+          </div>
+
           <%= f.submit "Save alert settings", class: "btn btn-xl settings-menu-button settings-outreach-save-btn" %>
         </div>
       <% end %>

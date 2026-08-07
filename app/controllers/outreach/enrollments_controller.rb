@@ -2,25 +2,54 @@
 
 module Outreach
   class EnrollmentsController < BaseController
-    before_action :set_enrollment, only: [:show, :complete_step, :send_message, :simulate_reply, :pause, :resume, :reenroll, :dev_reset, :toggle_dev_mode, :return_to_step]
+    before_action :set_enrollment, only: [:show, :poll, :complete_step, :send_message, :simulate_reply, :pause, :resume, :reenroll, :dev_reset, :toggle_dev_mode, :return_to_step]
     before_action :require_outreach_dev_tools!, only: [:simulate_reply, :dev_reset, :toggle_dev_mode]
     before_action :require_outreach_dev_mode!, only: [:simulate_reply, :dev_reset]
 
     def show
       authorize! :read, @enrollment
-      @activities = @enrollment.activities.includes(:user).recent_first.limit(30)
-      @prior_attempts = OutreachEnrollment
-        .where(customer: @enrollment.customer, outreach_campaign: @enrollment.outreach_campaign)
-        .where.not(id: @enrollment.id)
-        .closed
-        .recent_first
-      @step_module = Outreach::StepModules.context_for(
-        @enrollment,
-        sms_recipient_key: sms_recipient_key_for(@enrollment),
-        dev_mode: outreach_dev_mode?,
-        dev_tools_available: outreach_dev_tools_available?
-      ) unless @enrollment.plan_complete?
-      load_outreach_for_customer!(@enrollment.customer) if outreach_enabled?
+      load_enrollment_show_data
+    end
+
+    def poll
+      authorize! :read, @enrollment
+
+      inbound_scope = OutreachTextMessage.for_thread(enrollment: @enrollment).inbound
+      payload = {
+        inbound_count: inbound_scope.count,
+        last_inbound_id: inbound_scope.maximum(:id)
+      }
+
+      if sms_step_active?
+        step_locals = sms_step_poll_locals
+        payload[:follow_up_mode] = step_locals[:follow_up_mode]
+        payload[:conversation_html] = render_to_string(
+          partial: "outreach/enrollments/step_modules/sms_conversation",
+          locals: {
+            conversation_messages: step_locals[:conversation_messages],
+            dev_mode: step_locals[:dev_mode]
+          },
+          formats: [:html]
+        )
+        payload[:templates_sidebar_html] = render_to_string(
+          partial: "outreach/enrollments/step_modules/sms_templates_sidebar",
+          locals: {
+            follow_up_mode: step_locals[:follow_up_mode],
+            text_templates: step_locals[:text_templates],
+            response_template_columns: step_locals[:response_template_columns]
+          },
+          formats: [:html]
+        )
+      end
+
+      activities = @enrollment.activities.includes(:user).recent_first.limit(30)
+      payload[:activity_html] = render_to_string(
+        partial: "outreach/enrollments/activity_feed",
+        locals: { activities: activities },
+        formats: [:html]
+      )
+
+      render json: payload
     end
 
     def create
@@ -228,6 +257,35 @@ module Outreach
       return if outreach_dev_tools_available?
 
       redirect_back fallback_location: outreach_enrollment_path(@enrollment), alert: "Not authorized."
+    end
+
+    def load_enrollment_show_data
+      @activities = @enrollment.activities.includes(:user).recent_first.limit(30)
+      @prior_attempts = OutreachEnrollment
+        .where(customer: @enrollment.customer, outreach_campaign: @enrollment.outreach_campaign)
+        .where.not(id: @enrollment.id)
+        .closed
+        .recent_first
+      @step_module = Outreach::StepModules.context_for(
+        @enrollment,
+        sms_recipient_key: sms_recipient_key_for(@enrollment),
+        dev_mode: outreach_dev_mode?,
+        dev_tools_available: outreach_dev_tools_available?
+      ) unless @enrollment.plan_complete?
+      load_outreach_for_customer!(@enrollment.customer) if outreach_enabled?
+    end
+
+    def sms_step_active?
+      !@enrollment.plan_complete? && @enrollment.current_step_type == Outreach::PlanStepTypes::SEND_SMS
+    end
+
+    def sms_step_poll_locals
+      Outreach::Sms::StepContext.new(
+        enrollment: @enrollment,
+        sms_recipient_key: sms_recipient_key_for(@enrollment),
+        dev_mode: outreach_dev_mode?,
+        dev_tools_available: outreach_dev_tools_available?
+      ).partial_locals
     end
   end
 end

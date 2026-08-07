@@ -1,6 +1,14 @@
 <%# Renders when current step step_type is send_sms — works at any plan position. %>
+<% sms_polling_active = sms_polling_enabled && !dev_mode %>
 <div class="outreach-sms-step theme-text<%= " outreach-sms-step--follow-up" if follow_up_mode %>"
-     data-controller="outreach-sms-step"
+     data-controller="outreach-sms-step<%= " outreach-enrollment-poll" if sms_polling_active %>"
+     <% if sms_polling_active %>
+     data-outreach-enrollment-poll-url-value="<%= poll_outreach_enrollment_path(enrollment) %>"
+     data-outreach-enrollment-poll-interval-value="5000"
+     data-outreach-enrollment-poll-initial-inbound-count-value="<%= poll_inbound_count %>"
+     data-outreach-enrollment-poll-initial-last-inbound-id-value="<%= poll_last_inbound_id.to_i %>"
+     data-outreach-enrollment-poll-initial-follow-up-mode-value="<%= follow_up_mode %>"
+     <% end %>
      data-outreach-sms-step-text-templates-value="<%= text_templates.to_json %>"
      data-outreach-sms-step-default-text-template-value="<%= default_text_template_key %>"
      data-outreach-sms-step-recipients-value="<%= recipient_options.to_json %>"
@@ -12,7 +20,7 @@
      data-outreach-sms-step-sms-opted-out-value="<%= sms_opted_out && !dev_mode %>">
   <% if recipient_options.any? %>
     <div class="outreach-sms-recipient-picker">
-      <p class="outreach-sms-recipient-picker-hint theme-text">Send to</p>
+      <span class="outreach-sms-recipient-picker-hint theme-text">Send to</span>
       <div class="outreach-sms-recipient-options" aria-label="SMS recipients">
         <% recipient_options.each do |option| %>
           <button type="button"
@@ -28,7 +36,7 @@
   <% end %>
 
   <div class="outreach-sms-step-meta">
-    <span class="outreach-sms-step-label">To</span>
+    <span class="outreach-sms-recipient-picker-hint theme-text">To</span>
     <% if phone_present %>
       <span class="outreach-sms-step-phone" data-outreach-sms-step-target="phoneDisplay"><%= phone %></span>
     <% else %>
@@ -61,9 +69,11 @@
     <p class="outreach-sms-step-warning theme-text">Sending is blocked while SMS status is opted out. Update the prospect profile to opt back in.</p>
   <% end %>
 
-  <%= render "outreach/enrollments/step_modules/sms_conversation",
-        conversation_messages: conversation_messages,
-        dev_mode: dev_mode %>
+  <div data-outreach-enrollment-poll-target="conversation">
+    <%= render "outreach/enrollments/step_modules/sms_conversation",
+          conversation_messages: conversation_messages,
+          dev_mode: dev_mode %>
+  </div>
 
   <%= form_with url: send_message_outreach_enrollment_path(enrollment),
         method: :post,
@@ -72,9 +82,12 @@
     <%= hidden_field_tag :sms_recipient_key,
           selected_recipient_key,
           data: { outreach_sms_step_target: "recipientKey" } %>
-    <div class="outreach-sms-step-compose<%= " outreach-sms-step-compose--follow-up" if follow_up_mode %>">
+    <div class="outreach-sms-step-compose<%= " outreach-sms-step-compose--follow-up" if follow_up_mode %>"
+         data-outreach-enrollment-poll-target="compose">
       <div class="outreach-sms-step-compose-main">
-        <label class="outreach-sms-step-field-label" for="outreach_sms_message_body">
+        <label class="outreach-sms-step-field-label"
+               for="outreach_sms_message_body"
+               data-outreach-enrollment-poll-target="messageLabel">
           <%= follow_up_mode ? "Your reply" : "Message" %>
         </label>
         <textarea id="outreach_sms_message_body"
@@ -102,48 +115,10 @@
         </div>
       </div>
 
-      <div class="outreach-sms-templates-sidebar<%= " outreach-sms-templates-sidebar--follow-up" if follow_up_mode %>">
-        <% if follow_up_mode %>
-          <p class="outreach-sms-templates-sidebar-hint theme-text">Pick your response</p>
-          <div class="outreach-sms-templates-sidebar-columns">
-            <div class="outreach-sms-templates-sidebar-col">
-              <%= render "outreach/enrollments/step_modules/sms_template_groups", groups: response_template_columns[:left] %>
-            </div>
-            <div class="outreach-sms-templates-sidebar-col">
-              <%= render "outreach/enrollments/step_modules/sms_template_groups", groups: response_template_columns[:right] %>
-              <div class="outreach-sms-template-group">
-                <p class="outreach-sms-template-group-label theme-text">Custom</p>
-                <div class="outreach-sms-sidebar-templates" aria-label="Custom response">
-                  <div class="outreach-sms-sidebar-template-pill outreach-sms-text-template-pill--custom theme-text"
-                       data-outreach-sms-step-target="customPill"
-                       data-text-template-key="custom">
-                    <span class="outreach-sms-text-template-pill-label">Your edits</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        <% else %>
-          <p class="outreach-sms-templates-sidebar-hint theme-text">Get started</p>
-          <div class="outreach-sms-sidebar-templates" aria-label="Text templates">
-            <div class="outreach-sms-sidebar-template-pill outreach-sms-text-template-pill--custom theme-text"
-                 data-outreach-sms-step-target="customPill"
-                 data-text-template-key="custom">
-              <span class="outreach-sms-text-template-pill-label">Custom</span>
-            </div>
-
-            <% text_templates.each do |text_template| %>
-              <button type="button"
-                      class="outreach-sms-sidebar-template-pill theme-text"
-                      data-outreach-sms-step-target="pill"
-                      data-text-template-key="<%= text_template[:key] %>"
-                      data-action="outreach-sms-step#selectTextTemplate">
-                <span class="outreach-sms-text-template-pill-label"><%= text_template[:label] %></span>
-              </button>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
+      <%= render "outreach/enrollments/step_modules/sms_templates_sidebar",
+            follow_up_mode: follow_up_mode,
+            text_templates: text_templates,
+            response_template_columns: response_template_columns %>
     </div>
   <% end %>
 
