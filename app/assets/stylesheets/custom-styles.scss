@@ -6239,16 +6239,51 @@ body#app-theme-body[data-dark] .discovery-business-detail-row {
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.discovery-places-no-match-actions-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
+  gap: 10px 12px;
 }
 
 .discovery-places-no-match-note {
-  margin: 0;
+  margin: 0 0 10px;
   opacity: 0.8;
   font-size: 0.92em;
+}
+
+.discovery-places-place-id-hint {
+  margin: 0 0 12px;
+  font-size: 0.92em;
+  opacity: 0.9;
+}
+
+.discovery-places-or {
+  opacity: 0.65;
+  font-size: 0.92em;
+}
+
+.discovery-places-place-id-fallback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.discovery-places-place-id-input {
+  flex: 1 1 180px;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.discovery-places-place-id-lookup {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 body#app-theme-body[data-dark] .discovery-places-no-match-actions {

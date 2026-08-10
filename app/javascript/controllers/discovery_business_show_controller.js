@@ -273,8 +273,14 @@ export default class extends Controller {
 
       const label = data.api_label || (data.api === "v1" ? "Places V1" : "Legacy")
       this.setModalTitle(`Advanced Data`)
-      this.setModalStatus("")
       this.setPageStatus("")
+
+      const places = data.places || []
+      if (data.ok && places.length === 0) {
+        await this.maybeLookupSavedPlaceId()
+      } else {
+        this.setModalStatus("")
+      }
     } catch (error) {
       console.error("[Discovery Google Places search]", error)
       this.setModalStatus(`Google Places search failed: ${error.message}`)
@@ -300,7 +306,46 @@ export default class extends Controller {
     if (!placeId) return
 
     button.disabled = true
+    await this.loadPlaceDetails(placeId, api, { triggerButton: button })
+    button.disabled = false
+  }
+
+  async maybeLookupSavedPlaceId() {
+    const placeId = this.savedGooglePlaceId()
+    if (!placeId) {
+      this.setModalStatus("")
+      return
+    }
+
+    this.setModalStatus(`No text search matches. Looking up saved Place ID…`)
+    await this.loadPlaceDetails(placeId, "v1")
+  }
+
+  savedGooglePlaceId() {
+    return (this.currentEnrichmentValue?.google_place_id || "").trim()
+  }
+
+  async lookupPlaceIdFromInput(event) {
+    event?.preventDefault()
+
+    const container = event?.currentTarget?.closest(".discovery-places-place-id-fallback")
+    const input = container?.querySelector(".discovery-places-place-id-input")
+    const button = container?.querySelector(".discovery-places-place-id-lookup")
+    const placeId = input?.value?.trim()
+    if (!placeId) {
+      this.setModalStatus("Enter a Google Place ID (starts with ChIJ…).")
+      input?.focus()
+      return
+    }
+
+    if (button) button.disabled = true
+    await this.loadPlaceDetails(placeId, "v1", { triggerButton: button })
+    if (button) button.disabled = false
+  }
+
+  async loadPlaceDetails(placeId, api = "v1", { triggerButton = null } = {}) {
     this.setMatchButtonsDisabled(true)
+    if (triggerButton) triggerButton.disabled = true
     this.setModalStatus("Loading place details…")
 
     try {
@@ -333,7 +378,7 @@ export default class extends Controller {
       console.error("[Discovery Google Places details]", error)
       this.setModalStatus(`Google Places details failed: ${error.message}`)
     } finally {
-      button.disabled = false
+      if (triggerButton) triggerButton.disabled = false
       this.setMatchButtonsDisabled(false)
     }
   }
@@ -490,19 +535,19 @@ export default class extends Controller {
     if (!this.hasModalMatchesTarget) return
 
     const places = data.places || []
+    const prefilledId = this.savedGooglePlaceId()
+
     if (!data.ok || !places.length) {
       this.modalMatchesTarget.innerHTML = `
         <p class="theme-text discovery-places-modal-empty">
           ${this.escapeHtml(data.message || "No Google Places matches found.")}
         </p>
-        <div class="discovery-places-no-match-actions">
-          <button type="button"
-                  class="btn btn-dark discovery-page-btn theme-text"
-                  data-check-field="places_check_status"
-                  data-action="click->discovery-business-show#markCheckMissing">
-            Confirm No Google Page
-          </button>
-        </div>`
+        <p class="theme-text discovery-places-place-id-hint">
+          ${prefilledId
+            ? "Text search found nothing. A Place ID is saved on this record — looking it up, or paste a different one below."
+            : "Text search found nothing. Paste a Place ID from Google Maps or ReviewBox to look it up directly."}
+        </p>
+        ${this.noMatchActionsMarkup(prefilledId)}`
       return
     }
 
@@ -548,12 +593,36 @@ export default class extends Controller {
       </div>
       <div class="discovery-places-no-match-actions">
         <p class="theme-text discovery-places-no-match-note">None of these look right?</p>
+        ${this.noMatchActionsMarkup(prefilledId)}
+      </div>`
+  }
+
+  noMatchActionsMarkup(prefilledId = "") {
+    const value = this.escapeHtml(prefilledId)
+
+    return `
+      <div class="discovery-places-no-match-actions-row">
         <button type="button"
                 class="btn btn-dark discovery-page-btn theme-text"
                 data-check-field="places_check_status"
                 data-action="click->discovery-business-show#markCheckMissing">
-          Confirm  No Google Page
+          Confirm No Google Page
         </button>
+        <span class="theme-text discovery-places-or">or</span>
+        <div class="discovery-places-place-id-fallback">
+          <input type="text"
+                 class="form-control theme-field discovery-places-place-id-input"
+                 placeholder="Paste Place ID (ChIJ…)"
+                 value="${value}"
+                 autocomplete="off"
+                 spellcheck="false"
+                 data-action="keydown.enter->discovery-business-show#lookupPlaceIdFromInput" />
+          <button type="button"
+                  class="btn btn-warning discovery-page-btn theme-text discovery-places-place-id-lookup"
+                  data-action="click->discovery-business-show#lookupPlaceIdFromInput">
+            Look up
+          </button>
+        </div>
       </div>`
   }
 
