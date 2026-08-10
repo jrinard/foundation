@@ -46,7 +46,7 @@ RSpec.describe "Discovery update captured business", type: :request do
     expect(business.places_check_status).to eq(DiscoveryBusiness::CHECK_FOUND)
   end
 
-  it "does not wipe enrichment from blank modal fields on full-form save" do
+  it "clears enrichment fields when the edit modal submits blank values" do
     patch update_captured_business_discovery_path(business),
           params: {
             discovery_business: {
@@ -56,7 +56,8 @@ RSpec.describe "Discovery update captured business", type: :request do
               website: "",
               google_place_id: "",
               google_rating: "",
-              google_rating_count: ""
+              google_rating_count: "",
+              places_check_status: "unchecked"
             }
           },
           headers: { "Accept" => "application/json" }
@@ -65,8 +66,11 @@ RSpec.describe "Discovery update captured business", type: :request do
 
     business.reload
     expect(business.registered_agent_name).to eq("Modal Agent")
-    expect(business.phone).to eq("555-0100")
-    expect(business.website).to eq("https://example.com")
-    expect(business.google_place_id).to eq("ChIJtest")
+    expect(business.phone).to be_nil
+    expect(business.website).to be_nil
+    expect(business.google_place_id).to be_nil
+    expect(business.google_rating).to be_nil
+    expect(business.google_rating_count).to be_nil
+    expect(business.places_check_status).to eq(DiscoveryBusiness::CHECK_UNCHECKED)
   end
 end

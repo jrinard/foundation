@@ -673,39 +673,9 @@ class DiscoveryController < ApplicationController
     permitted
   end
 
-  ENRICHMENT_PRESERVE_ATTRS = %i[
-    phone email website google_place_id google_rating google_rating_count
-    places_check_status website_check_status
-    facebook_url instagram_url linkedin_url
-    facebook_check_status instagram_check_status linkedin_check_status
-  ].freeze
-
   def captured_business_update_attrs
     submitted_keys = params.require(:discovery_business).keys.map(&:to_sym)
-    attrs = captured_business_params.slice(*submitted_keys)
-
-    # Inline saves merge the edited field into the full client snapshot — apply all submitted attrs.
-    return attrs if inline_field_update?
-
-    preserve_present_enrichment!(attrs, submitted_keys)
-    attrs
-  end
-
-  def inline_field_update?
-    ActiveModel::Type::Boolean.new.cast(params[:inline])
-  end
-
-  def preserve_present_enrichment!(attrs, submitted_keys)
-    ENRICHMENT_PRESERVE_ATTRS.each do |key|
-      next unless submitted_keys.include?(key)
-      next unless attrs.key?(key)
-      next if attrs[key].present?
-
-      current = @discovery_business.public_send(key)
-      next if current.blank?
-
-      attrs.delete(key)
-    end
+    captured_business_params.slice(*submitted_keys)
   end
 
   def persist_score_requested?
