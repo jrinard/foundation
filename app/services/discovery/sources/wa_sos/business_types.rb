@@ -55,6 +55,43 @@ module Discovery
           ["WA SAVINGS AND LOAN ASSOCIATION", "89"],
           ["WA SOCIAL PURPOSE CORPORATION", "90"]
         ].freeze
+
+        TYPE_SHORT_SUFFIXES = [
+          ["PROFESSIONAL LIMITED LIABILITY LIMITED PARTNERSHIP", "PLLLP"],
+          ["LIMITED LIABILITY LIMITED PARTNERSHIP", "LLLP"],
+          ["PROFESSIONAL LIMITED LIABILITY PARTNERSHIP", "PLLP"],
+          ["LIMITED LIABILITY PARTNERSHIP", "LLP"],
+          ["PROFESSIONAL LIMITED LIABILITY COMPANY", "PLLC"],
+          ["BANK LIMITED LIABILITY COMPANY", "Bank LLC"],
+          ["LIMITED LIABILITY COMPANY", "LLC"],
+          ["NONPROFIT PROFESSIONAL SERVICE CORPORATION", "Nonprofit PSC"],
+          ["PROFESSIONAL SERVICE CORPORATION", "PSC"],
+          ["NONPROFIT CORPORATION", "Nonprofit"],
+          ["PROFIT CORPORATION", "Corp"],
+          ["PUBLIC UTILITY CORPORATION", "PUC"],
+          ["SAVINGS AND LOAN ASSOCIATION", "S&L"],
+          ["LIMITED PARTNERSHIP", "LP"],
+          ["CREDIT UNION", "CU"],
+          ["INSURANCE COMPANY", "Insurance"],
+          ["BANK CORPORATION", "Bank"],
+          ["COOPERATIVE ASSOCIATION", "Co-op"],
+          ["CORP SOLE", "Corp Sole"],
+          ["MASSACHUSETTS TRUST", "Mass Trust"],
+          ["SOCIAL PURPOSE CORPORATION", "SPC"],
+          ["NAME REGISTRATION", "Name Reg"],
+          ["MISCELLANEOUS AND MUTUAL CORPORATION", "Misc Corp"]
+        ].freeze
+
+        def self.short_label(full_name)
+          text = full_name.to_s.strip
+          return "" if text.blank?
+
+          TYPE_SHORT_SUFFIXES.each do |suffix, abbr|
+            return abbr if text.match?(/\b#{Regexp.escape(suffix)}\z/i)
+          end
+
+          text
+        end
       end
     end
   end

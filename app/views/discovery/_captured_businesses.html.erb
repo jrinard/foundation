@@ -15,7 +15,7 @@
     <table class="discovery-results-table discovery-captured-table">
       <thead>
         <tr>
-          <th scope="col" class="theme-text discovery-captured-date">Captured Date</th>
+          <th scope="col" class="theme-text discovery-captured-date">Date</th>
           <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
             <% col_class = case column
                  when "Business Name" then " discovery-captured-name"
@@ -24,7 +24,7 @@
                  when "Business Type" then " discovery-captured-type"
                  else ""
                  end %>
-            <th scope="col" class="theme-text<%= col_class %>"><%= column %></th>
+            <th scope="col" class="theme-text<%= col_class %>"><%= Discovery::Sources::WaSos::CsvParser.ui_column_label(column) %></th>
           <% end %>
           <th scope="col" class="theme-text discovery-captured-phone">Phone</th>
           <th scope="col" class="theme-text discovery-captured-email">Email</th>
@@ -36,7 +36,7 @@
       <tbody>
         <% discovery_businesses.each do |business| %>
           <tr class="discovery-results-row" id="discovery-business-<%= business.id %>">
-            <td class="theme-text discovery-captured-date"><%= l(business.created_at.to_date, format: :long) %></td>
+            <td class="theme-text discovery-captured-date"><%= l(business.created_at.to_date, format: :short) %></td>
             <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
               <% col_class = case column
                    when "Business Name" then " discovery-captured-name"
@@ -47,8 +47,16 @@
                    end %>
               <td class="theme-text<%= col_class %>">
                 <% value = Discovery::Sources::WaSos::CsvParser.captured_business_value(business, column) %>
+                <% full_value = Discovery::Sources::WaSos::CsvParser.captured_business_value_full(business, column) %>
                 <% if column == "Business Name" && value.present? %>
                   <%= link_to value, discovery_path(business), class: "theme-text discovery-business-link" %>
+                <% elsif column == Discovery::Sources::WaSos::CsvParser::OFFICE_ADDRESS_COLUMN && value.present? %>
+                  <span class="discovery-address-cell" tabindex="0">
+                    <span class="discovery-address-cell-short"><%= value %></span>
+                    <span class="discovery-address-cell-full" role="tooltip"><%= value %></span>
+                  </span>
+                <% elsif column == "Business Type" && value.present? %>
+                  <span class="discovery-captured-type-label" title="<%= full_value %>"><%= value %></span>
                 <% else %>
                   <%= value.presence || "—" %>
                 <% end %>

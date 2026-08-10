@@ -90,7 +90,8 @@ class DiscoveryController < ApplicationController
 
     result = fetch.fetch_result
     preview = result.body.byteslice(0, 2000)
-    all_rows = fetch.rows
+    row_filter = filter_uncaptured_wa_sos_rows(fetch.rows)
+    all_rows = row_filter.rows
     Rails.logger.info(
       "[Discovery WA SOS] run=#{fetch.run.id} HTTP #{result.status} bytes=#{result.body.bytesize} rows=#{all_rows.size}"
     )
@@ -103,7 +104,12 @@ class DiscoveryController < ApplicationController
       preview: preview,
       all_rows: all_rows,
       sos_query: fetch.sos_query,
-      message: fetch_result_message(fetch.success?, all_rows.size, search_entity_name: fetch.sos_query[:search_entity_name])
+      message: fetch_result_message(
+        fetch.success?,
+        all_rows.size,
+        search_entity_name: fetch.sos_query[:search_entity_name],
+        hidden_count: row_filter.hidden_count
+      )
     )
   rescue StandardError => e
     Rails.logger.error("[Discovery WA SOS] #{e.class}: #{e.message}")
@@ -128,12 +134,13 @@ class DiscoveryController < ApplicationController
     end
 
     result = Discovery::LoadWaSosRun.call(run: run)
+    row_filter = filter_uncaptured_wa_sos_rows(result.rows)
 
     render_load_run_response(
       ok: true,
       status: :ok,
-      message: load_run_message(result.run, result.rows.size),
-      all_rows: result.rows,
+      message: load_run_message(result.run, row_filter.rows.size, hidden_count: row_filter.hidden_count),
+      all_rows: row_filter.rows,
       filter_city: result.run.settings_snapshot["filter_city"],
       run_id: result.run.id,
       sos_query: result.run.settings_snapshot.slice("business_type_id", "start_date", "end_date", "date_cadence")
@@ -825,9 +832,19 @@ class DiscoveryController < ApplicationController
     parts.presence&.join(" — ") || "No businesses captured."
   end
 
-  def load_run_message(run, row_count)
+  def load_run_message(run, row_count, hidden_count: 0)
     when_label = helpers.l(run.started_at, format: :short)
-    "Loaded #{row_count} #{'business'.pluralize(row_count)} from run on #{when_label}."
+    base = "Loaded #{row_count} #{'business'.pluralize(row_count)} from run on #{when_label}."
+    return base if hidden_count.to_i <= 0
+
+    "#{base} #{hidden_count} already captured #{'was'.pluralize(hidden_count)} hidden."
+  end
+
+  def filter_uncaptured_wa_sos_rows(rows)
+    Discovery::FilterUncapturedWaSosRows.call(
+      organization: current_organization,
+      rows: rows
+    )
   end
 
   def load_wa_sos_source
@@ -867,19 +884,31 @@ class DiscoveryController < ApplicationController
     authorize! :manage, :settings
   end
 
-  def fetch_result_message(success, row_count, search_entity_name: nil)
+  def fetch_result_message(success, row_count, search_entity_name: nil, hidden_count: 0)
     return "Request failed — see browser console." unless success
+
+    hidden_suffix =
+      if hidden_count.to_i.positive?
+        " (#{hidden_count} already captured #{'was'.pluralize(hidden_count)} hidden)"
+      else
+        ""
+      end
 
     if search_entity_name.present?
       if row_count.positive?
-        "#{row_count} #{'match'.pluralize(row_count)} for \"#{search_entity_name}\"."
+        "#{row_count} #{'match'.pluralize(row_count)} for \"#{search_entity_name}\"#{hidden_suffix}."
       else
-        "No businesses matched \"#{search_entity_name}\"."
+        suffix = hidden_count.to_i.positive? ? " #{hidden_count} already captured #{'was'.pluralize(hidden_count)} hidden." : ""
+        "No businesses matched \"#{search_entity_name}\"#{suffix}"
       end
     elsif row_count.positive?
-      "#{row_count} #{'business'.pluralize(row_count)} returned."
+      "#{row_count} #{'business'.pluralize(row_count)} returned#{hidden_suffix}."
     else
-      "Request succeeded but no businesses were returned."
+      if hidden_count.to_i.positive?
+        "All #{hidden_count} #{'business'.pluralize(hidden_count)} from this fetch are already captured."
+      else
+        "Request succeeded but no businesses were returned."
+      end
     end
   end
 

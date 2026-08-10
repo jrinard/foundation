@@ -25,6 +25,10 @@ module Discovery
           "Business Type"
         ].freeze
 
+        UI_COLUMN_LABELS = {
+          "Business Type" => "Type"
+        }.freeze
+
         CSV_COLUMN_SOURCES = {
           OFFICE_ADDRESS_COLUMN => "Principal Office Address",
           REGISTERED_AGENT_NAME_COLUMN => "Registered Agent Name"
@@ -53,13 +57,24 @@ module Discovery
           CSV_COLUMN_SOURCES.fetch(display_column, display_column)
         end
 
+        def self.ui_column_label(column)
+          UI_COLUMN_LABELS.fetch(column, column)
+        end
+
         def self.captured_business_value(business, column)
           case column
           when "Business Name" then business.business_name
-          when "Business Type" then business.business_type
+          when "Business Type" then BusinessTypes.short_label(business.business_type)
           when OFFICE_ADDRESS_COLUMN then business.office_address
           when REGISTERED_AGENT_NAME_COLUMN then business.registered_agent_name
           else ""
+          end
+        end
+
+        def self.captured_business_value_full(business, column)
+          case column
+          when "Business Type" then business.display_business_type
+          else captured_business_value(business, column)
           end
         end
 

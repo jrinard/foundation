@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 import { applyFunnelFilters } from "../discovery/wa_sos_funnel_filters"
 
+const SKIPPED_UBIS_STORAGE_KEY = "foundation_discovery_sos_skipped_ubis"
+
 export default class extends Controller {
   static targets = [
     "status",
@@ -46,6 +48,7 @@ export default class extends Controller {
     this.filteredRows = []
     this.editUpdateUrl = null
     this.businessNameSearchMode = false
+    this.skippedUbis = this.loadSkippedUbis()
     this.syncCapturedControls()
   }
 
@@ -222,6 +225,69 @@ export default class extends Controller {
     if (!url) return
 
     await this.postCapturedAction(url, button, "Unarchive failed")
+  }
+
+  skipResultRow(event) {
+    event.preventDefault()
+
+    const ubi = event.currentTarget.dataset.rowUbi
+    if (!ubi) return
+
+    this.skippedUbis.add(ubi)
+    this.persistSkippedUbis()
+    this.renderFilteredResults()
+  }
+
+  unskipResultRow(event) {
+    event.preventDefault()
+
+    const ubi = event.currentTarget.dataset.rowUbi
+    if (!ubi) return
+
+    this.skippedUbis.delete(ubi)
+    this.persistSkippedUbis()
+    this.renderFilteredResults()
+  }
+
+  loadSkippedUbis() {
+    try {
+      const raw = window.sessionStorage.getItem(SKIPPED_UBIS_STORAGE_KEY)
+      const parsed = raw ? JSON.parse(raw) : []
+      return new Set(Array.isArray(parsed) ? parsed.map((id) => String(id)) : [])
+    } catch (_error) {
+      return new Set()
+    }
+  }
+
+  persistSkippedUbis() {
+    try {
+      window.sessionStorage.setItem(
+        SKIPPED_UBIS_STORAGE_KEY,
+        JSON.stringify(Array.from(this.skippedUbis))
+      )
+    } catch (_error) {
+      // Non-blocking — skip state is session-only
+    }
+  }
+
+  isRowSkipped(row) {
+    const ubi = this.rowExternalId(row)
+    return ubi !== "" && this.skippedUbis.has(ubi)
+  }
+
+  sortRowsWithSkippedLast(rows) {
+    const active = []
+    const skipped = []
+
+    rows.forEach((row) => {
+      if (this.isRowSkipped(row)) {
+        skipped.push(row)
+      } else {
+        active.push(row)
+      }
+    })
+
+    return [...active, ...skipped]
   }
 
   async postCapturedAction(url, button, errorPrefix) {
@@ -514,8 +580,9 @@ export default class extends Controller {
 
   async saveBusinesses(event) {
     event.preventDefault()
-    if (!this.filteredRows.length) return
-    await this.persistRows(this.filteredRows, event.currentTarget)
+    const rows = this.filteredRows.filter((row) => !this.isRowSkipped(row))
+    if (!rows.length) return
+    await this.persistRows(rows, event.currentTarget)
   }
 
   async captureBusiness(event) {
@@ -588,6 +655,12 @@ export default class extends Controller {
     const keys = new Set(rows.map((row) => this.rowKey(row)).filter(Boolean))
     if (!keys.size) return
 
+    rows.forEach((row) => {
+      const ubi = this.rowExternalId(row)
+      if (ubi) this.skippedUbis.delete(ubi)
+    })
+    this.persistSkippedUbis()
+
     this.allRows = this.allRows.filter((row) => !keys.has(this.rowKey(row)))
     this.filteredRows = this.filteredRows.filter((row) => !keys.has(this.rowKey(row)))
   }
@@ -621,7 +694,8 @@ export default class extends Controller {
     if (!this.hasResultsTarget) return
 
     const filters = this.currentFilters()
-    this.filteredRows = applyFunnelFilters(this.allRows, filters)
+    const filtered = applyFunnelFilters(this.allRows, filters)
+    this.filteredRows = this.sortRowsWithSkippedLast(filtered)
     this.resultsTarget.innerHTML = this.buildResultsHtml(this.filteredRows, filters, this.allRows.length)
   }
 
@@ -629,6 +703,8 @@ export default class extends Controller {
     const city = filters.city
     const nameQuery = (filters.businessName || "").trim()
     const nameSearchMode = this.businessNameSearchMode
+    const skippedCount = rows.filter((row) => this.isRowSkipped(row)).length
+    const activeCount = rows.length - skippedCount
 
     if (!rows.length) {
       if (totalUnfiltered > 0) {
@@ -660,7 +736,11 @@ export default class extends Controller {
             : ""
 
     const countLabel = rows.length === 1 ? "business" : "businesses"
-    const captureLabel = rows.length === 1 ? "Capture 1 business" : `Capture ${rows.length} businesses`
+    const captureLabel = activeCount === 1 ? "Capture 1 business" : `Capture ${activeCount} businesses`
+    const skippedNote =
+      skippedCount > 0
+        ? ` <span class="discovery-results-filter-note">(${activeCount} active · ${skippedCount} skipped)</span>`
+        : ""
     const nameMatchNote = nameQuery
       ? ` matching <strong>${this.escapeHtml(nameQuery)}</strong>`
       : ""
@@ -669,9 +749,11 @@ export default class extends Controller {
       : `<strong>${this.escapeHtml(city)}</strong>`
     const header = `
       <div class="discovery-results-toolbar">
-        <p class="discovery-results-count theme-text">${rows.length} ${countLabel} in ${locationLabel}${nameMatchNote}${filterNote}</p>
-        <button type="button" class="btn btn-sm discovery-capture-btn" data-action="click->discovery-sos-fetch#saveBusinesses">${this.escapeHtml(captureLabel)}</button>
+        <p class="discovery-results-count theme-text">${rows.length} ${countLabel} in ${locationLabel}${nameMatchNote}${filterNote}${skippedNote}</p>
+        <button type="button" class="btn btn-sm discovery-capture-btn" data-action="click->discovery-sos-fetch#saveBusinesses"${activeCount === 0 ? " disabled" : ""}>${this.escapeHtml(captureLabel)}</button>
       </div>`
+
+    const displayRows = this.sortRowsWithSkippedLast(rows)
 
     const columns = this.columnsValue
     const thead = [
@@ -682,8 +764,11 @@ export default class extends Controller {
       `<th scope="col" class="theme-text discovery-results-actions-col">Actions</th>`
     ].join("")
 
-    const tbody = rows
-      .map((row, index) => {
+    const tbody = displayRows
+      .map((row) => {
+        const rowIndex = rows.indexOf(row)
+        const skipped = this.isRowSkipped(row)
+        const rowUbi = this.rowExternalId(row)
         const cells = columns
           .map((column) => {
             const officeClass = column === "Office Address" ? " discovery-results-office-address" : ""
@@ -692,14 +777,32 @@ export default class extends Controller {
           .join("")
         const captureCell = `
           <td class="theme-text discovery-results-actions">
-            <button type="button"
-                    class="btn btn-sm discovery-capture-row-btn"
-                    data-action="click->discovery-sos-fetch#captureBusiness"
-                    data-row-index="${index}">
-              Capture
-            </button>
+            <div class="discovery-results-action-group">
+              <button type="button"
+                      class="btn btn-sm discovery-capture-row-btn"
+                      data-action="click->discovery-sos-fetch#captureBusiness"
+                      data-row-index="${rowIndex}"
+                      ${skipped ? "disabled" : ""}>
+                Capture
+              </button>
+              ${
+                skipped
+                  ? `<button type="button"
+                            class="btn btn-default btn-sm theme-text discovery-result-unskip-btn"
+                            data-action="click->discovery-sos-fetch#unskipResultRow"
+                            data-row-ubi="${this.escapeHtml(rowUbi)}">
+                      Unskip
+                    </button>`
+                  : `<button type="button"
+                            class="btn btn-default btn-sm theme-text discovery-result-skip-btn"
+                            data-action="click->discovery-sos-fetch#skipResultRow"
+                            data-row-ubi="${this.escapeHtml(rowUbi)}">
+                      Skip
+                    </button>`
+              }
+            </div>
           </td>`
-        return `<tr class="discovery-results-row">${cells}${captureCell}</tr>`
+        return `<tr class="discovery-results-row${skipped ? " discovery-results-row-skipped" : ""}">${cells}${captureCell}</tr>`
       })
       .join("")
 

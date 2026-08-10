@@ -4181,12 +4181,24 @@ body#app-theme-body[data-dark] .discovery-cadence-btn.discovery-cadence-active {
 }
 
 .discovery-results-actions-col {
-  width: 96px;
+  width: 148px;
   white-space: nowrap;
 }
 
 .discovery-results-actions {
   white-space: nowrap;
+}
+
+.discovery-results-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.discovery-result-skip-btn,
+.discovery-result-unskip-btn {
+  margin: 0;
 }
 
 .discovery-refine-btn,
@@ -4356,6 +4368,7 @@ body#app-theme-body[data-dark] .discovery-results-toggle {
 .discovery-captured-table {
   min-width: 720px;
   font-size: 0.88em;
+  table-layout: fixed;
 
   thead th,
   tbody td {
@@ -4383,7 +4396,9 @@ body#app-theme-body[data-dark] .discovery-results-toggle {
 
   tbody td.discovery-captured-name,
   thead th.discovery-captured-name {
-    max-width: 160px;
+    width: 148px;
+    min-width: 148px;
+    max-width: 148px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -4399,7 +4414,18 @@ body#app-theme-body[data-dark] .discovery-results-toggle {
 
   tbody td.discovery-captured-type,
   thead th.discovery-captured-type {
-    max-width: 100px;
+    width: 52px;
+    min-width: 52px;
+    max-width: 52px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .discovery-captured-type-label {
+    display: inline-block;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -4407,8 +4433,11 @@ body#app-theme-body[data-dark] .discovery-results-toggle {
 
   tbody td.discovery-captured-date,
   thead th.discovery-captured-date {
-    max-width: 118px;
+    width: 88px;
+    min-width: 88px;
+    max-width: 88px;
     white-space: nowrap;
+    box-sizing: border-box;
   }
 
   tbody td.discovery-sos-phone,
@@ -4453,18 +4482,56 @@ body#app-theme-body[data-dark] .discovery-results-toggle {
   }
 
   .discovery-captured-office-address {
-    min-width: 240px;
-    max-width: 280px;
-    width: 260px;
-    white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    width: 148px;
+    min-width: 148px;
+    max-width: 148px;
+    vertical-align: middle;
+  }
 
-    &::-webkit-scrollbar {
-      display: none;
-    }
+  tbody td.discovery-captured-office-address,
+  thead th.discovery-captured-office-address {
+    overflow: visible;
+  }
+
+  .discovery-address-cell {
+    position: relative;
+    display: block;
+    max-width: 100%;
+    cursor: default;
+  }
+
+  .discovery-address-cell-short {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .discovery-address-cell-full {
+    display: none;
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 6px);
+    top: auto;
+    z-index: 30;
+    min-width: 220px;
+    max-width: 360px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #fff;
+    color: #222;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+    white-space: normal;
+    line-height: 1.35;
+    user-select: text;
+    cursor: text;
+    font-size: 0.95em;
+  }
+
+  .discovery-address-cell:hover .discovery-address-cell-full,
+  .discovery-address-cell:focus-within .discovery-address-cell-full {
+    display: block;
   }
 }
 
@@ -4490,6 +4557,35 @@ body#app-theme-body[data-dark] .discovery-captured-table {
     &:focus {
       color: lighten($brand-purple-trial-on-dark, 8%);
     }
+  }
+}
+
+.discovery-results-table tbody tr.discovery-results-row-skipped {
+  opacity: 0.52;
+
+  td {
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  .discovery-capture-row-btn,
+  .discovery-result-skip-btn,
+  .discovery-result-unskip-btn {
+    opacity: 1;
+  }
+}
+
+body#app-theme-body[data-dark] .discovery-results-table tbody tr.discovery-results-row-skipped {
+  td {
+    color: rgba(255, 255, 255, 0.55);
+  }
+}
+
+body#app-theme-body[data-dark] .discovery-captured-table {
+  .discovery-address-cell-full {
+    background: #1e1e1e;
+    color: #f0f0f0;
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
   }
 }
 
