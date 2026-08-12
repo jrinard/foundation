@@ -14,6 +14,13 @@ export default class extends Controller {
     "sosMenuButton",
     "sosDropdown",
     "placesModalHost",
+    "advancedDataMenuHost",
+    "lniModalHost",
+    "lniModalStatus",
+    "lniModalMatches",
+    "lniModalDetails",
+    "lniModalBackButton",
+    "lniModalConfirmButton",
     "editModalHost",
     "scoreCardHost",
     "captureSummaryHost",
@@ -23,6 +30,8 @@ export default class extends Controller {
   static values = {
     googlePlacesUrl: String,
     selectGooglePlaceUrl: String,
+    waLniSearchUrl: String,
+    waLniDetailsUrl: String,
     updateUrl: String,
     scoreUrl: String,
     scoreCardUrl: String,
@@ -33,13 +42,19 @@ export default class extends Controller {
   connect() {
     this.activeApi = "v1"
     this.pendingDetails = null
+    this.pendingLniDetails = null
     this.lastSearchData = null
+    this.lastLniSearchData = null
     this.handleModalClosed = this.handleModalClosed.bind(this)
+    this.handleLniModalClosed = this.handleLniModalClosed.bind(this)
   }
 
   disconnect() {
     if (this.hasPlacesModalHostTarget) {
       this.placesModalHostTarget.removeEventListener("foundation-modal:closed", this.handleModalClosed)
+    }
+    if (this.hasLniModalHostTarget) {
+      this.lniModalHostTarget.removeEventListener("foundation-modal:closed", this.handleLniModalClosed)
     }
   }
 
@@ -51,6 +66,14 @@ export default class extends Controller {
     element.removeEventListener("foundation-modal:closed", this.handleModalClosed)
   }
 
+  lniModalHostTargetConnected(element) {
+    element.addEventListener("foundation-modal:closed", this.handleLniModalClosed)
+  }
+
+  lniModalHostTargetDisconnected(element) {
+    element.removeEventListener("foundation-modal:closed", this.handleLniModalClosed)
+  }
+
   get csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content
   }
@@ -60,9 +83,19 @@ export default class extends Controller {
     return this.application.getControllerForElementAndIdentifier(this.placesModalHostTarget, "foundation-modal")
   }
 
+  get advancedDataMenuModal() {
+    if (!this.hasAdvancedDataMenuHostTarget) return null
+    return this.application.getControllerForElementAndIdentifier(this.advancedDataMenuHostTarget, "foundation-modal")
+  }
+
   get editModal() {
     if (!this.hasEditModalHostTarget) return null
     return this.application.getControllerForElementAndIdentifier(this.editModalHostTarget, "foundation-modal")
+  }
+
+  get lniModal() {
+    if (!this.hasLniModalHostTarget) return null
+    return this.application.getControllerForElementAndIdentifier(this.lniModalHostTarget, "foundation-modal")
   }
 
   openEditModal(event) {
@@ -233,13 +266,34 @@ export default class extends Controller {
     this.closeSosMenu()
   }
 
+  openAdvancedDataMenu(event) {
+    event.preventDefault()
+    this.advancedDataMenuModal?.open()
+  }
+
+  async runAdvancedDataMenuOption(event) {
+    event.preventDefault()
+    const option = event.currentTarget.dataset.advancedDataOption
+    this.advancedDataMenuModal?.close()
+
+    if (option === "legacy") {
+      await this.runGooglePlacesSearch("legacy", { triggerButton: event.currentTarget })
+    } else if (option === "lni" || option === "trade") {
+      await this.runWaLniSearch({ triggerButton: event.currentTarget })
+    }
+  }
+
   async checkGooglePlaces(event) {
     event.preventDefault()
 
     const button = event.currentTarget
     const api = button.dataset.api || "v1"
+    await this.runGooglePlacesSearch(api, { triggerButton: button })
+  }
+
+  async runGooglePlacesSearch(api = "v1", { triggerButton = null } = {}) {
     this.activeApi = api
-    const actionButtons = this.placesActionButtons(button)
+    const actionButtons = triggerButton ? this.placesActionButtons(triggerButton) : []
     actionButtons.forEach((el) => {
       el.disabled = true
     })
@@ -271,8 +325,7 @@ export default class extends Controller {
       this.lastSearchData = data
       this.renderMatches(data)
 
-      const label = data.api_label || (data.api === "v1" ? "Places V1" : "Legacy")
-      this.setModalTitle(`Advanced Data`)
+      this.setModalTitle("Advanced Data")
       this.setPageStatus("")
 
       const places = data.places || []
@@ -772,5 +825,342 @@ export default class extends Controller {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
+  }
+
+  async checkWaLni(event) {
+    event.preventDefault()
+    await this.runWaLniSearch({ triggerButton: event.currentTarget })
+  }
+
+  async runWaLniSearch({ triggerButton = null } = {}) {
+    if (!this.waLniSearchUrlValue) return
+
+    if (triggerButton) triggerButton.disabled = true
+    this.pendingLniDetails = null
+    this.lastLniSearchData = null
+    this.showLniMatchesStep()
+    this.setLniModalTitle("Labor & Industry")
+    this.setLniModalStatus("Searching L&I registry…")
+    this.clearLniModalPanels()
+    this.lniModal?.open()
+
+    try {
+      const response = await fetch(this.waLniSearchUrlValue, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "X-CSRF-Token": this.csrfToken
+        },
+        credentials: "same-origin"
+      })
+
+      const data = await response.json()
+      this.lastLniSearchData = data
+
+      const results = data.results || []
+      if (data.ok && results.length === 1 && results[0].ubi_match) {
+        await this.loadLniDetails(results[0].ubi, results[0].license_id)
+        return
+      }
+
+      this.renderLniMatches(data)
+      this.setLniModalTitle("Labor & Industry — pick a match")
+      this.setLniModalStatus(data.message || "")
+    } catch (error) {
+      console.error("[Discovery WA L&I search]", error)
+      this.setLniModalStatus(`L&I search failed: ${error.message}`)
+    } finally {
+      if (triggerButton) triggerButton.disabled = false
+    }
+  }
+
+  async selectLniMatch(event) {
+    event.preventDefault()
+
+    const row = event.currentTarget
+    if (row.disabled) return
+
+    this.markLniMatchSelected(row)
+    await this.loadLniDetails(row.dataset.ubi, row.dataset.licenseId, { triggerButton: row })
+  }
+
+  markLniMatchSelected(row) {
+    if (!this.hasLniModalMatchesTarget) return
+
+    this.lniModalMatchesTarget.querySelectorAll(".discovery-lni-match-row").forEach((el) => {
+      el.classList.remove("is-selected")
+    })
+    row.classList.add("is-selected")
+  }
+
+  async loadLniDetails(ubi, licenseId, { triggerButton = null } = {}) {
+    if (!ubi || !licenseId || !this.waLniDetailsUrlValue) return
+
+    const matchRows = this.hasLniModalMatchesTarget
+      ? this.lniModalMatchesTarget.querySelectorAll(".discovery-lni-match-row")
+      : []
+
+    if (triggerButton) {
+      triggerButton.disabled = true
+      matchRows.forEach((el) => {
+        if (el !== triggerButton) el.disabled = true
+      })
+    }
+    this.setLniModalStatus("Loading L&I details…")
+
+    try {
+      const url = new URL(this.waLniDetailsUrlValue, window.location.origin)
+      url.searchParams.set("ubi", ubi)
+      url.searchParams.set("license_id", licenseId)
+
+      const response = await fetch(url.toString(), {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "X-CSRF-Token": this.csrfToken
+        },
+        credentials: "same-origin"
+      })
+
+      const data = await response.json()
+      if (data.ok && data.details) {
+        this.pendingLniDetails = data.details
+        this.renderLniDetails(data.details)
+        this.showLniDetailsStep()
+        this.setLniModalTitle("Labor & Industry — confirm")
+        this.setLniModalStatus(data.message || "")
+      } else {
+        this.setLniModalStatus(data.message || "Could not load L&I details.")
+      }
+    } catch (error) {
+      console.error("[Discovery WA L&I details]", error)
+      this.setLniModalStatus(`L&I details failed: ${error.message}`)
+    } finally {
+      matchRows.forEach((el) => {
+        el.disabled = false
+      })
+    }
+  }
+
+  backToLniMatches(event) {
+    event?.preventDefault()
+    this.pendingLniDetails = null
+    this.showLniMatchesStep()
+    if (this.lastLniSearchData) {
+      this.renderLniMatches(this.lastLniSearchData)
+      this.setLniModalTitle("Labor & Industry — pick a match")
+      this.setLniModalStatus(this.lastLniSearchData.message || "")
+    }
+  }
+
+  async confirmLniSave(event) {
+    event.preventDefault()
+    if (!this.pendingLniDetails || !this.updateUrlValue) return
+
+    const details = this.pendingLniDetails
+    const button = this.hasLniModalConfirmButtonTarget ? this.lniModalConfirmButtonTarget : null
+    if (button) button.disabled = true
+    this.setLniModalStatus("Saving…")
+
+    try {
+      const body = new FormData()
+      if (details.phone) body.append("discovery_business[phone]", details.phone)
+
+      const snapshot = this.businessSnapshotValue || {}
+      const currentVertical = (snapshot.vertical_classification || "").trim()
+      if (details.vertical_classification && !currentVertical) {
+        body.append("discovery_business[vertical_classification]", details.vertical_classification)
+      }
+
+      body.append("persist_score", "1")
+
+      const response = await fetch(this.updateUrlValue, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "X-CSRF-Token": this.csrfToken
+        },
+        body,
+        credentials: "same-origin"
+      })
+
+      const data = await response.json()
+      if (!data.ok) {
+        this.setLniModalStatus(data.message || "Save failed.")
+        this.setPageStatus(data.message || "Save failed.", false)
+        return
+      }
+
+      this.pendingLniDetails = null
+      this.lniModal?.close()
+      if (data.score_card_html) {
+        this.replaceScoreCard(data.score_card_html)
+        this.replaceCaptureSummary(data.capture_summary_html)
+      }
+      this.setPageStatus(data.message, true)
+      window.location.assign(data.redirect_url || window.location.href)
+    } catch (error) {
+      console.error("[Discovery WA L&I save]", error)
+      this.setLniModalStatus(`Save failed: ${error.message}`)
+      this.setPageStatus(`Save failed: ${error.message}`, false)
+    } finally {
+      if (button) button.disabled = false
+    }
+  }
+
+  handleLniModalClosed() {
+    this.pendingLniDetails = null
+    this.clearLniModalPanels()
+    this.showLniMatchesStep()
+    this.setLniModalTitle("Labor & Industry")
+    this.setLniModalStatus("")
+  }
+
+  renderLniMatches(data) {
+    if (!this.hasLniModalMatchesTarget) return
+
+    const results = data.results || []
+    if (!data.ok || !results.length) {
+      this.lniModalMatchesTarget.innerHTML = `
+        <p class="theme-text discovery-lni-modal-empty">
+          ${this.escapeHtml(data.message || "No L&I matches found for this business.")}
+        </p>
+        <p class="theme-text discovery-business-show-section-note">
+          L&I only lists licensed contractors and trades. Many SOS filings will not appear here.
+        </p>`
+      return
+    }
+
+    const rows = results
+      .map((result) => {
+        const name = this.escapeHtml(result.business_name || "Untitled")
+        const meta = this.escapeHtml(
+          [result.contractor_type, result.city, result.state, result.zip_code].filter(Boolean).join(" · ")
+        )
+        const status = this.escapeHtml(result.status || "—")
+        const ubiMatch = result.ubi_match ? `<span class="discovery-lni-ubi-match">UBI match</span>` : ""
+        const detailLink = result.detail_url
+          ? `<a href="${this.escapeHtml(result.detail_url)}" class="theme-text discovery-business-link" target="_blank" rel="noopener noreferrer">Open on L&I</a>`
+          : ""
+
+        return `
+          <div class="discovery-lni-match-item">
+            <button type="button"
+                    class="discovery-lni-match-row theme-text"
+                    data-action="click->discovery-business-show#selectLniMatch"
+                    data-ubi="${this.escapeHtml(result.ubi || "")}"
+                    data-license-id="${this.escapeHtml(result.license_id || "")}">
+              <div class="discovery-lni-match-name">${name} ${ubiMatch}</div>
+              <div class="discovery-lni-match-meta">${meta}</div>
+              <div class="discovery-lni-match-meta">Lic ${this.escapeHtml(result.license_id || "—")} · ${status}</div>
+            </button>
+            ${detailLink ? `<div class="discovery-lni-match-link">${detailLink}</div>` : ""}
+          </div>`
+      })
+      .join("")
+
+    this.lniModalMatchesTarget.innerHTML = `
+      <p class="theme-text discovery-business-show-section-note">
+        Searching for: <strong>${this.escapeHtml(data.query || "")}</strong>${data.city_filter ? ` · city on file: <strong>${this.escapeHtml(this.formatLniCity(data.city_filter))}</strong>` : ""}
+      </p>
+      <div class="discovery-lni-matches-wrap">
+        <div class="discovery-lni-matches-list">${rows}</div>
+      </div>`
+  }
+
+  renderLniDetails(details) {
+    if (!this.hasLniModalDetailsTarget) return
+
+    const current = this.currentEnrichmentValue || {}
+    const snapshot = this.businessSnapshotValue || {}
+    const currentPhone = this.normalizeValue(current.phone)
+    const nextPhone = this.normalizeValue(details.phone)
+    const currentVertical = (snapshot.vertical_classification || "").trim()
+    const inferredVertical = (details.vertical_classification || "").trim()
+    const willSavePhone = nextPhone !== "" && nextPhone !== currentPhone
+    const willSaveVertical = inferredVertical !== "" && currentVertical === ""
+
+    const rows = [
+      this.lniConfirmRow("Business", details.business_name),
+      this.lniConfirmRow("Phone", details.phone, {
+        willSave: willSavePhone,
+        currentValue: current.phone
+      }),
+      this.lniConfirmRow("Vertical", willSaveVertical ? inferredVertical : (currentVertical || inferredVertical), {
+        willSave: willSaveVertical,
+        currentValue: willSaveVertical ? currentVertical : null
+      }),
+      this.lniConfirmRow("Address", details.address)
+    ].join("")
+
+    const saveNote =
+      willSavePhone || willSaveVertical
+        ? `<p class="theme-text discovery-lni-confirm-note">Green values will be saved to this capture.</p>`
+        : ""
+
+    this.lniModalDetailsTarget.innerHTML = `
+      ${saveNote}
+      <dl class="discovery-business-detail-list discovery-lni-confirm-list">${rows}</dl>
+      ${details.detail_url ? `<p class="discovery-lni-confirm-link"><a href="${this.escapeHtml(details.detail_url)}" class="theme-text discovery-business-link" target="_blank" rel="noopener noreferrer">View full record on L&amp;I</a></p>` : ""}`
+  }
+
+  lniConfirmRow(label, value, { willSave = false, currentValue = null } = {}) {
+    const display = this.escapeHtml(this.displayValue(value))
+    const valueClass = willSave ? "discovery-places-value-new" : "theme-text"
+    const showCurrent =
+      currentValue != null &&
+      this.normalizeValue(currentValue) !== "" &&
+      this.normalizeValue(currentValue) !== this.normalizeValue(value)
+
+    const currentLine = showCurrent
+      ? `<div class="discovery-lni-confirm-current theme-text">Current: ${this.escapeHtml(this.displayValue(currentValue))}</div>`
+      : ""
+
+    return `
+      <div class="discovery-business-detail-row discovery-lni-confirm-row">
+        <dt class="theme-text">${this.escapeHtml(label)}</dt>
+        <dd>
+          ${currentLine}
+          <div class="${valueClass}">${display}</div>
+        </dd>
+      </div>`
+  }
+
+  showLniMatchesStep() {
+    if (this.hasLniModalMatchesTarget) this.lniModalMatchesTarget.hidden = false
+    if (this.hasLniModalDetailsTarget) {
+      this.lniModalDetailsTarget.hidden = true
+      this.lniModalDetailsTarget.innerHTML = ""
+    }
+    if (this.hasLniModalBackButtonTarget) this.lniModalBackButtonTarget.hidden = true
+    if (this.hasLniModalConfirmButtonTarget) this.lniModalConfirmButtonTarget.hidden = true
+  }
+
+  showLniDetailsStep() {
+    if (this.hasLniModalMatchesTarget) this.lniModalMatchesTarget.hidden = true
+    if (this.hasLniModalDetailsTarget) this.lniModalDetailsTarget.hidden = false
+    if (this.hasLniModalBackButtonTarget) this.lniModalBackButtonTarget.hidden = false
+    if (this.hasLniModalConfirmButtonTarget) this.lniModalConfirmButtonTarget.hidden = false
+  }
+
+  clearLniModalPanels() {
+    if (this.hasLniModalMatchesTarget) this.lniModalMatchesTarget.innerHTML = ""
+    if (this.hasLniModalDetailsTarget) this.lniModalDetailsTarget.innerHTML = ""
+  }
+
+  setLniModalTitle(title) {
+    const el = this.element.querySelector("#discoveryWaLniTitle")
+    if (el) el.textContent = title
+  }
+
+  setLniModalStatus(message) {
+    if (!this.hasLniModalStatusTarget) return
+    this.lniModalStatusTarget.textContent = message || ""
+  }
+
+  formatLniCity(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/\b[a-z]/g, (char) => char.toUpperCase())
   }
 }

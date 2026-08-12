@@ -28,14 +28,13 @@
           <% end %>
           <th scope="col" class="theme-text discovery-captured-phone">Phone</th>
           <th scope="col" class="theme-text discovery-captured-email">Email</th>
-          <th scope="col" class="theme-text discovery-captured-status">Status</th>
           <th scope="col" class="theme-text discovery-captured-score-col">Score</th>
           <th scope="col" class="theme-text discovery-captured-actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
         <% discovery_businesses.each do |business| %>
-          <tr class="discovery-results-row" id="discovery-business-<%= business.id %>">
+          <tr class="discovery-results-row<%= " discovery-results-row-waiting" if business.waiting? && !business.archived? %>" id="discovery-business-<%= business.id %>">
             <td class="theme-text discovery-captured-date"><%= l(business.created_at.to_date, format: :short) %></td>
             <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
               <% col_class = case column
@@ -48,13 +47,15 @@
               <td class="theme-text<%= col_class %>">
                 <% value = Discovery::Sources::WaSos::CsvParser.captured_business_value(business, column) %>
                 <% full_value = Discovery::Sources::WaSos::CsvParser.captured_business_value_full(business, column) %>
-                <% if column == "Business Name" && value.present? %>
-                  <%= link_to value, discovery_path(business), class: "theme-text discovery-business-link" %>
-                <% elsif column == Discovery::Sources::WaSos::CsvParser::OFFICE_ADDRESS_COLUMN && value.present? %>
-                  <span class="discovery-address-cell" tabindex="0">
-                    <span class="discovery-address-cell-short"><%= value %></span>
-                    <span class="discovery-address-cell-full" role="tooltip"><%= value %></span>
-                  </span>
+                <% if column == "Business Name" %>
+                  <%= render "captured_truncated_cell",
+                        value: value,
+                        full_value: full_value,
+                        link_url: value.present? ? discovery_path(business) : nil %>
+                <% elsif column == Discovery::Sources::WaSos::CsvParser::OFFICE_ADDRESS_COLUMN %>
+                  <%= render "captured_truncated_cell", value: value, full_value: full_value %>
+                <% elsif column == Discovery::Sources::WaSos::CsvParser::REGISTERED_AGENT_NAME_COLUMN %>
+                  <%= render "captured_truncated_cell", value: value, full_value: full_value %>
                 <% elsif column == "Business Type" && value.present? %>
                   <span class="discovery-captured-type-label" title="<%= full_value %>"><%= value %></span>
                 <% else %>
@@ -64,13 +65,6 @@
             <% end %>
             <td class="theme-text discovery-sos-phone"><%= business.phone.presence || "—" %></td>
             <td class="theme-text discovery-sos-email"><%= business.email.presence || "—" %></td>
-            <td class="theme-text discovery-captured-status">
-              <% if business.promoted? && business.customer_id.present? && potentials_enabled? %>
-                <%= link_to business.status_label, potentials_path(id: business.customer_id), class: "theme-text" %>
-              <% else %>
-                <%= business.status_label %>
-              <% end %>
-            </td>
             <td class="theme-text discovery-captured-score">
               <% if business.score_label.present? %>
                 <%= link_to business.score_label,
@@ -82,11 +76,17 @@
               <% end %>
             </td>
             <td class="theme-text discovery-captured-actions">
+              <div class="discovery-captured-actions-inner">
               <%= link_to "Refine",
                     discovery_path(business),
-                    class: "btn btn-sm discovery-refine-btn" %>
+                    class: "btn discovery-refine-btn" %>
 
               <% if business.archived? %>
+                <% if business.promoted? && business.customer_id.present? && potentials_enabled? %>
+                  <%= link_to "Potential",
+                        potentials_path(id: business.customer_id),
+                        class: "btn btn-default btn-sm theme-text discovery-potential-link-btn" %>
+                <% end %>
                 <button type="button"
                         class="btn btn-default btn-sm theme-text discovery-unarchive-btn"
                         data-action="click->discovery-sos-fetch#unarchiveBusiness"
@@ -95,14 +95,9 @@
                   Unarchive
                 </button>
               <% else %>
-                <button type="button"
-                        class="btn btn-default btn-sm theme-text discovery-archive-btn"
-                        data-action="click->discovery-sos-fetch#archiveBusiness"
-                        data-archive-url="<%= archive_discovery_path(business) %>"
-                        data-business-name="<%= business.business_name %>">
-                  Archive
-                </button>
+                <%= render "captured_queue_split_btn", business: business %>
               <% end %>
+              </div>
             </td>
           </tr>
         <% end %>

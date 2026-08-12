@@ -11,9 +11,13 @@ class DiscoveryController < ApplicationController
     :sync_to_potential,
     :archive,
     :unarchive,
+    :mark_waiting,
+    :clear_waiting,
     :destroy,
     :check_google_places,
     :select_google_place,
+    :check_wa_lni,
+    :select_wa_lni,
     :score,
     :score_card
   ]
@@ -360,6 +364,46 @@ class DiscoveryController < ApplicationController
     )
   end
 
+  def mark_waiting
+    authorize! :update, @discovery_business
+
+    @discovery_business.mark_waiting!
+    assign_captured_list_vars
+    @discovery_businesses = load_captured_businesses
+
+    render_archive_response(
+      ok: true,
+      message: "Marked #{@discovery_business.business_name} as Waiting."
+    )
+  rescue StandardError => e
+    Rails.logger.error("[Discovery mark waiting] #{e.class}: #{e.message}")
+    render_archive_response(
+      ok: false,
+      message: "Could not mark as Waiting: #{e.message}",
+      status: :internal_server_error
+    )
+  end
+
+  def clear_waiting
+    authorize! :update, @discovery_business
+
+    @discovery_business.clear_waiting!
+    assign_captured_list_vars
+    @discovery_businesses = load_captured_businesses
+
+    render_archive_response(
+      ok: true,
+      message: "Cleared Waiting on #{@discovery_business.business_name}."
+    )
+  rescue StandardError => e
+    Rails.logger.error("[Discovery clear waiting] #{e.class}: #{e.message}")
+    render_archive_response(
+      ok: false,
+      message: "Could not clear Waiting: #{e.message}",
+      status: :internal_server_error
+    )
+  end
+
   def destroy
     authorize! :destroy, @discovery_business
 
@@ -450,6 +494,65 @@ class DiscoveryController < ApplicationController
     render json: {
       ok: false,
       message: "Google Places details failed: #{e.message}"
+    }, status: :internal_server_error
+  end
+
+  def check_wa_lni
+    authorize! :update, @discovery_business
+
+    unless @discovery_business.source == DiscoveryBusiness::SOURCE_WA_SOS
+      return render json: {
+        ok: false,
+        message: "L&I lookup is available for WA SOS captures only."
+      }, status: :unprocessable_entity
+    end
+
+    result = Discovery::WaLniVerifyLookup.search(discovery_business: @discovery_business)
+
+    Rails.logger.info(
+      "[Discovery WA L&I search] business=#{@discovery_business.id} ok=#{result.ok} " \
+      "query=#{result.query.inspect} matches=#{result.results.size}"
+    )
+
+    render json: {
+      ok: result.ok,
+      message: result.message,
+      query: result.query,
+      city_filter: result.city_filter,
+      search_by: result.search_by,
+      results: result.results
+    }, status: result.ok ? :ok : :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error("[Discovery WA L&I search] #{e.class}: #{e.message}")
+    render json: {
+      ok: false,
+      message: "L&I search failed: #{e.message}"
+    }, status: :internal_server_error
+  end
+
+  def select_wa_lni
+    authorize! :update, @discovery_business
+
+    result = Discovery::WaLniVerifyLookup.details(
+      ubi: params[:ubi],
+      license: params[:license_id]
+    )
+
+    Rails.logger.info(
+      "[Discovery WA L&I details] business=#{@discovery_business.id} ok=#{result.ok} " \
+      "ubi=#{params[:ubi].inspect} license=#{params[:license_id].inspect}"
+    )
+
+    render json: {
+      ok: result.ok,
+      message: result.message,
+      details: result.details
+    }, status: result.ok ? :ok : :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error("[Discovery WA L&I details] #{e.class}: #{e.message}")
+    render json: {
+      ok: false,
+      message: "L&I details failed: #{e.message}"
     }, status: :internal_server_error
   end
 
@@ -698,7 +801,8 @@ class DiscoveryController < ApplicationController
         discovery_businesses: @discovery_businesses || load_captured_businesses,
         captured_view: @captured_view,
         archive_filter: @archive_filter,
-        hide_archived: @hide_archived
+        hide_archived: @hide_archived,
+        captured_sort: @captured_sort
       },
       formats: [:html]
     )
@@ -780,7 +884,8 @@ class DiscoveryController < ApplicationController
       stats_period: @stats_period,
       captured_view: @captured_view,
       hide_archived: @hide_archived,
-      archive_filter: @archive_filter
+      archive_filter: @archive_filter,
+      captured_sort: @captured_sort
     }.merge(overrides).compact
   end
 
@@ -793,13 +898,16 @@ class DiscoveryController < ApplicationController
                      end
     @archive_filter = params[:archive_filter].presence_in(DiscoveryBusiness::ARCHIVE_FILTERS) ||
                       DiscoveryBusiness::ARCHIVE_FILTER_ALL
+    @captured_sort = params[:captured_sort].presence_in(DiscoveryBusiness::CAPTURED_SORTS) ||
+                     DiscoveryBusiness::CAPTURED_SORT_DATE
   end
 
   def load_captured_businesses
     DiscoveryBusiness.for_captured_list(
       view: @captured_view,
       hide_archived: @hide_archived,
-      archive_filter: @archive_filter
+      archive_filter: @archive_filter,
+      captured_sort: @captured_sort
     )
   end
 

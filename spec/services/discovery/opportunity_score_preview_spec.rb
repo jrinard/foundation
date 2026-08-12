@@ -34,6 +34,14 @@ RSpec.describe Discovery::OpportunityScorePreview do
     preview[:fit_lines].find { |l| l.key == :new_business }
   end
 
+  def contact_phone_line(preview)
+    preview[:fit_lines].find { |l| l.key == :contact_phone }
+  end
+
+  def contact_email_line(preview)
+    preview[:fit_lines].find { |l| l.key == :contact_email }
+  end
+
   def places_line(preview)
     reputation_pillar(preview).lines.find { |l| l.key == :no_places }
   end
@@ -236,6 +244,39 @@ RSpec.describe Discovery::OpportunityScorePreview do
 
     expect(foundation[:parts].all? { |part| part[:accounted] }).to be(true)
     expect(foundation[:analyzed]).to be(true)
+  end
+
+  it "awards 100 contact fit points when phone is on file" do
+    preview = preview_for(phone: "360-555-0100", created_at: 40.days.ago)
+    phone_line = contact_phone_line(preview)
+    email_line = contact_email_line(preview)
+
+    expect(phone_line.status).to eq(:gap)
+    expect(phone_line.points).to eq(100)
+    expect(email_line.points).to eq(0)
+    expect(preview[:fit_total]).to eq(100)
+    expect(preview[:fit_max]).to eq(200)
+  end
+
+  it "awards 100 contact fit points when email is on file" do
+    preview = preview_for(email: "owner@example.com", created_at: 40.days.ago)
+    email_line = contact_email_line(preview)
+
+    expect(email_line.status).to eq(:gap)
+    expect(email_line.points).to eq(100)
+    expect(preview[:fit_total]).to eq(100)
+  end
+
+  it "caps contact fit at 100 when both phone and email are on file" do
+    preview = preview_for(
+      phone: "360-555-0100",
+      email: "owner@example.com",
+      created_at: 40.days.ago
+    )
+
+    expect(contact_phone_line(preview).points).to eq(100)
+    expect(contact_email_line(preview).points).to eq(100)
+    expect(preview[:fit_total]).to eq(100)
   end
 
   it "awards 100 new-business fit points inside 2 weeks and shows capture date" do

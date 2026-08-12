@@ -1,10 +1,28 @@
 <div class="discovery-captured-header">
   <h2 class="settings-title discovery-results-title discovery-captured-title"
       data-discovery-sos-fetch-target="capturedTitle">
-    <span data-discovery-sos-fetch-target="capturedTitleLabel"><%= captured_view == "archived" ? "Archived Businesses" : "Captured Businesses" %></span><span class="discovery-captured-count theme-text" data-discovery-sos-fetch-target="capturedCount">(<%= discovery_businesses.size %>)</span>
+    <span class="discovery-captured-title-main">
+      <span data-discovery-sos-fetch-target="capturedTitleLabel"><%= captured_view == "archived" ? "Archived Businesses" : "Captured Businesses" %></span><span class="discovery-captured-count theme-text" data-discovery-sos-fetch-target="capturedCount">(<%= discovery_businesses.size %>)</span>
+    </span>
   </h2>
 
   <div class="discovery-captured-controls">
+    <div class="discovery-captured-sort-wrap">
+      <%= label_tag :captured_sort, "Sort by", class: "theme-text discovery-captured-sort-label" %>
+      <%= select_tag :captured_sort,
+            options_for_select(
+              DiscoveryBusiness::CAPTURED_SORTS.map { |key|
+                [DiscoveryBusiness::CAPTURED_SORT_LABELS.fetch(key), key]
+              },
+              captured_sort
+            ),
+            class: "form-control theme-field discovery-captured-sort",
+            data: {
+              discovery_sos_fetch_target: "capturedSort",
+              action: "change->discovery-sos-fetch#refreshCapturedList"
+            } %>
+    </div>
+
     <label class="discovery-hide-archived-label theme-text<%= " is-hidden" if captured_view == "archived" %>"
            data-discovery-sos-fetch-target="hideArchivedLabel">
       <%= check_box_tag :hide_archived, "1", hide_archived,
@@ -52,5 +70,6 @@
         discovery_businesses: discovery_businesses,
         captured_view: captured_view,
         archive_filter: archive_filter,
-        hide_archived: hide_archived %>
+        hide_archived: hide_archived,
+        captured_sort: captured_sort %>
 </div>

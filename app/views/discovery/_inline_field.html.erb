@@ -5,9 +5,10 @@
 <% check_status = local_assigns.fetch(:check_status, "unchecked").to_s.presence || "unchecked" %>
 <% refresh_score = local_assigns.fetch(:refresh_score, false) %>
 <% rating_count = local_assigns[:rating_count] %>
+<% highlight_present = local_assigns.fetch(:highlight_present, false) && value.present? %>
 <% empty = "—" %>
 
-<div class="discovery-show-field discovery-show-field-checked discovery-inline-field"
+<div class="discovery-show-field discovery-show-field-checked discovery-inline-field<%= " discovery-inline-field-has-value" if highlight_present %>"
      data-controller="discovery-inline-field"
      data-discovery-inline-field-update-url-value="<%= update_url %>"
      data-discovery-inline-field-param-value="<%= param %>"

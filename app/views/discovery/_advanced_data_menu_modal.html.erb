@@ -1,0 +1,35 @@
+<%# locals: business %>
+<%
+  business = local_assigns[:business]
+  show_lni = business.present? && business.source == DiscoveryBusiness::SOURCE_WA_SOS
+%>
+<%= foundation_modal modal_id: "discoveryAdvancedDataMenu", title: "Advanced data", size: :sm,
+      dialog_class: "discovery-advanced-data-menu-modal" do %>
+  <p class="theme-text discovery-advanced-data-menu-note">
+    Choose an alternate enrichment source.
+  </p>
+
+  <div class="discovery-advanced-data-menu-options">
+    <button type="button"
+            class="btn discovery-advanced-data-menu-option theme-text"
+            data-advanced-data-option="legacy"
+            data-action="click->discovery-business-show#runAdvancedDataMenuOption">
+      <span class="discovery-advanced-data-menu-option-label">Legacy</span>
+      <span class="discovery-advanced-data-menu-option-note">Google Places legacy API</span>
+    </button>
+
+    <% if show_lni %>
+      <button type="button"
+              class="btn discovery-advanced-data-menu-option theme-text"
+              data-advanced-data-option="lni"
+              data-action="click->discovery-business-show#runAdvancedDataMenuOption">
+        <span class="discovery-advanced-data-menu-option-label">Labor &amp; Industry</span>
+        <span class="discovery-advanced-data-menu-option-note">WA L&amp;I business lookup — phone, license &amp; vertical</span>
+      </button>
+    <% end %>
+  </div>
+
+  <%= foundation_modal_footer do %>
+    <%= foundation_modal_close_button "Cancel", class: "discovery-page-btn" %>
+  <% end %>
+<% end %>

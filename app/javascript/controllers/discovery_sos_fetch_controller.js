@@ -22,6 +22,7 @@ export default class extends Controller {
     "archiveFilter",
     "archiveFilterWrap",
     "archivedViewBtn",
+    "capturedSort",
     "runs",
     "editForm",
     "editBusinessName",
@@ -30,7 +31,16 @@ export default class extends Controller {
     "editEmail",
     "editGooglePlaceId",
     "businessSearchInput",
-    "businessSearchSubmit"
+    "businessSearchSubmit",
+    "queueBusinessName",
+    "queuePhone",
+    "queueEmail",
+    "queueCapturedDate",
+    "queueScore",
+    "queueState",
+    "queueArchiveBtn",
+    "queueWaitingBtn",
+    "queueClearWaitingBtn"
   ]
 
   static values = {
@@ -40,7 +50,8 @@ export default class extends Controller {
     capturedListUrl: String,
     capturedView: { type: String, default: "working" },
     hideArchived: { type: Boolean, default: true },
-    archiveFilter: { type: String, default: "all" }
+    archiveFilter: { type: String, default: "all" },
+    capturedSort: { type: String, default: "date" }
   }
 
   connect() {
@@ -184,6 +195,9 @@ export default class extends Controller {
     if (this.hasArchiveFilterTarget) {
       this.archiveFilterValue = this.archiveFilterTarget.value || "all"
     }
+    if (this.hasCapturedSortTarget) {
+      this.capturedSortValue = this.capturedSortTarget.value || "date"
+    }
 
     try {
       const response = await fetch(this.withCapturedListParams(this.capturedListUrlValue), {
@@ -206,18 +220,6 @@ export default class extends Controller {
     }
   }
 
-  async archiveBusiness(event) {
-    event.preventDefault()
-    const button = event.currentTarget
-    const url = button.dataset.archiveUrl
-    if (!url) return
-
-    const businessName = button.dataset.businessName || "this business"
-    if (!window.confirm(`Archive "${businessName}"? It will leave the working Captured list.`)) return
-
-    await this.postCapturedAction(url, button, "Archive failed")
-  }
-
   async unarchiveBusiness(event) {
     event.preventDefault()
     const button = event.currentTarget
@@ -225,6 +227,87 @@ export default class extends Controller {
     if (!url) return
 
     await this.postCapturedAction(url, button, "Unarchive failed")
+  }
+
+  openCapturedQueueModal(event) {
+    const button = event.currentTarget
+    const { dataset } = button
+
+    this.queueArchiveUrl = dataset.archiveUrl || ""
+    this.queueMarkWaitingUrl = dataset.markWaitingUrl || ""
+    this.queueClearWaitingUrl = dataset.clearWaitingUrl || ""
+
+    if (this.hasQueueBusinessNameTarget) {
+      this.queueBusinessNameTarget.textContent = dataset.queueBusinessName || "—"
+    }
+    if (this.hasQueuePhoneTarget) {
+      this.queuePhoneTarget.textContent = dataset.queuePhone || "—"
+    }
+    if (this.hasQueueEmailTarget) {
+      this.queueEmailTarget.textContent = dataset.queueEmail || "—"
+    }
+    if (this.hasQueueCapturedDateTarget) {
+      this.queueCapturedDateTarget.textContent = dataset.queueCapturedDate || "—"
+    }
+    if (this.hasQueueScoreTarget) {
+      this.queueScoreTarget.textContent = dataset.queueScore || "—"
+    }
+
+    const waiting = dataset.queueWaiting === "1"
+    if (this.hasQueueStateTarget) {
+      this.queueStateTarget.textContent = waiting ? "Waiting" : "Active"
+    }
+
+    this.syncQueueActionButtons(waiting, dataset.queueIntent)
+  }
+
+  syncQueueActionButtons(waiting, intent) {
+    const show = (target, visible) => {
+      if (!target) return
+      target.classList.toggle("is-hidden", !visible)
+      target.classList.remove("is-primary")
+    }
+
+    show(this.hasQueueArchiveBtnTarget ? this.queueArchiveBtnTarget : null, true)
+    show(this.hasQueueWaitingBtnTarget ? this.queueWaitingBtnTarget : null, !waiting)
+    show(this.hasQueueClearWaitingBtnTarget ? this.queueClearWaitingBtnTarget : null, waiting)
+
+    const intentMap = {
+      archive: this.queueArchiveBtnTarget,
+      waiting: this.queueWaitingBtnTarget,
+      clear_waiting: this.queueClearWaitingBtnTarget
+    }
+    const primary = intentMap[intent]
+    if (primary) primary.classList.add("is-primary")
+  }
+
+  submitQueueArchive(event) {
+    event.preventDefault()
+    if (!this.queueArchiveUrl) return
+
+    this.postCapturedAction(this.queueArchiveUrl, event.currentTarget, "Archive failed")
+  }
+
+  submitQueueWaiting(event) {
+    event.preventDefault()
+    if (!this.queueMarkWaitingUrl) return
+
+    this.postCapturedAction(this.queueMarkWaitingUrl, event.currentTarget, "Could not mark as Waiting")
+  }
+
+  submitQueueClearWaiting(event) {
+    event.preventDefault()
+    if (!this.queueClearWaitingUrl) return
+
+    this.postCapturedAction(this.queueClearWaitingUrl, event.currentTarget, "Could not clear Waiting")
+  }
+
+  closeQueueModal() {
+    const modalController = this.application.getControllerForElementAndIdentifier(
+      this.element,
+      "foundation-modal"
+    )
+    modalController?.close()
   }
 
   skipResultRow(event) {
@@ -357,6 +440,7 @@ export default class extends Controller {
     next.searchParams.set("captured_view", this.capturedViewValue || "working")
     next.searchParams.set("hide_archived", this.hideArchivedValue ? "1" : "0")
     next.searchParams.set("archive_filter", this.archiveFilterValue || "all")
+    next.searchParams.set("captured_sort", this.capturedSortValue || "date")
     return next.toString()
   }
 
@@ -364,7 +448,8 @@ export default class extends Controller {
     return {
       captured_view: this.capturedViewValue || "working",
       hide_archived: this.hideArchivedValue ? "1" : "0",
-      archive_filter: this.archiveFilterValue || "all"
+      archive_filter: this.archiveFilterValue || "all",
+      captured_sort: this.capturedSortValue || "date"
     }
   }
 

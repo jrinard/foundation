@@ -48,9 +48,13 @@ Rails.application.routes.draw do
       post :sync_to_potential
       post :archive
       post :unarchive
+      post :mark_waiting
+      post :clear_waiting
       delete :destroy
       post :check_google_places
       post :select_google_place
+      post :check_wa_lni
+      post :select_wa_lni
       post :score
       get :score_card
     end

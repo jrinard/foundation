@@ -1,0 +1,40 @@
+<%# locals: business %>
+<%
+  queue_action = "click->discovery-sos-fetch#openCapturedQueueModal click->foundation-modal#open"
+  queue_data = {
+    archive_url: archive_discovery_path(business),
+    mark_waiting_url: mark_waiting_discovery_path(business),
+    clear_waiting_url: clear_waiting_discovery_path(business),
+    queue_business_name: business.business_name,
+    queue_phone: business.phone.presence || "—",
+    queue_email: business.email.presence || "—",
+    queue_captured_date: l(business.created_at.to_date, format: :short),
+    queue_score: business.score_label.presence || "—",
+    queue_waiting: business.waiting? ? "1" : "0"
+  }
+%>
+<div class="discovery-split-btn is-default-theme is-captured-queue<%= " is-waiting" if business.waiting? %>">
+  <button type="button"
+          class="btn btn-default theme-text discovery-split-btn-main"
+          data-action="<%= queue_action %>"
+          aria-controls="discoveryCapturedQueue"
+          aria-expanded="false"
+          data-queue-intent="<%= business.waiting? ? "clear_waiting" : "archive" %>"
+          <% queue_data.each do |key, value| %>
+          data-<%= key.to_s.dasherize %>="<%= ERB::Util.html_escape(value) %>"
+          <% end %>>
+    <%= business.waiting? ? "Waiting" : "Archive" %>
+  </button>
+  <button type="button"
+          class="btn btn-default theme-text discovery-split-btn-cog"
+          data-action="<%= queue_action %>"
+          aria-controls="discoveryCapturedQueue"
+          aria-expanded="false"
+          data-queue-intent="<%= business.waiting? ? "archive" : "waiting" %>"
+          <% queue_data.each do |key, value| %>
+          data-<%= key.to_s.dasherize %>="<%= ERB::Util.html_escape(value) %>"
+          <% end %>
+          aria-label="Queue options for <%= business.business_name %>">
+    &#9881;
+  </button>
+</div>

@@ -44,10 +44,23 @@
     social_mark_missing_keys.include?(line.key.to_sym) &&
     line.status != :gap
   mark_missing_field = mark_missing&.dig(:field)
+  website_url = business&.website.to_s.strip.presence
+  website_label_link = line.key.to_sym == :no_website && website_url.present?
 %>
 <li class="discovery-score-card-row is-<%= line.status %>">
   <div class="discovery-score-card-row-main">
-    <span class="discovery-score-card-label theme-text"><%= line.label %></span>
+    <span class="discovery-score-card-label theme-text">
+      <% if website_label_link %>
+        <%= link_to line.label,
+              website_url,
+              class: "discovery-business-link theme-text",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              title: "Open website in new tab" %>
+      <% else %>
+        <%= line.label %>
+      <% end %>
+    </span>
 
     <div class="discovery-score-card-row-controls">
       <% if show_foundation_qualify %>

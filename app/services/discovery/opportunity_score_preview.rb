@@ -113,8 +113,12 @@ module Discovery
     ].freeze
 
     FIT_RULES = [
+      { key: :contact_phone, label: "Phone number", points: 100 },
+      { key: :contact_email, label: "Email", points: 100 },
       { key: :new_business, label: "New / recently captured", points: 100 }
     ].freeze
+    CONTACT_OUTREACH_POINTS = 100
+    CONTACT_FIT_KEYS = %i[contact_phone contact_email].freeze
     NEW_BUSINESS_WINDOW = 30.days
     NEW_BUSINESS_FRESH_WINDOW = 14.days
     NEW_BUSINESS_MID_POINTS = 50
@@ -138,8 +142,9 @@ module Discovery
       pillars = PILLARS.map { |pillar| build_pillar(pillar) }
       pillars_by_key = pillars.index_by(&:key)
       fit_lines = FIT_RULES.map { |rule| build_fit_line(rule) }
-      fit_total = fit_lines.select(&:awarded?).sum(&:points)
-      fit_max = FIT_RULES.sum { |rule| rule[:points] }
+      fit_total = fit_lines.reject { |line| CONTACT_FIT_KEYS.include?(line.key) }.select(&:awarded?).sum(&:points) +
+        contact_outreach_points
+      fit_max = FIT_RULES.sum { |rule| rule[:points] } - CONTACT_OUTREACH_POINTS
 
       package_total = pillars.sum(&:total)
       package_max = pillars.sum(&:max_total)
@@ -301,8 +306,34 @@ module Discovery
 
     def evaluate_fit(key, max_points = 0)
       case key
+      when :contact_phone then contact_phone_fit(max_points)
+      when :contact_email then contact_email_fit(max_points)
       when :new_business then new_business_fit(max_points)
       else [0, nil]
+      end
+    end
+
+    def contact_outreach_points
+      return CONTACT_OUTREACH_POINTS if @business.phone.present? || @business.email.present?
+
+      0
+    end
+
+    def contact_phone_fit(max_points)
+      phone = @business.phone.to_s.strip
+      if phone.present?
+        [max_points, phone]
+      else
+        [0, "No phone on file — use Check search or Advanced Place Data"]
+      end
+    end
+
+    def contact_email_fit(max_points)
+      email = @business.email.to_s.strip
+      if email.present?
+        [max_points, email]
+      else
+        [0, "No email on file — use Check search or enrichment"]
       end
     end
 
@@ -332,7 +363,7 @@ module Discovery
     def weak_brand(default_label, max_points)
       case brand_status
       when STATUS_UNCHECKED
-        [:unchecked, "Qualify logo / brand — select Needs checked, NA, or Sell", default_label, 0]
+        [:unchecked, "Qualify logo / brand", default_label, 0]
       when STATUS_MISSING
         [:gap, "Sell logo / brand refresh", "Logo / brand refresh opportunity", foundation_refresh_points(max_points)]
       else
@@ -356,9 +387,9 @@ module Discovery
       when STATUS_UNCHECKED
         detail =
           if @business.website.present?
-            "Qualify website on file — select Needs checked, NA, or Sell"
+            "Qualify website on file"
           else
-            "Qualify website — select Needs checked, NA, or Sell"
+            "Qualify website"
           end
         [:unchecked, detail, default_label, 0]
       when STATUS_MISSING
@@ -392,7 +423,7 @@ module Discovery
       else
         case hosting_status
         when STATUS_UNCHECKED
-          [:unchecked, "Qualify hosting & maintenance — select Needs checked, NA, or Sell", default_label, 0]
+          [:unchecked, "Qualify hosting & maintenance", default_label, 0]
         when STATUS_MISSING
           [:gap, "Sell hosting & maintenance service package", default_label, max_points]
         else

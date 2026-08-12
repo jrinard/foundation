@@ -56,6 +56,24 @@ class DiscoveryBusiness < ApplicationRecord
     ARCHIVE_FILTER_POTENTIALS
   ].freeze
 
+  CAPTURED_SORT_DATE = "date"
+  CAPTURED_SORT_NAME = "name"
+  CAPTURED_SORT_EMAIL = "email"
+  CAPTURED_SORT_PHONE = "phone"
+  CAPTURED_SORTS = [
+    CAPTURED_SORT_DATE,
+    CAPTURED_SORT_NAME,
+    CAPTURED_SORT_EMAIL,
+    CAPTURED_SORT_PHONE
+  ].freeze
+
+  CAPTURED_SORT_LABELS = {
+    CAPTURED_SORT_DATE => "Date",
+    CAPTURED_SORT_NAME => "Name",
+    CAPTURED_SORT_EMAIL => "Has email",
+    CAPTURED_SORT_PHONE => "Has phone"
+  }.freeze
+
   scope :recent_first, -> { order(created_at: :desc) }
   scope :not_archived, -> { where(archived: false) }
   scope :archived_only, -> { where(archived: true) }
@@ -67,8 +85,13 @@ class DiscoveryBusiness < ApplicationRecord
     ubi.to_s.gsub(/\D/, "")
   end
 
-  def self.for_captured_list(view:, hide_archived: true, archive_filter: ARCHIVE_FILTER_ALL)
-    scope = recent_first
+  def self.for_captured_list(
+    view:,
+    hide_archived: true,
+    archive_filter: ARCHIVE_FILTER_ALL,
+    captured_sort: CAPTURED_SORT_DATE
+  )
+    scope = all
 
     if view.to_s == "archived"
       scope = scope.archived_only
@@ -82,23 +105,65 @@ class DiscoveryBusiness < ApplicationRecord
       scope = scope.working
     end
 
-    scope
+    apply_captured_sort(scope, captured_sort)
+  end
+
+  def self.apply_captured_sort(scope, captured_sort)
+    case captured_sort.to_s
+    when CAPTURED_SORT_NAME
+      scope.order(Arel.sql("LOWER(business_name) ASC"), created_at: :desc)
+    when CAPTURED_SORT_EMAIL
+      scope.order(
+        Arel.sql("CASE WHEN COALESCE(NULLIF(TRIM(email), ''), NULL) IS NULL THEN 1 ELSE 0 END"),
+        created_at: :desc
+      )
+    when CAPTURED_SORT_PHONE
+      scope.order(
+        Arel.sql("CASE WHEN COALESCE(NULLIF(TRIM(phone), ''), NULL) IS NULL THEN 1 ELSE 0 END"),
+        created_at: :desc
+      )
+    else
+      scope.recent_first
+    end
   end
 
   def captured_on
     created_at
   end
 
+  def captured_age_label
+    days = (Date.current - created_at.to_date).to_i
+    case days
+    when 0 then "today"
+    when 1 then "1 day ago"
+    else "#{days} days ago"
+    end
+  end
+
   def status_label
     STATUS_LABELS.fetch(status, status.to_s.humanize)
   end
 
+  def list_status_label
+    return status_label if promoted?
+
+    waiting? && !archived? ? "Waiting" : status_label
+  end
+
   def archive!
-    update!(archived: true)
+    update!(archived: true, waiting: false)
   end
 
   def unarchive!
     update!(archived: false)
+  end
+
+  def mark_waiting!
+    update!(waiting: true, archived: false)
+  end
+
+  def clear_waiting!
+    update!(waiting: false)
   end
 
   def promotable?
@@ -130,6 +195,10 @@ class DiscoveryBusiness < ApplicationRecord
 
   def live_score_preview
     Discovery::OpportunityScorePreview.call(discovery_business: self)
+  end
+
+  def google_search_url(intent: :contact)
+    Discovery::BusinessGoogleSearch.call(discovery_business: self, intent: intent)
   end
 
   # Canonical field bag for inline detail edits — column values, merged client-side on each save.

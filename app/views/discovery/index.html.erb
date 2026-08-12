@@ -6,7 +6,8 @@
      data-discovery-sos-fetch-captured-list-url-value="<%= captured_list_discovery_index_path %>"
      data-discovery-sos-fetch-captured-view-value="<%= @captured_view %>"
      data-discovery-sos-fetch-hide-archived-value="<%= @hide_archived %>"
-     data-discovery-sos-fetch-archive-filter-value="<%= @archive_filter %>">
+     data-discovery-sos-fetch-archive-filter-value="<%= @archive_filter %>"
+     data-discovery-sos-fetch-captured-sort-value="<%= @captured_sort %>">
   <div class="discovery-header-wrap shift-down30">
     <%= foundation_modal_wrapper controllers: "discovery-sos-page foundation-modal",
           class: "customer-note-report support-white-card-theme discovery-page discovery-header" do %>
@@ -112,7 +113,10 @@
             discovery_businesses: @discovery_businesses,
             captured_view: @captured_view,
             archive_filter: @archive_filter,
-            hide_archived: @hide_archived %>
+            hide_archived: @hide_archived,
+            captured_sort: @captured_sort %>
     </div>
   </div>
+
+  <%= render "captured_queue_modal" %>
 </div>

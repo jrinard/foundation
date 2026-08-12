@@ -1,0 +1,56 @@
+<%= foundation_modal modal_id: "discoveryCapturedQueue", title: "Captured business", size: :md,
+      dialog_class: "discovery-captured-queue-modal" do %>
+  <p class="discovery-modal-note theme-text discovery-captured-queue-lead">
+    Update queue status or review contact signals before outreach.
+  </p>
+
+  <h5 class="discovery-captured-queue-name theme-text" data-discovery-sos-fetch-target="queueBusinessName"></h5>
+
+  <dl class="discovery-captured-queue-stats theme-text">
+    <div class="discovery-captured-queue-stat">
+      <dt>Phone</dt>
+      <dd data-discovery-sos-fetch-target="queuePhone">—</dd>
+    </div>
+    <div class="discovery-captured-queue-stat">
+      <dt>Email</dt>
+      <dd data-discovery-sos-fetch-target="queueEmail">—</dd>
+    </div>
+    <div class="discovery-captured-queue-stat">
+      <dt>Captured</dt>
+      <dd data-discovery-sos-fetch-target="queueCapturedDate">—</dd>
+    </div>
+    <div class="discovery-captured-queue-stat">
+      <dt>Score</dt>
+      <dd data-discovery-sos-fetch-target="queueScore">—</dd>
+    </div>
+    <div class="discovery-captured-queue-stat">
+      <dt>Queue</dt>
+      <dd data-discovery-sos-fetch-target="queueState">—</dd>
+    </div>
+  </dl>
+
+  <%= foundation_modal_footer do %>
+    <%= foundation_modal_close_button "Cancel", class: "btn btn-default theme-text" %>
+
+    <button type="button"
+            class="btn btn-warning discovery-captured-queue-action is-hidden"
+            data-discovery-sos-fetch-target="queueClearWaitingBtn"
+            data-action="click->discovery-sos-fetch#submitQueueClearWaiting">
+      Return to active
+    </button>
+
+    <button type="button"
+            class="btn btn-warning discovery-captured-queue-action is-hidden"
+            data-discovery-sos-fetch-target="queueWaitingBtn"
+            data-action="click->discovery-sos-fetch#submitQueueWaiting">
+      Mark as Waiting
+    </button>
+
+    <button type="button"
+            class="btn btn-warning discovery-captured-queue-action is-hidden"
+            data-discovery-sos-fetch-target="queueArchiveBtn"
+            data-action="click->discovery-sos-fetch#submitQueueArchive">
+      Archive
+    </button>
+  <% end %>
+<% end %>

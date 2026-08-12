@@ -37,6 +37,7 @@ class ApplicationController < ActionController::Base
   # Nav badge counts + shared customer scopes (org-scoped in §12.1).
   def get_customers
     refresh_customer_scope_ivars!
+    refresh_discovery_nav_count!
   end
 
   def refresh_customer_scope_ivars!
@@ -48,6 +49,15 @@ class ApplicationController < ActionController::Base
     @count_potential = Customer.potential_customers
     @count_lead = Customer.lead_customers
     @count_archived = Customer.archived_customers
+  end
+
+  def refresh_discovery_nav_count!
+    @count_discovery_captured =
+      if current_organization&.discovery_enabled?
+        DiscoveryBusiness.working
+      else
+        DiscoveryBusiness.none
+      end
   end
 
   def current_organization

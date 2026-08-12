@@ -1,0 +1,16 @@
+<%# locals: value, full_value: nil, link_url: nil %>
+<% if value.blank? %>
+  —
+<% else %>
+  <% tooltip = full_value.presence || value %>
+  <span class="discovery-address-cell" tabindex="0">
+    <% if local_assigns[:link_url].present? %>
+      <%= link_to value,
+            link_url,
+            class: "theme-text discovery-business-link discovery-address-cell-short" %>
+    <% else %>
+      <span class="discovery-address-cell-short"><%= value %></span>
+    <% end %>
+    <span class="discovery-address-cell-full" role="tooltip"><%= tooltip %></span>
+  </span>
+<% end %>

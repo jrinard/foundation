@@ -15,6 +15,8 @@
        data-action="foundation-qualify-select:saved@window->discovery-business-show#refreshScoreCard foundation-qualify-select:error@window->discovery-business-show#handleToggleError foundation-toggle:saved@window->discovery-business-show#refreshScoreCard foundation-toggle:error@window->discovery-business-show#handleToggleError discovery-inline-field:saved@window->discovery-business-show#handleInlineFieldSaved discovery-inline-field:error@window->discovery-business-show#handleInlineFieldError"
        data-discovery-business-show-google-places-url-value="<%= check_google_places_discovery_path(business) %>"
        data-discovery-business-show-select-google-place-url-value="<%= select_google_place_discovery_path(business) %>"
+       data-discovery-business-show-wa-lni-search-url-value="<%= check_wa_lni_discovery_path(business) %>"
+       data-discovery-business-show-wa-lni-details-url-value="<%= select_wa_lni_discovery_path(business) %>"
        data-discovery-business-show-update-url-value="<%= update_captured_business_discovery_path(business) %>"
        data-discovery-business-show-score-url-value="<%= score_discovery_path(business) %>"
        data-discovery-business-show-score-card-url-value="<%= score_card_discovery_path(business) %>"
@@ -29,6 +31,7 @@
             <h1 class="settings-title discovery-business-show-title"><%= business.business_name %></h1>
             <p class="theme-text discovery-business-show-meta">
               Captured <%= l(business.created_at.to_date, format: :long) %>
+              <span class="discovery-business-captured-age"><%= business.captured_age_label %></span>
               <% if business.vertical_classification.present? %>
                 · <%= business.vertical_classification %>
               <% end %>
@@ -150,6 +153,7 @@
                     param: :phone,
                     value: business.phone,
                     input_type: :tel,
+                    highlight_present: true,
                     verified: business.field_verified?(:phone) %>
               <%= render "inline_field",
                     business: business,
@@ -158,6 +162,7 @@
                     param: :email,
                     value: business.email,
                     input_type: :email,
+                    highlight_present: true,
                     verified: business.field_verified?(:email) %>
               <%= render "inline_field",
                     business: business,
@@ -311,6 +316,16 @@
     <%= foundation_modal_wrapper class: "discovery-places-modal-host",
           data: { discovery_business_show_target: "placesModalHost" } do %>
       <%= render "google_places_modal" %>
+    <% end %>
+
+    <%= foundation_modal_wrapper class: "discovery-advanced-data-menu-host",
+          data: { discovery_business_show_target: "advancedDataMenuHost" } do %>
+      <%= render "advanced_data_menu_modal", business: business %>
+    <% end %>
+
+    <%= foundation_modal_wrapper class: "discovery-lni-modal-host",
+          data: { discovery_business_show_target: "lniModalHost" } do %>
+      <%= render "wa_lni_modal" %>
     <% end %>
 
     <%= foundation_modal_wrapper class: "discovery-edit-modal-host",
