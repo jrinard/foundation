@@ -55,6 +55,7 @@ Rails.application.routes.draw do
       post :select_google_place
       post :check_wa_lni
       post :select_wa_lni
+      post :check_website_contacts
       post :score
       get :score_card
     end

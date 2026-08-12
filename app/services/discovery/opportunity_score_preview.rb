@@ -360,6 +360,14 @@ module Discovery
       value.presence || STATUS_UNCHECKED
     end
 
+    def reviews_status
+      value = @business.reviews_check_status.to_s
+      return STATUS_MISSING if value == STATUS_MISSING
+      return STATUS_FOUND if value == STATUS_FOUND
+
+      value.presence || STATUS_UNCHECKED
+    end
+
     def weak_brand(default_label, max_points)
       case brand_status
       when STATUS_UNCHECKED
@@ -439,23 +447,41 @@ module Discovery
     def weak_reviews(default_label, max_points)
       case places_status
       when STATUS_UNCHECKED
-        [:unchecked, "Check Google Places for reviews", default_label, 0]
+        [:unchecked, "Match Google Places first", default_label, 0]
       when STATUS_MISSING
         [:unchecked, "Match Google Places first — required for ReviewBox", default_label, 0]
       else
-        evaluate_review_count(default_label)
+        case reviews_status
+        when STATUS_UNCHECKED
+          [:unchecked, reviews_qualify_hint, default_label, 0]
+        when STATUS_MISSING
+          [:gap, reviews_sell_detail, default_label, reviews_sell_points(max_points)]
+        else
+          [:ok, "NA — not a reviews sell", default_label, 0]
+        end
       end
     end
 
-    def evaluate_review_count(default_label)
-      count = @business.google_rating_count.to_i
-      gap_points = reviews_gap_points(count)
-
-      if gap_points.zero?
-        return [:ok, nil, default_label, 0]
+    def reviews_qualify_hint
+      if @business.google_rating.present? || @business.google_rating_count.present?
+        "Qualify Google reviews / rating (Places data on file — manual check)"
+      else
+        "Qualify Google reviews / rating"
       end
+    end
 
-      [:gap, reviews_gap_detail(count), default_label, gap_points]
+    def reviews_sell_points(max_points)
+      gap = reviews_gap_points(@business.google_rating_count.to_i)
+      gap.positive? ? gap : max_points
+    end
+
+    def reviews_sell_detail
+      count = @business.google_rating_count.to_i
+      if count.positive?
+        reviews_gap_detail(count)
+      else
+        "Sell review generation — no Google reviews on file"
+      end
     end
 
     def reviews_gap_points(count)

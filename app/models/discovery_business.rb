@@ -38,7 +38,7 @@ class DiscoveryBusiness < ApplicationRecord
   validates :external_id, uniqueness: { scope: [:organization_id, :source] }
   validates :status, inclusion: { in: STATUSES }
   validates :places_check_status, :facebook_check_status, :linkedin_check_status, :instagram_check_status,
-            :website_check_status, :brand_check_status, :hosting_check_status,
+            :website_check_status, :brand_check_status, :hosting_check_status, :reviews_check_status,
             inclusion: { in: CHECK_STATUSES }
   validates :vertical_classification,
             inclusion: { in: Discovery::Verticals::OPTIONS },
@@ -215,6 +215,7 @@ class DiscoveryBusiness < ApplicationRecord
       google_rating_count: google_rating_count&.to_s,
       google_place_id: google_place_id.to_s,
       places_check_status: places_check_status.to_s,
+      reviews_check_status: reviews_check_status.to_s,
       vertical_classification: vertical_classification.to_s,
       facebook_url: facebook_url.to_s,
       facebook_check_status: facebook_check_status.to_s,

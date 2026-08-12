@@ -5628,6 +5628,16 @@ body#app-theme-body[data-dark] .discovery-lni-ubi-match {
   font-size: 0.88em;
 }
 
+.discovery-website-contact-missing {
+  font-size: 0.92em;
+  opacity: 0.72;
+
+  &.is-disabled {
+    opacity: 0.48;
+    font-style: italic;
+  }
+}
+
 .discovery-lni-detail-label {
   display: block;
   font-size: 0.78em;
@@ -5770,16 +5780,24 @@ body#app-theme-body[data-dark] .discovery-mark-missing-btn {
   box-shadow: none !important;
   transition: background 0.15s ease, border-color 0.15s ease;
 
-  &:hover,
-  &:focus {
-    background: purple-trial-alpha(0.08);
-    border-color: purple-trial-alpha(0.35);
+  &:hover:not(:disabled),
+  &:focus:not(:disabled) {
+    background: purple-trial-alpha(0.18);
+    border-color: purple-trial-alpha(0.55);
     color: inherit;
   }
 
-  &:active {
-    background: purple-trial-alpha(0.12);
-    border-color: purple-trial-alpha(0.45);
+  &:active:not(:disabled) {
+    background: purple-trial-alpha(0.26);
+    border-color: purple-trial-alpha(0.65);
+  }
+
+  &.is-disabled,
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -5787,15 +5805,21 @@ body#app-theme-body[data-dark] .discovery-advanced-data-menu-option {
   border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.04);
 
-  &:hover,
-  &:focus {
-    background: purple-trial-alpha(0.16);
-    border-color: purple-trial-alpha(0.45);
+  &:hover:not(:disabled),
+  &:focus:not(:disabled) {
+    background: purple-trial-alpha(0.28);
+    border-color: purple-trial-alpha(0.62);
   }
 
-  &:active {
-    background: purple-trial-alpha(0.22);
-    border-color: purple-trial-alpha(0.55);
+  &:active:not(:disabled) {
+    background: purple-trial-alpha(0.36);
+    border-color: purple-trial-alpha(0.72);
+  }
+
+  &.is-disabled,
+  &:disabled {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.08);
   }
 }
 
@@ -5809,6 +5833,26 @@ body#app-theme-body[data-dark] .discovery-advanced-data-menu-option {
   font-weight: 400;
   opacity: 0.72;
   line-height: 1.35;
+}
+
+.discovery-advanced-data-menu-option-note-with-icons {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.discovery-social-brand-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  vertical-align: middle;
+}
+
+.discovery-social-brand-icon {
+  display: block;
+  flex-shrink: 0;
+  color: #fff;
 }
 
 @media screen and (max-width: 1100px) {

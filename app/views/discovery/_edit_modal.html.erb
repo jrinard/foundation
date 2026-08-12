@@ -63,6 +63,17 @@
         </div>
       </div>
 
+      <div class="field">
+        <%= f.label :reviews_check_status, "Google reviews / rating check" %>
+        <%= f.select :reviews_check_status,
+              options_for_select(
+                [["Not checked yet", "unchecked"], ["NA — reviews OK", "found"], ["Sell — weak / no reviews", "missing"]],
+                business.reviews_check_status
+              ),
+              {},
+              class: "form-control theme-field" %>
+      </div>
+
       <div class="discovery-edit-field-pair">
         <div class="field">
           <%= f.label :google_place_id, "Google Place ID" %>

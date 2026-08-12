@@ -67,14 +67,15 @@ module Discovery
     def details(ubi:, license:)
       ubi = ubi.to_s.gsub(/\D/, "")
       license = license.to_s.strip
-      return details_failure("Missing UBI or license number.") if ubi.blank? || license.blank?
+      return details_failure("Missing UBI.") if ubi.blank?
 
       payload = post_json(DETAILS_URL, details_payload(ubi: ubi, license: license))
       return_value = payload.dig("d", "ReturnValue") || {}
       contractor = return_value["Contractor"] || {}
+      employer_business = employer_business_details(return_value["Employer"] || {})
 
-      if contractor.blank?
-        return details_failure("L&I returned no contractor details.")
+      if contractor_data_blank?(contractor) && employer_business.blank?
+        return details_failure("L&I returned no business details.")
       end
 
       DetailsResult.new(
@@ -190,7 +191,8 @@ module Discovery
     def serialize_details(return_value)
       contractor = return_value["Contractor"] || {}
       employer = return_value["Employer"] || {}
-      ubi = contractor["UbiNumber"].to_s
+      employer_business = employer_business_details(employer)
+      ubi = contractor["UbiNumber"].to_s.presence || employer_business["BusinessId"].to_s
       license_id = contractor["LicenseNumber"].to_s
       owners = Array(contractor["BusinesOwners"]).map do |owner|
         {
@@ -208,7 +210,7 @@ module Discovery
 
       {
         phone: format_phone(contractor["PhoneNumber"]),
-        business_name: contractor["BusinessName"].to_s,
+        business_name: contractor["BusinessName"].to_s.presence || employer_business["LegalName"].to_s,
         parent_company: contractor["ParentCompany"].to_s,
         dba_name: employer_dba_name(employer),
         license_number: license_id,
@@ -219,16 +221,26 @@ module Discovery
         vertical_source: [specialty, license_type].compact.join(" · ").presence,
         status: contractor["StatusDescription"].to_s,
         address: compact_address(
-          contractor["Address1"],
+          contractor["Address1"].presence || employer_business["Address"],
           contractor["Address2"],
-          contractor["City"],
-          contractor["State"],
-          contractor["Zip"]
+          contractor["City"].presence || employer_business["CityName"],
+          contractor["State"].presence || employer_business["State"],
+          contractor["Zip"].presence || employer_business["ZipCode"]
         ),
         owners: owners,
         employer_rep: employer_account_rep(employer),
         detail_url: detail_page_url(ubi: ubi, license_id: license_id)
       }
+    end
+
+    def employer_business_details(employer)
+      employer["EmployerBussinessDetails"] || employer["EmployerBusinessDetails"] || {}
+    end
+
+    def contractor_data_blank?(contractor)
+      contractor["BusinessName"].blank? &&
+        contractor["LicenseNumber"].blank? &&
+        contractor["PhoneNumber"].blank?
     end
 
     def employer_dba_name(employer)

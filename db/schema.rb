@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_08_11_150000) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_11_153000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -138,6 +138,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_11_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "waiting", default: false, null: false
+    t.string "reviews_check_status", default: "unchecked", null: false
     t.index ["customer_id"], name: "index_discovery_businesses_on_customer_id"
     t.index ["organization_id", "archived"], name: "index_discovery_businesses_on_org_and_archived"
     t.index ["organization_id", "google_place_id"], name: "index_discovery_businesses_on_org_google_place_id"

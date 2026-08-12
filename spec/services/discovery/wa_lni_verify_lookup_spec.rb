@@ -235,6 +235,43 @@ RSpec.describe Discovery::WaLniVerifyLookup do
       expect(result.details[:employer_rep]).to include("rep@lni.wa.gov")
       expect(result.details[:owners].first[:name]).to include("COOPER")
     end
+
+    it "returns employer-only details when no contractor license is on file" do
+      payload = {
+        "d" => {
+          "ReturnValue" => {
+            "Contractor" => {
+              "LicenseNumber" => nil,
+              "UbiNumber" => nil,
+              "BusinessName" => nil,
+              "PhoneNumber" => nil,
+              "IsLoaded" => false
+            },
+            "Employer" => {
+              "EmployerBussinessDetails" => {
+                "LegalName" => "VOLUME11 LLC",
+                "BusinessId" => "605396926",
+                "CityName" => "RIDGEFIELD",
+                "ZipCode" => "986425479",
+                "State" => "WA",
+                "Address" => "778 N 49TH AVE"
+              }
+            }
+          }
+        }
+      }
+
+      allow_any_instance_of(described_class).to receive(:post_json).and_return(payload)
+
+      result = described_class.details(ubi: "605396926", license: "")
+
+      expect(result.ok).to be(true)
+      expect(result.details[:business_name]).to eq("VOLUME11 LLC")
+      expect(result.details[:ubi]).to eq("605396926")
+      expect(result.details[:address]).to include("778 N 49TH AVE")
+      expect(result.details[:address]).to include("RIDGEFIELD")
+      expect(result.details[:phone]).to be_blank
+    end
   end
 
   describe "vertical inference" do

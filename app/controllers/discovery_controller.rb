@@ -18,6 +18,7 @@ class DiscoveryController < ApplicationController
     :select_google_place,
     :check_wa_lni,
     :select_wa_lni,
+    :check_website_contacts,
     :score,
     :score_card
   ]
@@ -556,6 +557,44 @@ class DiscoveryController < ApplicationController
     }, status: :internal_server_error
   end
 
+  def check_website_contacts
+    authorize! :update, @discovery_business
+
+    if @discovery_business.website.blank?
+      return render json: {
+        ok: false,
+        message: "Add a website before scanning for contact info."
+      }, status: :unprocessable_entity
+    end
+
+    result = Discovery::WebsiteContactScrape.call(url: @discovery_business.website)
+
+    Rails.logger.info(
+      "[Discovery website scrape] business=#{@discovery_business.id} ok=#{result.ok} " \
+      "website=#{result.website.inspect} phone=#{result.phone.present?} email=#{result.email.present?} " \
+      "facebook=#{result.facebook_url.present?} linkedin=#{result.linkedin_url.present?} " \
+      "instagram=#{result.instagram_url.present?}"
+    )
+
+    render json: {
+      ok: result.ok,
+      message: result.message,
+      website: result.website,
+      pages_checked: result.pages_checked,
+      phone: result.phone,
+      email: result.email,
+      facebook_url: result.facebook_url,
+      linkedin_url: result.linkedin_url,
+      instagram_url: result.instagram_url
+    }, status: result.ok ? :ok : :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error("[Discovery website scrape] #{e.class}: #{e.message}")
+    render json: {
+      ok: false,
+      message: "Website scrape failed: #{e.message}"
+    }, status: :internal_server_error
+  end
+
   def update_sos_defaults
     attrs = wa_sos_settings_attrs_from_params
     cadence = attrs[:date_cadence]
@@ -754,6 +793,7 @@ class DiscoveryController < ApplicationController
       :instagram_check_status,
       :brand_check_status,
       :hosting_check_status,
+      :reviews_check_status,
       :linkedin_check_status
     )
 
@@ -773,7 +813,7 @@ class DiscoveryController < ApplicationController
     permitted[:instagram_url] = permitted[:instagram_url].presence
     permitted[:linkedin_url] = permitted[:linkedin_url].presence
 
-    %i[places_check_status website_check_status facebook_check_status instagram_check_status linkedin_check_status brand_check_status hosting_check_status].each do |key|
+    %i[places_check_status website_check_status facebook_check_status instagram_check_status linkedin_check_status brand_check_status hosting_check_status reviews_check_status].each do |key|
       next unless permitted.key?(key)
 
       value = permitted[key].to_s

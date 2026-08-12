@@ -2,6 +2,7 @@
 <%
   business = local_assigns[:business]
   show_lni = business.present? && business.source == DiscoveryBusiness::SOURCE_WA_SOS
+  has_website = business.present? && business.website.to_s.strip.present?
 %>
 <%= foundation_modal modal_id: "discoveryAdvancedDataMenu", title: "Advanced data", size: :sm,
       dialog_class: "discovery-advanced-data-menu-modal" do %>
@@ -27,6 +28,21 @@
         <span class="discovery-advanced-data-menu-option-note">WA L&amp;I business lookup — phone, license &amp; vertical</span>
       </button>
     <% end %>
+
+    <button type="button"
+            class="btn discovery-advanced-data-menu-option theme-text<%= " is-disabled" unless has_website %>"
+            data-advanced-data-option="website"
+            data-action="click->discovery-business-show#runAdvancedDataMenuOption"
+            <%= "disabled" unless has_website %>>
+      <span class="discovery-advanced-data-menu-option-label">Website</span>
+      <span class="discovery-advanced-data-menu-option-note discovery-advanced-data-menu-option-note-with-icons">
+        <% if has_website %>
+          Scan site for phone, email &amp; <%= render "shared/social_brand_icons", size: 15 %>
+        <% else %>
+          Add a website on this capture to enable
+        <% end %>
+      </span>
+    </button>
   </div>
 
   <%= foundation_modal_footer do %>

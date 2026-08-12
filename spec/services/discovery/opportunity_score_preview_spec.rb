@@ -318,22 +318,23 @@ RSpec.describe Discovery::OpportunityScorePreview do
     expect(line.points).to eq(25)
   end
 
-  it "awards 50 review gap points at zero reviews when places are matched" do
+  it "awards 50 review gap points at zero reviews when manually qualified as sell" do
     line = reviews_line(
       preview_for(
         places_check_status: DiscoveryBusiness::CHECK_FOUND,
         google_place_id: "abc123",
         google_rating: nil,
-        google_rating_count: 0
+        google_rating_count: 0,
+        reviews_check_status: DiscoveryBusiness::CHECK_MISSING
       )
     )
 
     expect(line.status).to eq(:gap)
     expect(line.points).to eq(50)
-    expect(line.detail).to include("No Google reviews")
+    expect(line.detail).to include("no Google reviews")
   end
 
-  it "awards 50 review gap points when under 3 reviews" do
+  it "does not auto-score reviews from Places count until manually qualified" do
     line = reviews_line(
       preview_for(
         places_check_status: DiscoveryBusiness::CHECK_FOUND,
@@ -343,17 +344,34 @@ RSpec.describe Discovery::OpportunityScorePreview do
       )
     )
 
-    expect(line.status).to eq(:gap)
-    expect(line.points).to eq(50)
+    expect(line.status).to eq(:unchecked)
+    expect(line.points).to eq(0)
+    expect(line.detail).to include("manual check")
   end
 
-  it "awards 25 review gap points when under 10 reviews" do
+  it "awards 50 review gap points when under 3 reviews and marked sell" do
     line = reviews_line(
       preview_for(
         places_check_status: DiscoveryBusiness::CHECK_FOUND,
         google_place_id: "abc123",
         google_rating: 4.5,
-        google_rating_count: 5
+        google_rating_count: 2,
+        reviews_check_status: DiscoveryBusiness::CHECK_MISSING
+      )
+    )
+
+    expect(line.status).to eq(:gap)
+    expect(line.points).to eq(50)
+  end
+
+  it "awards 25 review gap points when under 10 reviews and marked sell" do
+    line = reviews_line(
+      preview_for(
+        places_check_status: DiscoveryBusiness::CHECK_FOUND,
+        google_place_id: "abc123",
+        google_rating: 4.5,
+        google_rating_count: 5,
+        reviews_check_status: DiscoveryBusiness::CHECK_MISSING
       )
     )
 
@@ -362,13 +380,14 @@ RSpec.describe Discovery::OpportunityScorePreview do
     expect(line.detail).to include("under 10")
   end
 
-  it "awards 15 review gap points when under 50 reviews" do
+  it "awards 15 review gap points when under 50 reviews and marked sell" do
     line = reviews_line(
       preview_for(
         places_check_status: DiscoveryBusiness::CHECK_FOUND,
         google_place_id: "abc123",
         google_rating: 4.2,
-        google_rating_count: 25
+        google_rating_count: 25,
+        reviews_check_status: DiscoveryBusiness::CHECK_MISSING
       )
     )
 
@@ -376,18 +395,20 @@ RSpec.describe Discovery::OpportunityScorePreview do
     expect(line.points).to eq(15)
   end
 
-  it "clears review gap when count reaches 50" do
+  it "marks reviews NA when manually qualified as found" do
     line = reviews_line(
       preview_for(
         places_check_status: DiscoveryBusiness::CHECK_FOUND,
         google_place_id: "abc123",
         google_rating: 4.2,
-        google_rating_count: 50
+        google_rating_count: 50,
+        reviews_check_status: DiscoveryBusiness::CHECK_FOUND
       )
     )
 
     expect(line.status).to eq(:ok)
     expect(line.points).to eq(0)
+    expect(line.detail).to include("NA")
   end
 
   it "leaves reviews unchecked until places are matched" do

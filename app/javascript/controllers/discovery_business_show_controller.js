@@ -32,6 +32,7 @@ export default class extends Controller {
     selectGooglePlaceUrl: String,
     waLniSearchUrl: String,
     waLniDetailsUrl: String,
+    websiteContactsUrl: String,
     updateUrl: String,
     scoreUrl: String,
     scoreCardUrl: String,
@@ -43,6 +44,7 @@ export default class extends Controller {
     this.activeApi = "v1"
     this.pendingDetails = null
     this.pendingLniDetails = null
+    this.pendingWebsiteDetails = null
     this.lastSearchData = null
     this.lastLniSearchData = null
     this.handleModalClosed = this.handleModalClosed.bind(this)
@@ -280,6 +282,8 @@ export default class extends Controller {
       await this.runGooglePlacesSearch("legacy", { triggerButton: event.currentTarget })
     } else if (option === "lni" || option === "trade") {
       await this.runWaLniSearch({ triggerButton: event.currentTarget })
+    } else if (option === "website") {
+      await this.runWebsiteContactScrape({ triggerButton: event.currentTarget })
     }
   }
 
@@ -859,8 +863,8 @@ export default class extends Controller {
 
       const results = data.results || []
       if (data.ok && results.length === 1 && results[0].ubi_match) {
-        await this.loadLniDetails(results[0].ubi, results[0].license_id)
-        return
+        const loaded = await this.loadLniDetails(results[0].ubi, results[0].license_id)
+        if (loaded) return
       }
 
       this.renderLniMatches(data)
@@ -894,7 +898,7 @@ export default class extends Controller {
   }
 
   async loadLniDetails(ubi, licenseId, { triggerButton = null } = {}) {
-    if (!ubi || !licenseId || !this.waLniDetailsUrlValue) return
+    if (!ubi || !this.waLniDetailsUrlValue) return false
 
     const matchRows = this.hasLniModalMatchesTarget
       ? this.lniModalMatchesTarget.querySelectorAll(".discovery-lni-match-row")
@@ -911,7 +915,7 @@ export default class extends Controller {
     try {
       const url = new URL(this.waLniDetailsUrlValue, window.location.origin)
       url.searchParams.set("ubi", ubi)
-      url.searchParams.set("license_id", licenseId)
+      url.searchParams.set("license_id", licenseId || "")
 
       const response = await fetch(url.toString(), {
         method: "POST",
@@ -929,12 +933,15 @@ export default class extends Controller {
         this.showLniDetailsStep()
         this.setLniModalTitle("Labor & Industry — confirm")
         this.setLniModalStatus(data.message || "")
-      } else {
-        this.setLniModalStatus(data.message || "Could not load L&I details.")
+        return true
       }
+
+      this.setLniModalStatus(data.message || "Could not load L&I details.")
+      return false
     } catch (error) {
       console.error("[Discovery WA L&I details]", error)
       this.setLniModalStatus(`L&I details failed: ${error.message}`)
+      return false
     } finally {
       matchRows.forEach((el) => {
         el.disabled = false
@@ -951,6 +958,15 @@ export default class extends Controller {
       this.setLniModalTitle("Labor & Industry — pick a match")
       this.setLniModalStatus(this.lastLniSearchData.message || "")
     }
+  }
+
+  async confirmEnrichmentSave(event) {
+    if (this.pendingWebsiteDetails) {
+      await this.confirmWebsiteSave(event)
+      return
+    }
+
+    await this.confirmLniSave(event)
   }
 
   async confirmLniSave(event) {
@@ -1008,8 +1024,230 @@ export default class extends Controller {
     }
   }
 
+  async confirmWebsiteSave(event) {
+    event.preventDefault()
+    if (!this.pendingWebsiteDetails || !this.updateUrlValue) return
+
+    const details = this.pendingWebsiteDetails
+    const snapshot = this.businessSnapshotValue || {}
+    const currentPhone = this.normalizeValue(snapshot.phone)
+    const currentEmail = this.normalizeValue(snapshot.email)
+    const currentFacebook = this.normalizeValue(snapshot.facebook_url)
+    const currentLinkedin = this.normalizeValue(snapshot.linkedin_url)
+    const currentInstagram = this.normalizeValue(snapshot.instagram_url)
+    const nextPhone = this.normalizeValue(details.phone)
+    const nextEmail = this.normalizeValue(details.email)
+    const nextFacebook = this.normalizeValue(details.facebook_url)
+    const nextLinkedin = this.normalizeValue(details.linkedin_url)
+    const nextInstagram = this.normalizeValue(details.instagram_url)
+    const willSavePhone = nextPhone !== "" && nextPhone !== currentPhone
+    const willSaveEmail = nextEmail !== "" && nextEmail !== currentEmail
+    const willSaveFacebook = nextFacebook !== "" && nextFacebook !== currentFacebook
+    const willSaveLinkedin = nextLinkedin !== "" && nextLinkedin !== currentLinkedin
+    const willSaveInstagram = nextInstagram !== "" && nextInstagram !== currentInstagram
+
+    if (!willSavePhone && !willSaveEmail && !willSaveFacebook && !willSaveLinkedin && !willSaveInstagram) return
+
+    const button = this.hasLniModalConfirmButtonTarget ? this.lniModalConfirmButtonTarget : null
+    if (button) button.disabled = true
+    this.setLniModalStatus("Saving…")
+
+    try {
+      const body = new FormData()
+      if (willSavePhone) body.append("discovery_business[phone]", details.phone)
+      if (willSaveEmail) body.append("discovery_business[email]", details.email)
+      if (willSaveFacebook) {
+        body.append("discovery_business[facebook_url]", details.facebook_url)
+        body.append("discovery_business[facebook_check_status]", "found")
+      }
+      if (willSaveLinkedin) {
+        body.append("discovery_business[linkedin_url]", details.linkedin_url)
+        body.append("discovery_business[linkedin_check_status]", "found")
+      }
+      if (willSaveInstagram) {
+        body.append("discovery_business[instagram_url]", details.instagram_url)
+        body.append("discovery_business[instagram_check_status]", "found")
+      }
+      body.append("persist_score", "1")
+
+      const response = await fetch(this.updateUrlValue, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "X-CSRF-Token": this.csrfToken
+        },
+        body,
+        credentials: "same-origin"
+      })
+
+      const data = await response.json()
+      if (!data.ok) {
+        this.setLniModalStatus(data.message || "Save failed.")
+        this.setPageStatus(data.message || "Save failed.", false)
+        return
+      }
+
+      this.pendingWebsiteDetails = null
+      this.lniModal?.close()
+      if (data.score_card_html) {
+        this.replaceScoreCard(data.score_card_html)
+        this.replaceCaptureSummary(data.capture_summary_html)
+      }
+      this.setPageStatus(data.message, true)
+      window.location.assign(data.redirect_url || window.location.href)
+    } catch (error) {
+      console.error("[Discovery website save]", error)
+      this.setLniModalStatus(`Save failed: ${error.message}`)
+      this.setPageStatus(`Save failed: ${error.message}`, false)
+    } finally {
+      if (button) button.disabled = false
+    }
+  }
+
+  async runWebsiteContactScrape({ triggerButton = null } = {}) {
+    if (!this.websiteContactsUrlValue) return
+
+    this.pendingWebsiteDetails = null
+    this.pendingLniDetails = null
+    this.clearLniModalPanels()
+    this.showWebsiteConfirmStep()
+    this.setLniModalTitle("Website scan")
+    this.setLniModalStatus("Scanning website pages…")
+    this.lniModal?.open()
+
+    try {
+      const response = await fetch(this.websiteContactsUrlValue, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "X-CSRF-Token": this.csrfToken
+        },
+        credentials: "same-origin"
+      })
+
+      const data = await response.json()
+      if (!response.ok || !data.ok) {
+        this.setLniModalStatus(data.message || "Website scan failed.")
+        return
+      }
+
+      this.pendingWebsiteDetails = data
+      this.renderWebsiteDetails(data)
+      this.setLniModalTitle("Website — confirm")
+      this.setLniModalStatus(data.message || "")
+
+      const snapshot = this.businessSnapshotValue || {}
+      const willSavePhone =
+        this.normalizeValue(data.phone) !== "" &&
+        this.normalizeValue(data.phone) !== this.normalizeValue(snapshot.phone)
+      const willSaveEmail =
+        this.normalizeValue(data.email) !== "" &&
+        this.normalizeValue(data.email) !== this.normalizeValue(snapshot.email)
+      const willSaveFacebook =
+        this.normalizeValue(data.facebook_url) !== "" &&
+        this.normalizeValue(data.facebook_url) !== this.normalizeValue(snapshot.facebook_url)
+      const willSaveLinkedin =
+        this.normalizeValue(data.linkedin_url) !== "" &&
+        this.normalizeValue(data.linkedin_url) !== this.normalizeValue(snapshot.linkedin_url)
+      const willSaveInstagram =
+        this.normalizeValue(data.instagram_url) !== "" &&
+        this.normalizeValue(data.instagram_url) !== this.normalizeValue(snapshot.instagram_url)
+
+      if (this.hasLniModalConfirmButtonTarget) {
+        this.lniModalConfirmButtonTarget.hidden = !(
+          willSavePhone ||
+          willSaveEmail ||
+          willSaveFacebook ||
+          willSaveLinkedin ||
+          willSaveInstagram
+        )
+      }
+    } catch (error) {
+      console.error("[Discovery website scrape]", error)
+      this.setLniModalStatus(`Website scan failed: ${error.message}`)
+    } finally {
+      if (triggerButton) triggerButton.disabled = false
+    }
+  }
+
+  renderWebsiteDetails(data) {
+    if (!this.hasLniModalDetailsTarget) return
+
+    const snapshot = this.businessSnapshotValue || {}
+    const currentPhone = this.normalizeValue(snapshot.phone)
+    const currentEmail = this.normalizeValue(snapshot.email)
+    const currentFacebook = this.normalizeValue(snapshot.facebook_url)
+    const currentLinkedin = this.normalizeValue(snapshot.linkedin_url)
+    const currentInstagram = this.normalizeValue(snapshot.instagram_url)
+    const nextPhone = this.normalizeValue(data.phone)
+    const nextEmail = this.normalizeValue(data.email)
+    const nextFacebook = this.normalizeValue(data.facebook_url)
+    const nextLinkedin = this.normalizeValue(data.linkedin_url)
+    const nextInstagram = this.normalizeValue(data.instagram_url)
+    const willSavePhone = nextPhone !== "" && nextPhone !== currentPhone
+    const willSaveEmail = nextEmail !== "" && nextEmail !== currentEmail
+    const willSaveFacebook = nextFacebook !== "" && nextFacebook !== currentFacebook
+    const willSaveLinkedin = nextLinkedin !== "" && nextLinkedin !== currentLinkedin
+    const willSaveInstagram = nextInstagram !== "" && nextInstagram !== currentInstagram
+    const pages = (data.pages_checked || []).map((page) => page || "/").join(", ")
+
+    const rows = [
+      this.lniConfirmRow("Website", data.website),
+      this.lniConfirmRow("Pages scanned", pages || "—"),
+      this.lniConfirmRow("Phone", data.phone, {
+        willSave: willSavePhone,
+        currentValue: snapshot.phone,
+        missingLabel: "Not found on site"
+      }),
+      this.lniConfirmRow("Email", data.email, {
+        willSave: willSaveEmail,
+        currentValue: snapshot.email,
+        missingLabel: "Not found on site",
+        missingDisabled: true
+      }),
+      this.lniConfirmRow("Facebook", data.facebook_url, {
+        willSave: willSaveFacebook,
+        currentValue: snapshot.facebook_url,
+        missingLabel: "Not found on site",
+        missingDisabled: true
+      }),
+      this.lniConfirmRow("LinkedIn", data.linkedin_url, {
+        willSave: willSaveLinkedin,
+        currentValue: snapshot.linkedin_url,
+        missingLabel: "Not found on site",
+        missingDisabled: true
+      }),
+      this.lniConfirmRow("Instagram", data.instagram_url, {
+        willSave: willSaveInstagram,
+        currentValue: snapshot.instagram_url,
+        missingLabel: "Not found on site",
+        missingDisabled: true
+      })
+    ].join("")
+
+    const saveNote =
+      willSavePhone || willSaveEmail || willSaveFacebook || willSaveLinkedin || willSaveInstagram
+        ? `<p class="theme-text discovery-lni-confirm-note">Green values will be saved to this capture.</p>`
+        : `<p class="theme-text discovery-lni-confirm-note">Nothing new to save from this scan.</p>`
+
+    this.lniModalDetailsTarget.innerHTML = `
+      ${saveNote}
+      <dl class="discovery-business-detail-list discovery-lni-confirm-list">${rows}</dl>`
+  }
+
+  showWebsiteConfirmStep() {
+    if (this.hasLniModalMatchesTarget) {
+      this.lniModalMatchesTarget.hidden = true
+      this.lniModalMatchesTarget.innerHTML = ""
+    }
+    if (this.hasLniModalDetailsTarget) this.lniModalDetailsTarget.hidden = false
+    if (this.hasLniModalBackButtonTarget) this.lniModalBackButtonTarget.hidden = true
+    if (this.hasLniModalConfirmButtonTarget) this.lniModalConfirmButtonTarget.hidden = true
+  }
+
   handleLniModalClosed() {
     this.pendingLniDetails = null
+    this.pendingWebsiteDetails = null
     this.clearLniModalPanels()
     this.showLniMatchesStep()
     this.setLniModalTitle("Labor & Industry")
@@ -1104,7 +1342,22 @@ export default class extends Controller {
       ${details.detail_url ? `<p class="discovery-lni-confirm-link"><a href="${this.escapeHtml(details.detail_url)}" class="theme-text discovery-business-link" target="_blank" rel="noopener noreferrer">View full record on L&amp;I</a></p>` : ""}`
   }
 
-  lniConfirmRow(label, value, { willSave = false, currentValue = null } = {}) {
+  lniConfirmRow(label, value, { willSave = false, currentValue = null, missingLabel = null, missingDisabled = false } = {}) {
+    const hasValue = this.normalizeValue(value) !== ""
+    const showMissing = !hasValue && missingLabel
+
+    if (showMissing) {
+      const missingClass = missingDisabled
+        ? "discovery-website-contact-missing is-disabled theme-text"
+        : "discovery-website-contact-missing theme-text"
+
+      return `
+        <div class="discovery-business-detail-row discovery-lni-confirm-row">
+          <dt class="theme-text">${this.escapeHtml(label)}</dt>
+          <dd><div class="${missingClass}">${this.escapeHtml(missingLabel)}</div></dd>
+        </div>`
+    }
+
     const display = this.escapeHtml(this.displayValue(value))
     const valueClass = willSave ? "discovery-places-value-new" : "theme-text"
     const showCurrent =

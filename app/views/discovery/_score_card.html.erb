@@ -166,8 +166,9 @@
                     line: line,
                     business: business,
                     show_actions: show_actions,
-                        show_brand_toggle: false,
-                        show_foundation_qualify: false %>
+                    show_brand_toggle: false,
+                    show_foundation_qualify: false,
+                    show_reputation_qualify: line.key == :weak_reviews %>
             <% end %>
           </ul>
         <% end %>

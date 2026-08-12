@@ -106,7 +106,8 @@ def seed_dev_prospect_with_scorecard!(organization:, ubi:, business_name:, **att
     linkedin_check_status: attrs.fetch(:linkedin_check_status, DiscoveryBusiness::CHECK_MISSING),
     instagram_check_status: attrs.fetch(:instagram_check_status, DiscoveryBusiness::CHECK_UNCHECKED),
     brand_check_status: attrs.fetch(:brand_check_status, DiscoveryBusiness::CHECK_UNCHECKED),
-    hosting_check_status: attrs.fetch(:hosting_check_status, DiscoveryBusiness::CHECK_UNCHECKED)
+    hosting_check_status: attrs.fetch(:hosting_check_status, DiscoveryBusiness::CHECK_UNCHECKED),
+    reviews_check_status: attrs.fetch(:reviews_check_status, DiscoveryBusiness::CHECK_UNCHECKED)
   )
 
   if business.promoted?
