@@ -37,7 +37,8 @@ module Discovery
 
     def search
       query = search_text
-      return search_failure("Missing business name for L&I search.") if query.blank?
+      gem_label = GemSources.forge_gems_label
+      return search_failure("Missing business name for #{gem_label} search.") if query.blank?
 
       payload = post_json(SEARCH_URL, search_payload(query))
       raw_results = payload.dig("d", "SearchResult") || []
@@ -46,9 +47,9 @@ module Discovery
       city = city_filter
       empty_message =
         if city.present?
-          "No active L&I matches for “#{query}” (city on file: #{city.titleize})."
+          "No active #{gem_label} matches for “#{query}” (city on file: #{city.titleize})."
         else
-          "No active L&I matches for “#{query}”."
+          "No active #{gem_label} matches for “#{query}”."
         end
 
       SearchResult.new(
@@ -61,7 +62,7 @@ module Discovery
         raw_search: payload
       )
     rescue StandardError => e
-      search_failure("L&I search failed: #{e.message}")
+      search_failure("#{GemSources.forge_gems_label} search failed: #{e.message}")
     end
 
     def details(ubi:, license:)
@@ -75,7 +76,7 @@ module Discovery
       employer_business = employer_business_details(return_value["Employer"] || {})
 
       if contractor_data_blank?(contractor) && employer_business.blank?
-        return details_failure("L&I returned no business details.")
+        return details_failure("#{GemSources.forge_gems_label} returned no business details.")
       end
 
       DetailsResult.new(
@@ -85,7 +86,7 @@ module Discovery
         raw_details: payload
       )
     rescue StandardError => e
-      details_failure("L&I details failed: #{e.message}")
+      details_failure("#{GemSources.forge_gems_label} details failed: #{e.message}")
     end
 
     private

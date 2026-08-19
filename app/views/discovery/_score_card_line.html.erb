@@ -26,9 +26,6 @@
   hosting_scorable =
     business&.website.present? &&
     business.website_check_status != DiscoveryBusiness::CHECK_MISSING
-  places_matched =
-    business&.places_check_status == DiscoveryBusiness::CHECK_FOUND ||
-    business&.google_place_id.present?
   show_qualify_select =
     qualify_config.present? &&
     show_actions &&
@@ -36,7 +33,7 @@
     (
       (show_foundation_qualify && %i[weak_brand no_website hosting_maintenance].include?(line.key.to_sym) &&
         (line.key != :hosting_maintenance || hosting_scorable)) ||
-      (show_reputation_qualify && line.key == :weak_reviews && places_matched)
+      (show_reputation_qualify && line.key == :weak_reviews)
     )
   qualify_value =
     if qualify_config.present?

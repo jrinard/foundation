@@ -3214,6 +3214,26 @@ body#app-theme-body[data-dark] .org-admin-card {
 .discovery-results-wrap {
   margin-top: 16px;
   margin-bottom: 16px;
+
+  .discovery-results-card.support-white-card-theme {
+    border-color: #000;
+  }
+
+  .discovery-results-table-wrap {
+    border: 1px solid #000;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+}
+
+body#app-theme-body[data-dark] .discovery-results-wrap {
+  .discovery-results-card.support-white-card-theme {
+    border-color: #000;
+  }
+
+  .discovery-results-table-wrap {
+    border-color: #000;
+  }
 }
 
 .discovery-captured-wrap {
@@ -3862,7 +3882,106 @@ body#app-theme-body[data-dark] .discovery-header-top {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: 10px 12px;
+}
+
+.discovery-business-search-source-fieldset {
+  border: 0;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.discovery-business-search-source-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 16px;
+  font-weight: normal;
+}
+
+.discovery-axel-row-range-panel {
+  margin-top: 8px;
+}
+
+.discovery-axel-row-range-panel.is-hidden {
+  display: none;
+}
+
+.discovery-axel-row-range-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.discovery-axel-row-range-sliders {
+  display: grid;
   gap: 10px;
+  margin-top: 12px;
+}
+
+.discovery-settings-source-form {
+  margin-bottom: 12px;
+}
+
+.discovery-settings-source-save {
+  margin-left: 12px;
+}
+
+.discovery-gem-sources-card {
+  text-align: center;
+
+  .discovery-gem-source-option.org-admin-check {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 220px;
+    max-width: 280px;
+    margin: 0;
+    text-align: center;
+    font-weight: normal;
+  }
+}
+
+.discovery-gem-sources-title {
+  margin-bottom: 20px;
+}
+
+.discovery-gem-sources-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.discovery-gem-sources-grid {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 32px 56px;
+  width: 100%;
+}
+
+
+.discovery-gem-source-checkbox {
+  margin: 0;
+}
+
+.discovery-gem-source-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.discovery-gem-source-subtext {
+  font-size: 0.85rem;
+  opacity: 0.65;
+  font-weight: normal;
+  line-height: 1.35;
+}
+
+.discovery-gem-sources-save {
+  min-width: 120px;
 }
 
 .discovery-business-search-btn {
@@ -5617,6 +5736,59 @@ body#app-theme-body[data-dark] .discovery-lni-ubi-match {
   }
 }
 
+.discovery-axel-confirm-table {
+  margin-top: 4px;
+}
+
+.discovery-axel-confirm-header,
+.discovery-axel-confirm-row {
+  display: grid;
+  grid-template-columns: minmax(108px, 22%) minmax(0, 1fr) 84px;
+  gap: 12px 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body#app-theme-body[data-dark] {
+  .discovery-axel-confirm-header,
+  .discovery-axel-confirm-row {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.discovery-axel-confirm-header {
+  padding-top: 0;
+  font-size: 0.82em;
+  font-weight: 600;
+  opacity: 0.72;
+}
+
+.discovery-axel-confirm-label {
+  font-weight: 600;
+}
+
+.discovery-axel-confirm-action-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.discovery-axel-confirm-row-savable.is-skipped {
+  .discovery-axel-confirm-value {
+    color: inherit;
+    font-weight: normal;
+    opacity: 0.45;
+    text-decoration: line-through;
+  }
+}
+
+.discovery-axel-skip-btn {
+  min-width: 72px;
+  padding: 4px 10px;
+  font-size: 0.82em;
+}
+
 .discovery-lni-confirm-current {
   opacity: 0.75;
   font-size: 0.92em;
@@ -7015,7 +7187,6 @@ body#app-theme-body[data-dark] .discovery-places-value-new {
 .discovery-results-wrap .discovery-results-table-wrap {
   max-height: min(700px, 55vh);
   overflow: auto;
-  border-radius: 6px;
 
   thead th {
     position: sticky;
@@ -7029,6 +7200,15 @@ body#app-theme-body[data-dark] .discovery-places-value-new {
   tbody td {
     text-align: left;
   }
+}
+
+.discovery-results-phone-yes {
+  color: #1b7a3d;
+  font-weight: 600;
+}
+
+body#app-theme-body[data-dark] .discovery-results-phone-yes {
+  color: #7dcea0;
 }
 
 .discovery-results-table-wrap {

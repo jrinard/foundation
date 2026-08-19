@@ -42,5 +42,17 @@ RSpec.describe Discovery::Sources::WaSosFunnelFilters do
         "2 B St, Camas, WA"
       )
     end
+
+    it "matches Axel City column when present" do
+      axel_rows = [
+        { "Office Address" => "40600 NE 221st Ave, Amboy, WA, 98601", "City" => "Amboy" },
+        { "Office Address" => "123 Main St, Vancouver, WA, 98660", "City" => "Vancouver" }
+      ]
+
+      filtered = described_class.apply(axel_rows, city: "Amboy")
+
+      expect(filtered.size).to eq(1)
+      expect(filtered.first["City"]).to eq("Amboy")
+    end
   end
 end

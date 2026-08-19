@@ -2,7 +2,7 @@ class DiscoveryController < ApplicationController
   include NavModuleRequired
   require_nav_module :discovery
 
-  before_action :load_wa_sos_source, except: [:show, :load_discovery_run]
+  before_action :load_discovery_sources, except: [:show, :load_discovery_run]
   before_action :authorize_sos_defaults!, only: [:update_sos_defaults]
   before_action :set_discovery_business, only: [
     :show,
@@ -18,6 +18,8 @@ class DiscoveryController < ApplicationController
     :select_google_place,
     :check_wa_lni,
     :select_wa_lni,
+    :check_data_axel,
+    :select_data_axel,
     :check_website_contacts,
     :score,
     :score_card
@@ -70,6 +72,66 @@ class DiscoveryController < ApplicationController
     )
   end
 
+  def fetch_data_axel
+    fetch = Discovery::FetchDataAxel.call(
+      organization: current_organization,
+      user: current_user,
+      triggered_by: DiscoveryRun::TRIGGER_MANUAL,
+      overrides: {
+        row_limit: params[:row_limit],
+        row_range_enabled: params[:row_range_enabled],
+        row_range_start: params[:row_range_start],
+        row_range_end: params[:row_range_end],
+        search_entity_name: params[:search_entity_name]
+      }
+    )
+
+    if fetch.disabled?
+      return render_fetch_response(
+        ok: false,
+        status: 422,
+        message: "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL)} is disabled. Enable it under Settings → Discovery.",
+        preview: nil,
+        source_key: DiscoveryBusiness::SOURCE_DATA_AXEL
+      )
+    end
+
+    result = fetch.fetch_result
+    preview = result&.body&.byteslice(0, 2000)
+    row_filter = filter_uncaptured_rows(fetch.rows, DiscoveryBusiness::SOURCE_DATA_AXEL)
+    all_rows = row_filter.rows
+    Rails.logger.info(
+      "[Discovery Data Axel] run=#{fetch.run.id} status=#{result&.status} rows=#{all_rows.size}"
+    )
+
+    render_fetch_response(
+      ok: fetch.success?,
+      status: result&.status || 500,
+      bytes: result&.body&.bytesize,
+      content_type: result&.content_type,
+      preview: preview,
+      all_rows: all_rows,
+      source_key: DiscoveryBusiness::SOURCE_DATA_AXEL,
+      axel_query: fetch.axel_query,
+      message: fetch_axel_result_message(
+        fetch.success?,
+        all_rows.size,
+        search_entity_name: fetch.axel_query[:search_entity_name],
+        hidden_count: row_filter.hidden_count
+      )
+    )
+  rescue StandardError => e
+    Rails.logger.error("[Discovery Data Axel] #{e.class}: #{e.message}")
+    render_fetch_response(
+      ok: false,
+      status: 500,
+      error: e.message,
+      message: "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL)} request error: #{e.message}",
+      preview: nil,
+      source_key: DiscoveryBusiness::SOURCE_DATA_AXEL
+    )
+  end
+
   def fetch_wa_sos
     fetch = Discovery::FetchWaSos.call(
       organization: current_organization,
@@ -88,14 +150,14 @@ class DiscoveryController < ApplicationController
       return render_fetch_response(
         ok: false,
         status: 422,
-        message: "WA Secretary of State source is disabled. Enable it under Settings → Discovery.",
+        message: "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_WA_SOS)} is disabled. Enable it under Settings → Discovery.",
         preview: nil
       )
     end
 
     result = fetch.fetch_result
     preview = result.body.byteslice(0, 2000)
-    row_filter = filter_uncaptured_wa_sos_rows(fetch.rows)
+    row_filter = filter_uncaptured_rows(fetch.rows, DiscoveryBusiness::SOURCE_WA_SOS)
     all_rows = row_filter.rows
     Rails.logger.info(
       "[Discovery WA SOS] run=#{fetch.run.id} HTTP #{result.status} bytes=#{result.body.bytesize} rows=#{all_rows.size}"
@@ -108,6 +170,7 @@ class DiscoveryController < ApplicationController
       content_type: result.content_type,
       preview: preview,
       all_rows: all_rows,
+      source_key: DiscoveryBusiness::SOURCE_WA_SOS,
       sos_query: fetch.sos_query,
       message: fetch_result_message(
         fetch.success?,
@@ -122,8 +185,9 @@ class DiscoveryController < ApplicationController
       ok: false,
       status: 500,
       error: e.message,
-      message: "SOS request error: #{e.message}",
-      preview: nil
+      message: "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_WA_SOS)} request error: #{e.message}",
+      preview: nil,
+      source_key: DiscoveryBusiness::SOURCE_WA_SOS
     )
   end
 
@@ -138,8 +202,8 @@ class DiscoveryController < ApplicationController
       )
     end
 
-    result = Discovery::LoadWaSosRun.call(run: run)
-    row_filter = filter_uncaptured_wa_sos_rows(result.rows)
+    result = Discovery::LoadDiscoveryRun.call(run: run)
+    row_filter = filter_uncaptured_rows(result.rows, run.source_key)
 
     render_load_run_response(
       ok: true,
@@ -148,7 +212,13 @@ class DiscoveryController < ApplicationController
       all_rows: row_filter.rows,
       filter_city: result.run.settings_snapshot["filter_city"],
       run_id: result.run.id,
-      sos_query: result.run.settings_snapshot.slice("business_type_id", "start_date", "end_date", "date_cadence")
+      source_key: run.source_key,
+      sos_query: result.run.settings_snapshot.slice(
+        "business_type_id", "start_date", "end_date", "date_cadence", "search_entity_name"
+      ),
+      axel_query: result.run.settings_snapshot.slice(
+        "row_limit", "row_range_enabled", "row_range_start", "row_range_end", "search_entity_name"
+      )
     )
   rescue ActiveRecord::RecordNotFound
     render_load_run_response(
@@ -176,6 +246,7 @@ class DiscoveryController < ApplicationController
 
     rows = save_businesses_params[:rows]
     filter_city = save_businesses_params[:filter_city]
+    source = save_businesses_params[:source].presence || DiscoveryBusiness::SOURCE_WA_SOS
 
     if rows.blank?
       return render_save_response(
@@ -185,11 +256,21 @@ class DiscoveryController < ApplicationController
       )
     end
 
-    result = Discovery::SaveWaSosBusinesses.call(
-      organization: current_organization,
-      rows: rows,
-      filter_city: filter_city.presence || @wa_sos_source.wa_sos_settings.filter_city
-    )
+    result =
+      case source
+      when DiscoveryBusiness::SOURCE_DATA_AXEL
+        Discovery::SaveDataAxelBusinesses.call(
+          organization: current_organization,
+          rows: rows,
+          filter_city: filter_city.presence || @data_axel_source.data_axel_settings.filter_city
+        )
+      else
+        Discovery::SaveWaSosBusinesses.call(
+          organization: current_organization,
+          rows: rows,
+          filter_city: filter_city.presence || @wa_sos_source.wa_sos_settings.filter_city
+        )
+      end
 
     assign_captured_list_vars
     @discovery_businesses = load_captured_businesses
@@ -501,13 +582,6 @@ class DiscoveryController < ApplicationController
   def check_wa_lni
     authorize! :update, @discovery_business
 
-    unless @discovery_business.source == DiscoveryBusiness::SOURCE_WA_SOS
-      return render json: {
-        ok: false,
-        message: "L&I lookup is available for WA SOS captures only."
-      }, status: :unprocessable_entity
-    end
-
     result = Discovery::WaLniVerifyLookup.search(discovery_business: @discovery_business)
 
     Rails.logger.info(
@@ -527,7 +601,7 @@ class DiscoveryController < ApplicationController
     Rails.logger.error("[Discovery WA L&I search] #{e.class}: #{e.message}")
     render json: {
       ok: false,
-      message: "L&I search failed: #{e.message}"
+      message: "#{Discovery::GemSources.forge_gems_label} lookup failed: #{e.message}"
     }, status: :internal_server_error
   end
 
@@ -553,7 +627,65 @@ class DiscoveryController < ApplicationController
     Rails.logger.error("[Discovery WA L&I details] #{e.class}: #{e.message}")
     render json: {
       ok: false,
-      message: "L&I details failed: #{e.message}"
+      message: "#{Discovery::GemSources.forge_gems_label} details failed: #{e.message}"
+    }, status: :internal_server_error
+  end
+
+  def check_data_axel
+    authorize! :update, @discovery_business
+
+    unless current_organization.discovery_data_axel_available?
+      return render json: {
+        ok: false,
+        message: "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL)} is not available."
+      }, status: :unprocessable_entity
+    end
+
+    result = Discovery::DataAxelEnrichmentLookup.search(discovery_business: @discovery_business)
+
+    Rails.logger.info(
+      "[Discovery Data Axel search] business=#{@discovery_business.id} ok=#{result.ok} " \
+      "query=#{result.query.inspect} matches=#{result.results.size}"
+    )
+
+    render json: {
+      ok: result.ok,
+      message: result.message,
+      query: result.query,
+      city_filter: result.city_filter,
+      results: result.results
+    }, status: result.ok ? :ok : :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error("[Discovery Data Axel search] #{e.class}: #{e.message}")
+    render json: {
+      ok: false,
+      message: "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL)} lookup failed: #{e.message}"
+    }, status: :internal_server_error
+  end
+
+  def select_data_axel
+    authorize! :update, @discovery_business
+
+    result = Discovery::DataAxelEnrichmentLookup.details(
+      discovery_business: @discovery_business,
+      iusa: params[:iusa]
+    )
+
+    Rails.logger.info(
+      "[Discovery Data Axel details] business=#{@discovery_business.id} ok=#{result.ok} " \
+      "iusa=#{params[:iusa].inspect}"
+    )
+
+    render json: {
+      ok: result.ok,
+      message: result.message,
+      details: result.details
+    }, status: result.ok ? :ok : :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error("[Discovery Data Axel details] #{e.class}: #{e.message}")
+    render json: {
+      ok: false,
+      message: "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL)} details failed: #{e.message}"
     }, status: :internal_server_error
   end
 
@@ -619,7 +751,7 @@ class DiscoveryController < ApplicationController
 
   private
 
-  def render_fetch_response(ok:, status:, message:, preview: nil, bytes: nil, content_type: nil, error: nil, all_rows: [], sos_query: {})
+  def render_fetch_response(ok:, status:, message:, preview: nil, bytes: nil, content_type: nil, error: nil, all_rows: [], sos_query: {}, axel_query: {}, source_key: DiscoveryBusiness::SOURCE_WA_SOS)
     payload = {
       ok: ok,
       status: status,
@@ -628,11 +760,13 @@ class DiscoveryController < ApplicationController
       preview: preview,
       error: error,
       message: message,
+      source_key: source_key,
       sos_query: sos_query,
-      search_entity_name: sos_query[:search_entity_name],
-      business_name_search: sos_query[:search_entity_name].present?,
+      axel_query: axel_query,
+      search_entity_name: sos_query[:search_entity_name] || axel_query[:search_entity_name],
+      business_name_search: (sos_query[:search_entity_name] || axel_query[:search_entity_name]).present?,
       all_rows: all_rows,
-      display_columns: Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS,
+      display_columns: Discovery::Sources::WaSos::CsvParser::RESULTS_UI_DISPLAY_COLUMNS,
       runs_html: render_runs_html
     }
 
@@ -645,15 +779,17 @@ class DiscoveryController < ApplicationController
     end
   end
 
-  def render_load_run_response(ok:, status:, message:, all_rows: [], filter_city: nil, run_id: nil, sos_query: {})
+  def render_load_run_response(ok:, status:, message:, all_rows: [], filter_city: nil, run_id: nil, sos_query: {}, axel_query: {}, source_key: DiscoveryBusiness::SOURCE_WA_SOS)
     payload = {
       ok: ok,
       message: message,
       all_rows: all_rows,
       filter_city: filter_city,
       run_id: run_id,
+      source_key: source_key,
       sos_query: sos_query,
-      display_columns: Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS
+      axel_query: axel_query,
+      display_columns: Discovery::Sources::WaSos::CsvParser::RESULTS_UI_DISPLAY_COLUMNS
     }
 
     respond_to do |format|
@@ -784,6 +920,7 @@ class DiscoveryController < ApplicationController
       :google_rating_count,
       :website,
       :vertical_classification,
+      :date_business_established,
       :facebook_url,
       :instagram_url,
       :linkedin_url,
@@ -809,6 +946,7 @@ class DiscoveryController < ApplicationController
     permitted[:google_rating_count] = permitted[:google_rating_count].presence
     permitted[:website] = permitted[:website].presence
     permitted[:vertical_classification] = permitted[:vertical_classification].presence
+    permitted[:date_business_established] = permitted[:date_business_established].presence
     permitted[:facebook_url] = permitted[:facebook_url].presence
     permitted[:instagram_url] = permitted[:instagram_url].presence
     permitted[:linkedin_url] = permitted[:linkedin_url].presence
@@ -963,6 +1101,7 @@ class DiscoveryController < ApplicationController
   def save_businesses_params
     {
       filter_city: params[:filter_city],
+      source: params[:source],
       rows: Array(params[:rows])
     }
   end
@@ -988,11 +1127,25 @@ class DiscoveryController < ApplicationController
     "#{base} #{hidden_count} already captured #{'was'.pluralize(hidden_count)} hidden."
   end
 
+  def filter_uncaptured_rows(rows, source_key)
+    case source_key.to_s
+    when DiscoveryBusiness::SOURCE_DATA_AXEL
+      Discovery::FilterUncapturedDataAxelRows.call(organization: current_organization, rows: rows)
+    else
+      filter_uncaptured_wa_sos_rows(rows)
+    end
+  end
+
   def filter_uncaptured_wa_sos_rows(rows)
     Discovery::FilterUncapturedWaSosRows.call(
       organization: current_organization,
       rows: rows
     )
+  end
+
+  def load_discovery_sources
+    load_wa_sos_source
+    load_data_axel_source
   end
 
   def load_wa_sos_source
@@ -1004,6 +1157,40 @@ class DiscoveryController < ApplicationController
       end_date: params[:end_date]
     )
     @filter_city = @wa_sos_source.wa_sos_settings.normalized_filter_city
+  end
+
+  def load_data_axel_source
+    @data_axel_source = DiscoverySource.ensure_data_axel!(current_organization)
+    @axel_settings = @data_axel_source.data_axel_settings.to_fetch_settings(
+      row_limit: params[:row_limit],
+      row_range_enabled: params[:row_range_enabled],
+      row_range_start: params[:row_range_start],
+      row_range_end: params[:row_range_end]
+    )
+    @axel_total_rows = axel_total_row_count
+  end
+
+  def axel_total_row_count
+    Discovery::Sources::DataAxel::FileCatalog.total_row_count
+  rescue StandardError
+    0
+  end
+
+  def fetch_axel_result_message(success, row_count, search_entity_name: nil, hidden_count: 0)
+    hidden_suffix = hidden_count.to_i.positive? ? " (#{hidden_count} already captured hidden)" : ""
+    suffix = hidden_suffix
+
+    if success
+      if search_entity_name.present?
+        "#{row_count} #{'match'.pluralize(row_count)} for \"#{search_entity_name}\"#{hidden_suffix}."
+      else
+        "#{row_count} #{'business'.pluralize(row_count)} from #{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL)}#{hidden_suffix}."
+      end
+    elsif search_entity_name.present?
+      "No businesses matched \"#{search_entity_name}\"#{suffix}"
+    else
+      "#{Discovery::GemSources.collect_label_for(DiscoveryBusiness::SOURCE_DATA_AXEL)} returned no rows#{suffix}."
+    end
   end
 
   def wa_sos_settings_attrs_from_params
@@ -1064,6 +1251,6 @@ class DiscoveryController < ApplicationController
     search_fields = attrs.values_at(:business_type_id, :date_cadence).compact_blank
     city_only = attrs[:filter_city].present? && search_fields.empty?
 
-    city_only ? "City filter default saved." : "WA SOS source settings saved."
+    city_only ? "City filter default saved." : "#{Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_WA_SOS)} collect settings saved."
   end
 end

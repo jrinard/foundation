@@ -3,27 +3,30 @@
   <div class="h3-black theme-text">Discovery — <%= current_organization.name %></div>
   <br>
 
-  <p class="theme-text">
-    Enable data sources for automated prospecting. Search defaults for each source are stored per organization.
-  </p>
-
   <% wa_sos_source = DiscoverySource.ensure_wa_sos!(current_organization) %>
+  <% data_axel_source = DiscoverySource.ensure_data_axel!(current_organization) %>
 
-  <%= form_with model: wa_sos_source, url: update_discovery_settings_path, method: :patch, local: true do |f| %>
-    <div class="qb-form-cont lead-card-dark theme-text">
-      <h3 class="h4-black theme-text">Data sources</h3>
+  <div class="qb-form-cont lead-card-dark theme-text discovery-gem-sources-card">
+    <h3 class="h4-black theme-text discovery-gem-sources-title">Data Gem Sources</h3>
 
-      <label class="org-admin-check">
-        <%= f.check_box :enabled %>
-        Washington Secretary of State
-      </label>
+    <%= form_with url: update_discovery_settings_path, method: :patch, local: true, class: "discovery-gem-sources-form" do %>
+      <div class="discovery-gem-sources-grid">
+        <label class="org-admin-check discovery-gem-source-option">
+          <%= hidden_field_tag "discovery_sources[wa_sos][enabled]", "0" %>
+          <%= check_box_tag "discovery_sources[wa_sos][enabled]", "1", wa_sos_source.enabled?, class: "discovery-gem-source-checkbox" %>
+          <span class="discovery-gem-source-name theme-text">River Gems</span>
+          <span class="discovery-gem-source-subtext theme-text"><%= Discovery::GemSources.subtext_for(DiscoveryBusiness::SOURCE_WA_SOS) %></span>
+        </label>
 
-      <br>
-      <%= f.submit "Save source settings", class: "btn btn-xl btn-default settings-menu-button" %>
-    </div>
-  <% end %>
+        <label class="org-admin-check discovery-gem-source-option">
+          <%= hidden_field_tag "discovery_sources[data_axel][enabled]", "0" %>
+          <%= check_box_tag "discovery_sources[data_axel][enabled]", "1", data_axel_source.enabled?, class: "discovery-gem-source-checkbox" %>
+          <span class="discovery-gem-source-name theme-text">Mountain Gems</span>
+          <span class="discovery-gem-source-subtext theme-text"><%= Discovery::GemSources.subtext_for(DiscoveryBusiness::SOURCE_DATA_AXEL) %></span>
+        </label>
+      </div>
 
-  <p class="theme-text help-block">
-    WA SOS search defaults (business type, date range, city filter) are saved from the Discovery page into this org’s persisted WA SOS source record.
-  </p>
+      <%= submit_tag "Save", class: "btn btn-default theme-text discovery-gem-sources-save" %>
+    <% end %>
+  </div>
 </div>

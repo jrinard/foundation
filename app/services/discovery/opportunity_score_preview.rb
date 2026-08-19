@@ -324,7 +324,7 @@ module Discovery
       if phone.present?
         [max_points, phone]
       else
-        [0, "No phone on file — use Check search or Advanced Place Data"]
+        [0, "No phone on file — use Check search or #{Discovery::GemSources.refine_label}"]
       end
     end
 
@@ -445,28 +445,21 @@ module Discovery
     end
 
     def weak_reviews(default_label, max_points)
-      case places_status
+      case reviews_status
       when STATUS_UNCHECKED
-        [:unchecked, "Match Google Places first", default_label, 0]
+        [:unchecked, reviews_qualify_hint, default_label, 0]
       when STATUS_MISSING
-        [:unchecked, "Match Google Places first — required for ReviewBox", default_label, 0]
+        [:gap, reviews_sell_detail, default_label, reviews_sell_points(max_points)]
       else
-        case reviews_status
-        when STATUS_UNCHECKED
-          [:unchecked, reviews_qualify_hint, default_label, 0]
-        when STATUS_MISSING
-          [:gap, reviews_sell_detail, default_label, reviews_sell_points(max_points)]
-        else
-          [:ok, "NA — not a reviews sell", default_label, 0]
-        end
+        [:ok, "NA — not a reviews sell", default_label, 0]
       end
     end
 
     def reviews_qualify_hint
       if @business.google_rating.present? || @business.google_rating_count.present?
-        "Qualify Google reviews / rating (Places data on file — manual check)"
+        "Qualify reviews / rating — Places data is reference only; pick NA or Sell after your check"
       else
-        "Qualify Google reviews / rating"
+        "Qualify Google reviews / rating — check manually, then pick NA or Sell"
       end
     end
 

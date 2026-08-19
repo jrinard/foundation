@@ -51,15 +51,17 @@ class DiscoveryRun < ApplicationRecord
 
   def query_summary
     snap = settings_snapshot.with_indifferent_access
-    parts = []
-    if snap[:start_date].present? || snap[:end_date].present?
-      parts << [snap[:start_date], snap[:end_date]].compact.join(" – ")
+
+    case source_key
+    when DiscoveryBusiness::SOURCE_DATA_AXEL
+      data_axel_query_summary(snap)
+    else
+      wa_sos_query_summary(snap)
     end
-    if snap[:business_type_id].present?
-      label = business_type_label(snap[:business_type_id])
-      parts << label if label.present?
-    end
-    parts.join(" · ").presence || "—"
+  end
+
+  def source_label
+    Discovery::Sources::Catalog.label_for(source_key)
   end
 
   def duration_label
@@ -78,6 +80,33 @@ class DiscoveryRun < ApplicationRecord
   end
 
   private
+
+  def wa_sos_query_summary(snap)
+    parts = []
+    if snap[:start_date].present? || snap[:end_date].present?
+      parts << [snap[:start_date], snap[:end_date]].compact.join(" – ")
+    end
+    if snap[:business_type_id].present?
+      label = business_type_label(snap[:business_type_id])
+      parts << label if label.present?
+    end
+    if snap[:search_entity_name].present?
+      parts << "\"#{snap[:search_entity_name]}\""
+    end
+    parts.join(" · ").presence || "—"
+  end
+
+  def data_axel_query_summary(snap)
+    parts = []
+    parts << "\"#{snap[:search_entity_name]}\"" if snap[:search_entity_name].present?
+    if ActiveModel::Type::Boolean.new.cast(snap[:row_range_enabled])
+      parts << "rows #{snap[:row_range_start]}-#{snap[:row_range_end]}"
+    elsif snap[:row_limit].present?
+      parts << "limit #{snap[:row_limit]}"
+    end
+    parts << "#{snap[:source_file_count]} files" if snap[:source_file_count].present?
+    parts.join(" · ").presence || "—"
+  end
 
   def business_type_label(type_id)
     match = Discovery::Sources::WaSos::BusinessTypes::OPTIONS.find { |_label, id| id == type_id.to_s }

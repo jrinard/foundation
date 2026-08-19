@@ -32,6 +32,7 @@ export default class extends Controller {
     "editGooglePlaceId",
     "businessSearchInput",
     "businessSearchSubmit",
+    "businessSearchSource",
     "queueBusinessName",
     "queuePhone",
     "queueEmail",
@@ -45,13 +46,22 @@ export default class extends Controller {
 
   static values = {
     columns: Array,
+    columnLabels: Object,
+    phoneColumn: String,
     saveUrl: String,
     fetchUrl: String,
+    fetchAxelUrl: String,
     capturedListUrl: String,
     capturedView: { type: String, default: "working" },
     hideArchived: { type: Boolean, default: true },
     archiveFilter: { type: String, default: "all" },
-    capturedSort: { type: String, default: "date" }
+    capturedSort: { type: String, default: "date" },
+    currentSource: { type: String, default: "wa_sos" },
+    riverGemsLabel: { type: String, default: "River Gems" },
+    mountainGemsLabel: { type: String, default: "Mountain Gems" },
+    collectRiverLabel: { type: String, default: "Collect River Gems" },
+    collectMountainLabel: { type: String, default: "Collect Mountain Gems" },
+    defaultBusinessSearchSource: { type: String, default: "wa_sos" }
   }
 
   connect() {
@@ -455,8 +465,16 @@ export default class extends Controller {
 
   async submit(event) {
     event.preventDefault()
+    this.currentSourceValue = "wa_sos"
     this.businessNameSearchMode = false
-    await this.runFetch(this.collectStateFormData())
+    await this.runFetch(this.collectStateFormData(), { url: this.fetchUrlValue })
+  }
+
+  async submitAxel(event) {
+    event.preventDefault()
+    this.currentSourceValue = "data_axel"
+    this.businessNameSearchMode = false
+    await this.runFetch(this.collectAxelFormData(), { url: this.fetchAxelUrlValue })
   }
 
   handleBusinessSearchKeydown(event) {
@@ -471,8 +489,11 @@ export default class extends Controller {
     const name = this.businessSearchInputTarget?.value?.trim()
     if (!name) return
 
-    const body = this.collectStateFormData()
+    const source = this.selectedBusinessSearchSource()
+    const body = source === "data_axel" ? this.collectAxelFormData() : this.collectStateFormData()
     body.append("search_entity_name", name)
+    const url = source === "data_axel" ? this.fetchAxelUrlValue : this.fetchUrlValue
+    this.currentSourceValue = source
 
     if (this.hasBusinessSearchSubmitTarget) {
       this.businessSearchSubmitTarget.disabled = true
@@ -480,7 +501,7 @@ export default class extends Controller {
 
     try {
       this.businessNameSearchMode = true
-      await this.runFetch(body, { searchName: name })
+      await this.runFetch(body, { searchName: name, url })
       this.closeBusinessSearchModal()
     } finally {
       if (this.hasBusinessSearchSubmitTarget) {
@@ -502,12 +523,38 @@ export default class extends Controller {
     return body
   }
 
-  async runFetch(body, { searchName = null } = {}) {
-    const submitButton = document.querySelector(".discovery-sos-fetch-form [type='submit']")
+  collectAxelFormData() {
+    const body = new FormData()
+    const form = document.querySelector(".discovery-axel-fetch-form")
+    if (!form) return body
+
+    ;["row_limit", "row_range_enabled", "row_range_start", "row_range_end"].forEach((fieldName) => {
+      const field = form.querySelector(`[name="${fieldName}"]`)
+      if (field) body.append(fieldName, field.value)
+    })
+
+    return body
+  }
+
+  selectedBusinessSearchSource() {
+    const sources = this.businessSearchSourceTargets
+    if (sources.length === 0) return this.defaultBusinessSearchSourceValue
+    if (sources.length === 1) return sources[0].value
+
+    const selected = sources.find((input) => input.checked)
+    return selected?.value || this.defaultBusinessSearchSourceValue
+  }
+
+  async runFetch(body, { searchName = null, url = null } = {}) {
+    const fetchUrl = url || this.fetchUrlValue
+    const submitButton =
+      this.currentSourceValue === "data_axel"
+        ? document.querySelector(".discovery-axel-fetch-form [type='submit']")
+        : document.querySelector(".discovery-sos-fetch-form [type='submit']")
     if (submitButton) submitButton.disabled = true
 
     try {
-      const response = await fetch(this.fetchUrlValue, {
+      const response = await fetch(fetchUrl, {
         method: "POST",
         body,
         headers: {
@@ -527,6 +574,9 @@ export default class extends Controller {
 
       if (data.ok) {
         this.allRows = data.all_rows || []
+        if (data.source_key) {
+          this.currentSourceValue = data.source_key
+        }
         if (data.business_name_search) {
           this.businessNameSearchMode = true
           if (this.hasNameFilterTarget) {
@@ -625,6 +675,9 @@ export default class extends Controller {
 
       if (data.ok) {
         this.allRows = data.all_rows || []
+        if (data.source_key) {
+          this.currentSourceValue = data.source_key
+        }
         this.businessNameSearchMode = false
         if (this.hasNameFilterTarget) {
           this.nameFilterTarget.value = ""
@@ -696,6 +749,7 @@ export default class extends Controller {
         credentials: "same-origin",
         body: JSON.stringify({
           filter_city: this.currentCity(),
+          source: this.currentSourceValue,
           rows,
           ...this.capturedListParams()
         })
@@ -788,21 +842,20 @@ export default class extends Controller {
     const city = filters.city
     const nameQuery = (filters.businessName || "").trim()
     const nameSearchMode = this.businessNameSearchMode
+    const sourceLabel = this.collectSourceLabel()
     const skippedCount = rows.filter((row) => this.isRowSkipped(row)).length
     const activeCount = rows.length - skippedCount
 
     if (!rows.length) {
       if (totalUnfiltered > 0) {
+        const collectedLabel =
+          totalUnfiltered === 1 ? "1 collected" : `${totalUnfiltered} collected`
+
         if (nameSearchMode && nameQuery) {
-          return `<p class="discovery-results-empty theme-text">No businesses matching <strong>${this.escapeHtml(nameQuery)}</strong> (${totalUnfiltered} from SOS).</p>`
+          return `<p class="discovery-results-empty theme-text">No businesses matching <strong>${this.escapeHtml(nameQuery)}</strong> (${collectedLabel}). Try changing the <strong>City</strong> filter or search term.</p>`
         }
 
-        const parts = [`No businesses in <strong>${this.escapeHtml(city)}</strong>`]
-        if (nameQuery) {
-          parts.push(` matching <strong>${this.escapeHtml(nameQuery)}</strong>`)
-        }
-        parts.push(` (${totalUnfiltered} from Collect State).`)
-        return `<p class="discovery-results-empty theme-text">${parts.join("")}</p>`
+        return `<p class="discovery-results-empty theme-text">No businesses in <strong>${this.escapeHtml(city)}</strong> (${collectedLabel}). Try changing the <strong>City</strong> filter.</p>`
       }
 
       return `<p class="discovery-results-empty theme-text">No businesses returned for this search.</p>`
@@ -815,9 +868,9 @@ export default class extends Controller {
       !nameSearchMode && cityOnlyCount > rows.length
         ? ` <span class="discovery-results-filter-note">(${cityOnlyCount} in city${nameQuery ? " before name filter" : ""})</span>`
         : !nameSearchMode && totalUnfiltered > cityOnlyCount
-          ? ` <span class="discovery-results-filter-note">(${totalUnfiltered} from Collect State)</span>`
+          ? ` <span class="discovery-results-filter-note">(${totalUnfiltered} from ${this.escapeHtml(sourceLabel)})</span>`
           : nameSearchMode && nameQuery && totalUnfiltered > rows.length
-            ? ` <span class="discovery-results-filter-note">(${totalUnfiltered} from SOS before name filter)</span>`
+            ? ` <span class="discovery-results-filter-note">(${totalUnfiltered} from ${this.escapeHtml(sourceLabel)} before name filter)</span>`
             : ""
 
     const countLabel = rows.length === 1 ? "business" : "businesses"
@@ -830,7 +883,7 @@ export default class extends Controller {
       ? ` matching <strong>${this.escapeHtml(nameQuery)}</strong>`
       : ""
     const locationLabel = nameSearchMode
-      ? "statewide"
+      ? (this.currentSourceValue === "data_axel" ? this.mountainGemsLabelValue : this.riverGemsLabelValue)
       : `<strong>${this.escapeHtml(city)}</strong>`
     const header = `
       <div class="discovery-results-toolbar">
@@ -844,7 +897,9 @@ export default class extends Controller {
     const thead = [
       ...columns.map((column) => {
         const officeClass = column === "Office Address" ? " discovery-results-office-address" : ""
-        return `<th scope="col" class="theme-text${officeClass}">${this.escapeHtml(column)}</th>`
+        const phoneClass = column === this.phoneColumnValue ? " discovery-results-phone-col" : ""
+        const label = this.columnLabel(column)
+        return `<th scope="col" class="theme-text${officeClass}${phoneClass}">${this.escapeHtml(label)}</th>`
       }),
       `<th scope="col" class="theme-text discovery-results-actions-col">Actions</th>`
     ].join("")
@@ -855,10 +910,7 @@ export default class extends Controller {
         const skipped = this.isRowSkipped(row)
         const rowUbi = this.rowExternalId(row)
         const cells = columns
-          .map((column) => {
-            const officeClass = column === "Office Address" ? " discovery-results-office-address" : ""
-            return `<td class="theme-text${officeClass}">${this.escapeHtml(row[column] || "—")}</td>`
-          })
+          .map((column) => this.renderResultCell(row, column))
           .join("")
         const captureCell = `
           <td class="theme-text discovery-results-actions">
@@ -957,5 +1009,27 @@ export default class extends Controller {
 
   get csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content
+  }
+
+  columnLabel(column) {
+    return this.columnLabelsValue?.[column] || column
+  }
+
+  renderResultCell(row, column) {
+    if (column === this.phoneColumnValue) {
+      const phone = String(row["Phone Number Combined"] || row.Phone || "").trim()
+      if (phone) {
+        return `<td class="theme-text discovery-results-phone-cell" title="${this.escapeHtml(phone)}"><span class="discovery-results-phone-yes">Yes</span></td>`
+      }
+
+      return `<td class="theme-text discovery-results-phone-cell">—</td>`
+    }
+
+    const officeClass = column === "Office Address" ? " discovery-results-office-address" : ""
+    return `<td class="theme-text${officeClass}">${this.escapeHtml(row[column] || "—")}</td>`
+  }
+
+  collectSourceLabel() {
+    return this.currentSourceValue === "data_axel" ? this.collectMountainLabelValue : this.collectRiverLabelValue
   }
 }

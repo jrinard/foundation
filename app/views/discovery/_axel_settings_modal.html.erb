@@ -1,0 +1,95 @@
+<%= foundation_modal modal_id: "discoveryAxelSettings", title: "Mountain Gems collect settings", size: :md do %>
+  <p class="discovery-modal-note theme-text">
+    These settings apply to the next <strong><%= Discovery::GemSources.collect_label_for(DiscoveryBusiness::SOURCE_DATA_AXEL) %></strong> run.
+    <% if @axel_total_rows.positive? %>
+      About <%= @axel_total_rows %> businesses are available across <%= Discovery::Sources::DataAxel::FileCatalog.file_count %> CSV files.
+    <% end %>
+  </p>
+
+  <div class="field">
+    <%= label_tag :modal_axel_row_limit, "Rows to load", class: "theme-text" %>
+    <%= select_tag :modal_axel_row_limit,
+          options_for_select(
+            Discovery::Sources::DataAxelSettings::ROW_LIMIT_OPTIONS.map { |value| [value.to_s == "all" ? "All" : value, value] },
+            @axel_settings[:row_limit]
+          ),
+          class: "form-control theme-field",
+          data: { discovery_axel_page_target: "modalRowLimit" } %>
+  </div>
+
+  <div class="field discovery-axel-range-toggle">
+    <label class="theme-text discovery-axel-range-toggle-label">
+      <%= check_box_tag :modal_axel_row_range_enabled,
+            "1",
+            @axel_settings[:row_range_enabled],
+            data: {
+              discovery_axel_page_target: "modalRowRangeEnabled",
+              action: "change->discovery-axel-page#toggleRowRange"
+            } %>
+      Use row range instead of row limit
+    </label>
+  </div>
+
+  <div class="discovery-axel-row-range-panel<%= " is-hidden" unless @axel_settings[:row_range_enabled] %>"
+       data-discovery-axel-page-target="rowRangePanel">
+    <div class="discovery-axel-row-range-values theme-text">
+      Row <strong data-discovery-axel-page-target="rowRangeStartLabel"><%= @axel_settings[:row_range_start] %></strong>
+      through
+      <strong data-discovery-axel-page-target="rowRangeEndLabel"><%= @axel_settings[:row_range_end] %></strong>
+    </div>
+
+    <div class="discovery-axel-row-range-inputs">
+      <div class="field">
+        <%= label_tag :modal_axel_row_range_start, "Start row", class: "theme-text" %>
+        <%= number_field_tag :modal_axel_row_range_start,
+              @axel_settings[:row_range_start],
+              min: 1,
+              max: [@axel_total_rows, 1].max,
+              class: "form-control theme-field",
+              data: {
+                discovery_axel_page_target: "modalRowRangeStart",
+                action: "input->discovery-axel-page#syncRowRange"
+              } %>
+      </div>
+      <div class="field">
+        <%= label_tag :modal_axel_row_range_end, "End row", class: "theme-text" %>
+        <%= number_field_tag :modal_axel_row_range_end,
+              @axel_settings[:row_range_end],
+              min: 1,
+              max: [@axel_total_rows, 1].max,
+              class: "form-control theme-field",
+              data: {
+                discovery_axel_page_target: "modalRowRangeEnd",
+                action: "input->discovery-axel-page#syncRowRange"
+              } %>
+      </div>
+    </div>
+
+    <div class="discovery-axel-row-range-sliders">
+      <label class="theme-text" for="modal_axel_row_range_start_slider">Start</label>
+      <input type="range"
+             id="modal_axel_row_range_start_slider"
+             min="1"
+             max="<%= [@axel_total_rows, 1].max %>"
+             value="<%= @axel_settings[:row_range_start] %>"
+             data-discovery-axel-page-target="modalRowRangeStartSlider"
+             data-action="input->discovery-axel-page#syncRowRangeFromSlider">
+      <label class="theme-text" for="modal_axel_row_range_end_slider">End</label>
+      <input type="range"
+             id="modal_axel_row_range_end_slider"
+             min="1"
+             max="<%= [@axel_total_rows, 1].max %>"
+             value="<%= @axel_settings[:row_range_end] %>"
+             data-discovery-axel-page-target="modalRowRangeEndSlider"
+             data-action="input->discovery-axel-page#syncRowRangeFromSlider">
+    </div>
+  </div>
+
+  <%= foundation_modal_footer do %>
+    <%= button_tag "Apply",
+          type: "button",
+          class: "btn btn-warning",
+          data: { action: "click->discovery-axel-page#applySettings click->foundation-modal#close" } %>
+    <%= foundation_modal_close_button %>
+  <% end %>
+<% end %>

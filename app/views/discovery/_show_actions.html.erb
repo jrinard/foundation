@@ -9,11 +9,27 @@
           method: :post,
           class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text",
           form: { data: { turbo_confirm: "Update the linked prospect with the latest discovery data? Activity notes and other prospect history will be kept." } } %>
-  <% elsif business.promotable? && potentials_enabled? %>
-    <%= button_to "Promote to Potentials",
-          promote_to_potential_discovery_path(business),
-          method: :post,
-          class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text",
-          form: { data: { turbo_confirm: "Promote \"#{business.business_name}\" to Potentials?" } } %>
+  <% else %>
+    <% if business.promotable? && potentials_enabled? && !business.archived? %>
+      <%= button_to "Promote to Prospect",
+            promote_to_potential_discovery_path(business),
+            method: :post,
+            class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text",
+            form: { data: { turbo_confirm: "Promote \"#{business.business_name}\" to Prospect?" } } %>
+    <% end %>
+
+    <% if business.archived? %>
+      <%= button_to "Unarchive",
+            unarchive_discovery_path(business),
+            method: :post,
+            class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text",
+            form: { data: { turbo_confirm: "Restore \"#{business.business_name}\" to the captured list?" } } %>
+    <% else %>
+      <%= button_to "Archive",
+            archive_discovery_path(business),
+            method: :post,
+            class: "btn discovery-page-btn discovery-capture-btn discovery-show-tabbar-action theme-text",
+            form: { data: { turbo_confirm: "Archive \"#{business.business_name}\"? It will move to the archived list." } } %>
+    <% end %>
   <% end %>
 </div>

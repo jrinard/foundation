@@ -39,6 +39,8 @@
             <%= business.google_rating_label %>
           <% elsif input_type == "vertical_select" %>
             <%= value.presence || empty %>
+          <% elsif input_type == "date" %>
+            <%= display_value.presence || empty %>
           <% else %>
             <%= display_value.presence || value.presence || empty %>
           <% end %>
@@ -111,6 +113,8 @@
               <%= telephone_field_tag "discovery_business[#{param}]", value, field_options %>
             <% when "email" %>
               <%= email_field_tag "discovery_business[#{param}]", value, field_options %>
+            <% when "date" %>
+              <%= date_field_tag "discovery_business[#{param}]", value, field_options %>
             <% when "number" %>
               <%= number_field_tag "discovery_business[#{param}]", value, field_options %>
             <% else %>

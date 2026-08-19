@@ -35,12 +35,12 @@
                   class="btn discovery-page-btn discovery-capture-btn discovery-capture-split-btn-main theme-text"
                   data-api="v1"
                   data-action="click->discovery-business-show#checkGooglePlaces">
-            Advanced Place Data
+            <%= Discovery::GemSources.refine_label %>
           </button>
           <button type="button"
                   class="btn discovery-page-btn discovery-capture-btn discovery-capture-split-btn-cog theme-text"
                   data-action="click->discovery-business-show#openAdvancedDataMenu"
-                  aria-label="More advanced data options"
+                  aria-label="More <%= Discovery::GemSources.refine_label %> options"
                   aria-haspopup="dialog">
             <span class="discovery-capture-split-btn-caret" aria-hidden="true">▾</span>
           </button>

@@ -55,12 +55,15 @@ Rails.application.routes.draw do
       post :select_google_place
       post :check_wa_lni
       post :select_wa_lni
+      post :check_data_axel
+      post :select_data_axel
       post :check_website_contacts
       post :score
       get :score_card
     end
     collection do
       post :fetch_wa_sos
+      post :fetch_data_axel
       post :save_businesses
       get :captured_list
       patch :sos_defaults, action: :update_sos_defaults

@@ -10,7 +10,8 @@ const INDIVIDUAL_CITIES = [
   "Battle Ground",
   "Hockinson",
   "Brush Prairie",
-  "Woodland"
+  "Woodland",
+  "Amboy"
 ]
 
 export function extractCity(address) {
@@ -29,12 +30,19 @@ function matchCities(city) {
     : [normalized]
 }
 
+function rowCity(row) {
+  const explicit = String(row["City"] || "").trim()
+  if (explicit) return explicit
+
+  return extractCity(row[ADDRESS_COLUMN])
+}
+
 function filterByCity(rows, city) {
   if (!city) return rows
 
   const targets = matchCities(city)
   return rows.filter((row) => {
-    const extracted = extractCity(row[ADDRESS_COLUMN])
+    const extracted = rowCity(row)
     return (
       extracted &&
       targets.some(

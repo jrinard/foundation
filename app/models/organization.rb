@@ -77,8 +77,28 @@ class Organization < ApplicationRecord
     wa_sos_discovery_source.enabled?
   end
 
+  def discovery_data_axel_enabled?
+    data_axel_discovery_source.enabled?
+  end
+
+  def discovery_wa_sos_available?
+    discovery_wa_sos_enabled?
+  end
+
+  def discovery_data_axel_available?
+    discovery_data_axel_enabled? && Discovery::Sources::DataAxel::FileCatalog.csv_files.any?
+  end
+
+  def discovery_gems_available?
+    discovery_wa_sos_available? || discovery_data_axel_available?
+  end
+
   def wa_sos_discovery_source
     @wa_sos_discovery_source ||= DiscoverySource.ensure_wa_sos!(self)
+  end
+
+  def data_axel_discovery_source
+    @data_axel_discovery_source ||= DiscoverySource.ensure_data_axel!(self)
   end
 
   def member_count

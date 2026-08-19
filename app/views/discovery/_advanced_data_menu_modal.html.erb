@@ -1,33 +1,43 @@
 <%# locals: business %>
 <%
   business = local_assigns[:business]
-  show_lni = business.present? && business.source == DiscoveryBusiness::SOURCE_WA_SOS
   has_website = business.present? && business.website.to_s.strip.present?
+  show_mountain_gems = business.present? && business.organization.discovery_data_axel_available?
 %>
-<%= foundation_modal modal_id: "discoveryAdvancedDataMenu", title: "Advanced data", size: :sm,
+<%= foundation_modal modal_id: "discoveryAdvancedDataMenu", title: Discovery::GemSources.refine_label, size: :sm,
       dialog_class: "discovery-advanced-data-menu-modal" do %>
   <p class="theme-text discovery-advanced-data-menu-note">
     Choose an alternate enrichment source.
   </p>
 
   <div class="discovery-advanced-data-menu-options">
+    <% if show_mountain_gems %>
+      <button type="button"
+              class="btn discovery-advanced-data-menu-option theme-text"
+              data-advanced-data-option="axel"
+              data-action="click->discovery-business-show#runAdvancedDataMenuOption">
+        <span class="discovery-advanced-data-menu-option-label"><%= Discovery::GemSources.refine_mountain_gems_label %></span>
+        <span class="discovery-advanced-data-menu-option-note">
+          Search local Mountain Gems data — phone, address &amp; contact fields
+        </span>
+      </button>
+    <% end %>
+
     <button type="button"
             class="btn discovery-advanced-data-menu-option theme-text"
             data-advanced-data-option="legacy"
             data-action="click->discovery-business-show#runAdvancedDataMenuOption">
-      <span class="discovery-advanced-data-menu-option-label">Legacy</span>
-      <span class="discovery-advanced-data-menu-option-note">Google Places legacy API</span>
+      <span class="discovery-advanced-data-menu-option-label"><%= Discovery::GemSources.refine_legacy_label %></span>
+      <span class="discovery-advanced-data-menu-option-note"><%= Discovery::GemSources.refine_legacy_subtext %></span>
     </button>
 
-    <% if show_lni %>
-      <button type="button"
-              class="btn discovery-advanced-data-menu-option theme-text"
-              data-advanced-data-option="lni"
-              data-action="click->discovery-business-show#runAdvancedDataMenuOption">
-        <span class="discovery-advanced-data-menu-option-label">Labor &amp; Industry</span>
-        <span class="discovery-advanced-data-menu-option-note">WA L&amp;I business lookup — phone, license &amp; vertical</span>
-      </button>
-    <% end %>
+    <button type="button"
+            class="btn discovery-advanced-data-menu-option theme-text"
+            data-advanced-data-option="lni"
+            data-action="click->discovery-business-show#runAdvancedDataMenuOption">
+      <span class="discovery-advanced-data-menu-option-label"><%= Discovery::GemSources.refine_forge_gems_label %></span>
+      <span class="discovery-advanced-data-menu-option-note"><%= Discovery::GemSources.refine_forge_gems_subtext %></span>
+    </button>
 
     <button type="button"
             class="btn discovery-advanced-data-menu-option theme-text<%= " is-disabled" unless has_website %>"

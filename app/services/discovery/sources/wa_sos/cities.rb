@@ -15,7 +15,8 @@ module Discovery
           "Battle Ground",
           "Hockinson",
           "Brush Prairie",
-          "Woodland"
+          "Woodland",
+          "Amboy"
         ].freeze
 
         OPTIONS = [SOUTHERN_WA, *INDIVIDUAL_CITIES].freeze

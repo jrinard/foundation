@@ -17,12 +17,17 @@
        data-discovery-business-show-select-google-place-url-value="<%= select_google_place_discovery_path(business) %>"
        data-discovery-business-show-wa-lni-search-url-value="<%= check_wa_lni_discovery_path(business) %>"
        data-discovery-business-show-wa-lni-details-url-value="<%= select_wa_lni_discovery_path(business) %>"
+       data-discovery-business-show-data-axel-search-url-value="<%= check_data_axel_discovery_path(business) %>"
+       data-discovery-business-show-data-axel-details-url-value="<%= select_data_axel_discovery_path(business) %>"
        data-discovery-business-show-website-contacts-url-value="<%= check_website_contacts_discovery_path(business) %>"
        data-discovery-business-show-update-url-value="<%= update_captured_business_discovery_path(business) %>"
        data-discovery-business-show-score-url-value="<%= score_discovery_path(business) %>"
        data-discovery-business-show-score-card-url-value="<%= score_card_discovery_path(business) %>"
        data-discovery-business-show-current-enrichment-value="<%= ERB::Util.html_escape(current_enrichment.to_json) %>"
-       data-discovery-business-show-business-snapshot-value="<%= ERB::Util.html_escape(business_snapshot.to_json) %>">
+       data-discovery-business-show-business-snapshot-value="<%= ERB::Util.html_escape(business_snapshot.to_json) %>"
+       data-discovery-business-show-mountain-gems-label-value="<%= Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL) %>"
+       data-discovery-business-show-refine-label-value="<%= Discovery::GemSources.refine_label %>"
+       data-discovery-business-show-forge-gems-label-value="<%= Discovery::GemSources.forge_gems_label %>">
     <div class="customer-note-report support-white-card-theme discovery-business-show-card">
       <div class="discovery-business-show-header">
         <%= link_to "← Discovery", discovery_index_path, class: "theme-text discovery-business-back-link" %>
@@ -200,6 +205,15 @@
                     value: business.vertical_classification,
                     input_type: :vertical_select,
                     verified: business.field_verified?(:vertical_classification) %>
+              <%= render "inline_field",
+                    business: business,
+                    update_url: inline_update_url,
+                    label: "Date business established",
+                    param: :date_business_established,
+                    value: business.date_business_established&.to_s,
+                    display_value: business.date_business_established.present? ? l(business.date_business_established, format: :long) : nil,
+                    input_type: :date,
+                    verified: business.field_verified?(:date_business_established) %>
 
               <div class="discovery-show-fields-social">
                 <%= render "inline_field",

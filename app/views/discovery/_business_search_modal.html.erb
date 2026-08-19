@@ -1,7 +1,39 @@
 <%= foundation_modal modal_id: "discoveryBusinessSearch", title: "Business search", size: :md do %>
+  <% wa_sos_available = current_organization.discovery_wa_sos_available? %>
+  <% data_axel_available = current_organization.discovery_data_axel_available? %>
+  <% default_search_source = wa_sos_available ? "wa_sos" : "data_axel" %>
+  <% show_source_picker = wa_sos_available && data_axel_available %>
 
   <form class="discovery-business-search-form"
         data-action="submit->discovery-sos-fetch#submitBusinessSearch">
+    <% if show_source_picker %>
+      <fieldset class="discovery-business-search-source-fieldset">
+        <legend class="theme-text">Search source</legend>
+        <% if wa_sos_available %>
+          <label class="theme-text discovery-business-search-source-option">
+            <%= radio_button_tag :business_search_source,
+                  "wa_sos",
+                  default_search_source == "wa_sos",
+                  data: { discovery_sos_fetch_target: "businessSearchSource" } %>
+            River Gems
+          </label>
+        <% end %>
+        <% if data_axel_available %>
+          <label class="theme-text discovery-business-search-source-option">
+            <%= radio_button_tag :business_search_source,
+                  "data_axel",
+                  default_search_source == "data_axel",
+                  data: { discovery_sos_fetch_target: "businessSearchSource" } %>
+            Mountain Gems
+          </label>
+        <% end %>
+      </fieldset>
+    <% elsif wa_sos_available || data_axel_available %>
+      <%= hidden_field_tag :business_search_source,
+            default_search_source,
+            data: { discovery_sos_fetch_target: "businessSearchSource" } %>
+    <% end %>
+
     <div class="field">
       <%= label_tag :business_search_name, "Business name", class: "theme-text" %>
       <%= text_field_tag :business_search_name,

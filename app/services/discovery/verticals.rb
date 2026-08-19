@@ -28,7 +28,6 @@ module Discovery
       value.blank? || OPTIONS.include?(value.to_s)
     end
 
-    # Map WA L&I specialty / license labels to Foundation verticals.
     def self.infer_from_lni(specialty: nil, license_type: nil, contractor_type: nil)
       specialty_text = specialty.to_s.strip
       unless generic_lni_specialty?(specialty_text)
@@ -38,6 +37,20 @@ module Discovery
 
       haystack = [license_type, contractor_type].compact.join(" ").downcase.squish
       infer_from_text(haystack)
+    end
+
+    # Map Data Axel Primary SIC Description to Foundation verticals.
+    def self.infer_from_axel(business_type:)
+      text = business_type.to_s.strip
+      return nil if text.blank?
+
+      exact = OPTIONS.find { |option| option.casecmp?(text) }
+      return exact if exact
+
+      inferred = infer_from_text(text.downcase.squish)
+      return inferred if inferred
+
+      OPTIONS.find { |option| text.match?(/\b#{Regexp.escape(option)}\b/i) }
     end
 
     def self.generic_lni_specialty?(specialty)
@@ -71,7 +84,7 @@ module Discovery
       "Retail" => /\b(retail|store|shop)\b/,
       "Medical" => /\b(medical|dental|health|clinic|chiropract|physician)\b/,
       "Automotive" => /\b(auto\w*|automotive|mechanic|body.?shop|tire)\b/,
-      "Construction Contractor" => /\b(construction contractor|building contractor|residential contractor)\b/,
+      "Construction Contractor" => /\b(construction compan\w*|construction contractor|building contractor|residential contractor)\b/,
       "Remodeling" => /\b(remodel\w*|renovat\w*)\b/
     }.freeze
   end

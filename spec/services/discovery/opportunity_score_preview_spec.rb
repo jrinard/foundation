@@ -346,7 +346,7 @@ RSpec.describe Discovery::OpportunityScorePreview do
 
     expect(line.status).to eq(:unchecked)
     expect(line.points).to eq(0)
-    expect(line.detail).to include("manual check")
+    expect(line.detail).to include("Qualify reviews")
   end
 
   it "awards 50 review gap points when under 3 reviews and marked sell" do
@@ -411,10 +411,29 @@ RSpec.describe Discovery::OpportunityScorePreview do
     expect(line.detail).to include("NA")
   end
 
-  it "leaves reviews unchecked until places are matched" do
-    line = reviews_line(preview_for(places_check_status: DiscoveryBusiness::CHECK_MISSING))
+  it "allows manual reviews qualification without a Places match" do
+    line = reviews_line(
+      preview_for(
+        places_check_status: DiscoveryBusiness::CHECK_MISSING,
+        reviews_check_status: DiscoveryBusiness::CHECK_MISSING
+      )
+    )
 
-    expect(line.status).to eq(:unchecked)
+    expect(line.status).to eq(:gap)
+    expect(line.points).to eq(50)
+    expect(line.detail).to include("no Google reviews")
+  end
+
+  it "marks reviews NA when manually qualified without Places data" do
+    line = reviews_line(
+      preview_for(
+        places_check_status: DiscoveryBusiness::CHECK_UNCHECKED,
+        reviews_check_status: DiscoveryBusiness::CHECK_FOUND
+      )
+    )
+
+    expect(line.status).to eq(:ok)
     expect(line.points).to eq(0)
+    expect(line.detail).to include("NA")
   end
 end

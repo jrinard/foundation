@@ -127,7 +127,7 @@ RSpec.describe Discovery::WaLniVerifyLookup do
 
       expect(result.ok).to be(true)
       expect(result.results).to be_empty
-      expect(result.message).to include("No active L&I matches")
+      expect(result.message).to include("No active Forge Gems matches")
     end
 
     it "searches by name only to match the public L&I site (no CityFilter)" do
@@ -179,6 +179,40 @@ RSpec.describe Discovery::WaLniVerifyLookup do
       expect(result.ok).to be(true)
       expect(result.results.size).to eq(1)
       expect(result.results.first[:business_name]).to eq("ASPEN GROUP NW LLC")
+      expect(result.results.first[:ubi_match]).to be(true)
+    end
+
+    it "works for Mountain Gems captures using external_id as UBI" do
+      payload = {
+        "d" => {
+          "SearchResult" => [
+            {
+              "Ubi" => "604325889",
+              "LicenseId" => "PRIMECN822PA",
+              "BusinessName" => "PRIME CONSTRUCTION NW LLC",
+              "ContractorType" => "Construction Contractor",
+              "City" => "PORT ORCHARD",
+              "State" => "WA",
+              "ZipCode" => "98366",
+              "Status" => "View Details",
+              "OverallRank" => 5000
+            }
+          ]
+        }
+      }
+
+      allow_any_instance_of(described_class).to receive(:post_json).and_return(payload)
+
+      result = described_class.search(
+        discovery_business: business_for(
+          source: DiscoveryBusiness::SOURCE_DATA_AXEL,
+          business_name: "PRIME CONSTRUCTION NW LLC",
+          external_id: "604325889",
+          city: "Port Orchard"
+        )
+      )
+
+      expect(result.ok).to be(true)
       expect(result.results.first[:ubi_match]).to be(true)
     end
   end

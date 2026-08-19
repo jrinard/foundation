@@ -28,10 +28,17 @@ module Discovery
       end
 
       def self.matches_cities?(row, cities)
-        extracted = extract_city(row[ADDRESS_COLUMN])
+        extracted = row_city(row)
         return false if extracted.blank?
 
         cities.any? { |target| extracted.casecmp?(target.to_s.strip) }
+      end
+
+      def self.row_city(row)
+        explicit = row["City"].to_s.strip
+        return explicit if explicit.present?
+
+        extract_city(row[ADDRESS_COLUMN])
       end
 
       def self.matches_city?(row, city)

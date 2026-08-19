@@ -4,6 +4,7 @@ class DiscoveryBusiness < ApplicationRecord
   include OrganizationScoped
 
   SOURCE_WA_SOS = "wa_sos"
+  SOURCE_DATA_AXEL = "data_axel"
 
   STATUS_DISCOVERY = "discovery"
   STATUS_IMPORTED = "imported"
@@ -217,6 +218,7 @@ class DiscoveryBusiness < ApplicationRecord
       places_check_status: places_check_status.to_s,
       reviews_check_status: reviews_check_status.to_s,
       vertical_classification: vertical_classification.to_s,
+      date_business_established: date_business_established&.iso8601.to_s,
       facebook_url: facebook_url.to_s,
       facebook_check_status: facebook_check_status.to_s,
       linkedin_url: linkedin_url.to_s,
@@ -224,10 +226,6 @@ class DiscoveryBusiness < ApplicationRecord
       instagram_url: instagram_url.to_s,
       instagram_check_status: instagram_check_status.to_s
     }
-  end
-
-  def display_ubi
-    raw_payload_field("UBI#").presence || external_id
   end
 
   def display_office_address
@@ -249,12 +247,13 @@ class DiscoveryBusiness < ApplicationRecord
   end
 
   def source_label
-    case source
-    when SOURCE_WA_SOS
-      "WA Secretary of State"
-    else
-      source.to_s.humanize
-    end
+    Discovery::GemSources.label_for(source)
+  end
+
+  def display_ubi
+    return external_id if source == SOURCE_DATA_AXEL
+
+    raw_payload_field("UBI#").presence || external_id
   end
 
   def google_rating_label
@@ -287,6 +286,8 @@ class DiscoveryBusiness < ApplicationRecord
       google_place_id.present?
     when :vertical_classification
       vertical_classification.present?
+    when :date_business_established
+      date_business_established.present?
     when :facebook_url
       facebook_url.present? || facebook_check_status == CHECK_MISSING
     when :instagram_url
@@ -309,9 +310,16 @@ class DiscoveryBusiness < ApplicationRecord
   end
 
   def hydrate_sos_identity_from_raw_payload
-    return unless source == SOURCE_WA_SOS
     return if raw_payload.blank?
 
+    if source == SOURCE_WA_SOS
+      hydrate_wa_sos_identity
+    elsif source == SOURCE_DATA_AXEL
+      hydrate_data_axel_identity
+    end
+  end
+
+  def hydrate_wa_sos_identity
     self.office_address = raw_payload_field("Office Address", "Principal Office Address") if office_address.blank?
     self.registered_agent_name = raw_payload_field("Reg Name", "Registered Agent Name") if registered_agent_name.blank?
     self.business_type = raw_payload_field("Business Type") if business_type.blank?
@@ -320,6 +328,24 @@ class DiscoveryBusiness < ApplicationRecord
 
     extracted = Discovery::Sources::WaSos::FunnelFilters.extract_city(office_address.to_s)
     self.city = extracted if extracted.present?
+  end
+
+  def hydrate_data_axel_identity
+    self.office_address = raw_payload_field("Office Address") if office_address.blank?
+    self.registered_agent_name = raw_payload_field("Reg Name") if registered_agent_name.blank?
+    self.business_type = raw_payload_field("Business Type") if business_type.blank?
+    self.phone = raw_payload_field("Phone Number Combined") if phone.blank?
+    self.city = raw_payload_field("City") if city.blank?
+    self.date_business_established ||= parse_established_date_from_raw
+  end
+
+  def parse_established_date_from_raw
+    raw = raw_payload["date_business_established"]
+    return nil if raw.blank?
+
+    Date.parse(raw.to_s)
+  rescue ArgumentError
+    nil
   end
 
   def sync_check_statuses_from_fields

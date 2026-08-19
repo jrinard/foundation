@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_08_11_153000) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_14_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -139,6 +139,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_11_153000) do
     t.datetime "updated_at", null: false
     t.boolean "waiting", default: false, null: false
     t.string "reviews_check_status", default: "unchecked", null: false
+    t.date "date_business_established"
     t.index ["customer_id"], name: "index_discovery_businesses_on_customer_id"
     t.index ["organization_id", "archived"], name: "index_discovery_businesses_on_org_and_archived"
     t.index ["organization_id", "google_place_id"], name: "index_discovery_businesses_on_org_google_place_id"
@@ -395,6 +396,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_11_153000) do
     t.string "discovery_wa_sos_date_cadence", default: "24h", null: false
     t.string "discovery_wa_sos_city", default: "Vancouver", null: false
     t.boolean "outreach_enabled", default: false, null: false
+    t.boolean "discovery_data_axel_enabled", default: true, null: false
     t.index ["slug"], name: "index_organizations_on_slug", unique: true
   end
 

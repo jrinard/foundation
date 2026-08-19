@@ -1,6 +1,6 @@
-<%= foundation_modal modal_id: "discoverySosSettings", title: "WA SOS search settings", size: :md do %>
+<%= foundation_modal modal_id: "discoverySosSettings", title: "River Gems collect settings", size: :md do %>
   <p class="discovery-modal-note theme-text">
-    These settings are saved on this org’s WA SOS discovery source and used when you run <strong>Collect State</strong>.
+    These settings apply to the next <strong><%= Discovery::GemSources.collect_label_for(DiscoveryBusiness::SOURCE_WA_SOS) %></strong> run.
   </p>
 
   <div class="field">

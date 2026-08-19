@@ -18,16 +18,30 @@
     <table class="discovery-results-table">
       <thead>
         <tr>
-          <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
-            <th scope="col" class="theme-text"><%= column %></th>
+          <% Discovery::Sources::WaSos::CsvParser::RESULTS_UI_DISPLAY_COLUMNS.each do |column| %>
+            <% office_class = column == "Office Address" ? " discovery-results-office-address" : "" %>
+            <% phone_class = column == Discovery::Sources::WaSos::CsvParser::UI_PHONE_COLUMN ? " discovery-results-phone-col" : "" %>
+            <th scope="col" class="theme-text<%= office_class %><%= phone_class %>"><%= Discovery::Sources::WaSos::CsvParser.ui_column_label(column) %></th>
           <% end %>
         </tr>
       </thead>
       <tbody>
         <% rows.each do |row| %>
           <tr class="discovery-results-row">
-            <% Discovery::Sources::WaSos::CsvParser::UI_DISPLAY_COLUMNS.each do |column| %>
-              <td class="theme-text"><%= row[column].presence || "—" %></td>
+            <% Discovery::Sources::WaSos::CsvParser::RESULTS_UI_DISPLAY_COLUMNS.each do |column| %>
+              <% if column == Discovery::Sources::WaSos::CsvParser::UI_PHONE_COLUMN %>
+                <td class="theme-text discovery-results-phone-cell">
+                  <% phone = Discovery::Sources::WaSos::CsvParser.row_phone(row) %>
+                  <% if phone.present? %>
+                    <span class="discovery-results-phone-yes" title="<%= phone %>">Yes</span>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+              <% else %>
+                <% office_class = column == "Office Address" ? " discovery-results-office-address" : "" %>
+                <td class="theme-text<%= office_class %>"><%= row[column].presence || "—" %></td>
+              <% end %>
             <% end %>
           </tr>
         <% end %>

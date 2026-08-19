@@ -67,11 +67,20 @@ class SettingsController < ApplicationController
   def update_discovery
     authorize! :manage, :settings
 
-    source = DiscoverySource.ensure_wa_sos!(current_organization)
-    if source.update(discovery_source_params)
-      flash[:notice] = "Discovery source settings saved for #{current_organization.name}."
+    wa_sos = DiscoverySource.ensure_wa_sos!(current_organization)
+    axel = DiscoverySource.ensure_data_axel!(current_organization)
+    sources = params.fetch(:discovery_sources, {})
+
+    wa_sos.enabled = discovery_source_enabled_param(sources, :wa_sos)
+    axel.enabled = discovery_source_enabled_param(sources, :data_axel)
+
+    ok = wa_sos.save && axel.save
+    errors = (wa_sos.errors.full_messages + axel.errors.full_messages).uniq
+
+    if ok && errors.empty?
+      flash[:notice] = "Data gem source settings saved for #{current_organization.name}."
     else
-      flash[:alert] = source.errors.full_messages.to_sentence
+      flash[:alert] = errors.presence&.to_sentence || "Could not save discovery source settings."
     end
     redirect_to settings_path(discovery: "discovery")
   end
@@ -216,6 +225,13 @@ class SettingsController < ApplicationController
       :archived_enabled,
       :activity_enabled
     )
+  end
+
+  def discovery_source_enabled_param(sources, key)
+    entry = sources[key.to_s] || sources[key.to_sym] || {}
+    value = entry[:enabled] || entry["enabled"] || "0"
+    value = value.last if value.is_a?(Array)
+    ActiveModel::Type::Boolean.new.cast(value)
   end
 
   def discovery_source_params

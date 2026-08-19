@@ -8,6 +8,8 @@ module Discovery
       class CsvParser
         OFFICE_ADDRESS_COLUMN = "Office Address"
         REGISTERED_AGENT_NAME_COLUMN = "Reg Name"
+        PHONE_DATA_COLUMN = "Phone Number Combined"
+        UI_PHONE_COLUMN = "Phone"
 
         DISPLAY_COLUMNS = [
           "Business Name",
@@ -25,8 +27,14 @@ module Discovery
           "Business Type"
         ].freeze
 
+        RESULTS_UI_DISPLAY_COLUMNS = [
+          *UI_DISPLAY_COLUMNS,
+          UI_PHONE_COLUMN
+        ].freeze
+
         UI_COLUMN_LABELS = {
-          "Business Type" => "Type"
+          "Business Type" => "Type",
+          UI_PHONE_COLUMN => "Phone"
         }.freeze
 
         CSV_COLUMN_SOURCES = {
@@ -59,6 +67,16 @@ module Discovery
 
         def self.ui_column_label(column)
           UI_COLUMN_LABELS.fetch(column, column)
+        end
+
+        def self.row_phone(row)
+          hash = row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row
+          hash = hash.stringify_keys
+          hash[PHONE_DATA_COLUMN].to_s.strip.presence
+        end
+
+        def self.phone_present?(row)
+          row_phone(row).present?
         end
 
         def self.captured_business_value(business, column)
