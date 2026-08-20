@@ -3932,56 +3932,614 @@ body#app-theme-body[data-dark] .discovery-header-top {
 
   .discovery-gem-source-option.org-admin-check {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    min-width: 220px;
-    max-width: 280px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
     margin: 0;
-    text-align: center;
+    width: 100%;
+    text-align: left;
     font-weight: normal;
+    color: inherit;
   }
 }
 
-.discovery-gem-sources-title {
-  margin-bottom: 20px;
+.discovery-gem-sources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px 28px;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  align-items: start;
 }
 
-.discovery-gem-sources-form {
+.discovery-gem-source-panel {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-.discovery-gem-sources-grid {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 32px 56px;
+  align-items: stretch;
+  gap: 12px;
   width: 100%;
+  min-height: 129px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #111;
+  color: #ececec;
+  box-sizing: border-box;
 }
 
+body#app-theme-body:not([data-dark]) .discovery-gem-source-panel {
+  background: #fff;
+  border-color: #d2d2d2;
+  color: #111;
+}
 
-.discovery-gem-source-checkbox {
+.discovery-gem-source-panel-mountain {
+  min-width: 0;
+}
+
+.discovery-gem-source-panel-body {
+  width: 100%;
+  text-align: left;
+}
+
+.discovery-gem-source-panel-lead {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  opacity: 0.85;
+  color: inherit;
+}
+
+.discovery-gem-library-toggle-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 2px 0 4px;
+  height: 22px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+}
+
+body#app-theme-body:not([data-dark]) .discovery-gem-library-toggle-row::before {
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.discovery-gem-library-toggle-group {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
   margin: 0;
+  border: none;
+  background: #111;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+
+  &:hover,
+  &:focus {
+    outline: none;
+
+    .discovery-gem-library-toggle {
+      background: #333;
+    }
+  }
+}
+
+body#app-theme-body:not([data-dark]) .discovery-gem-library-toggle-group {
+  background: #fff;
+
+  &:hover,
+  &:focus {
+    .discovery-gem-library-toggle {
+      background: #f3f3f3;
+    }
+  }
+}
+
+.discovery-gem-library-toggle-label {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  color: inherit;
+}
+
+.discovery-gem-library-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: #222;
+  color: #fff;
+  line-height: 1;
+}
+
+body#app-theme-body:not([data-dark]) .discovery-gem-library-toggle {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.18);
+  color: #111;
+}
+
+.discovery-gem-library-toggle-arrow {
+  display: inline-block;
+  font-size: 11px;
+  transition: transform 0.15s ease;
+}
+
+.discovery-gem-library-toggle-group.is-collapsed .discovery-gem-library-toggle-arrow {
+  transform: rotate(-90deg);
+}
+
+.discovery-gem-library-panel {
+  width: 100%;
+  text-align: left;
+}
+
+.discovery-gem-library-panel.is-collapsed {
+  display: none;
+}
+
+.discovery-gem-source-checkbox-wrap {
+  flex: 0 0 auto;
+  padding-top: 5px;
+}
+
+.discovery-gem-source-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .discovery-gem-source-name {
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: inherit;
 }
 
 .discovery-gem-source-subtext {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   opacity: 0.65;
   font-weight: normal;
   line-height: 1.35;
+  color: inherit;
 }
 
-.discovery-gem-sources-save {
+.discovery-gem-source-checkbox {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.discovery-mountain-gems-files-table-wrap {
+  margin-bottom: 12px;
+  overflow: visible;
+}
+
+.discovery-mountain-gems-files-table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+  color: inherit;
+
+  th,
+  td {
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    color: inherit;
+  }
+
+  th:first-child,
+  td.discovery-mountain-gems-file-label {
+    width: 130px;
+    max-width: 130px;
+  }
+
+  th:nth-child(2),
+  td.discovery-mountain-gems-file-rows {
+    width: 72px;
+  }
+
+  th:last-child,
+  td.discovery-mountain-gems-file-actions {
+    width: 72px;
+    text-align: right;
+  }
+
+  tbody tr.discovery-mountain-gems-files-row {
+    position: relative;
+    z-index: 1;
+  }
+
+  tbody tr.discovery-mountain-gems-files-row:hover,
+  tbody tr.discovery-mountain-gems-files-row:has(.discovery-mountain-gems-file-label-text:hover),
+  tbody tr.discovery-mountain-gems-files-row:has(.discovery-mountain-gems-file-label-text:focus-within) {
+    z-index: 40;
+  }
+
+  tbody tr.discovery-mountain-gems-files-row:hover,
+  tfoot tr.discovery-mountain-gems-files-row:hover {
+    td {
+      background: rgba(255, 255, 255, 0.04);
+    }
+  }
+
+  thead th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.45);
+    color: rgba(255, 255, 255, 0.92);
+    border-bottom-color: rgba(255, 255, 255, 0.16);
+  }
+
+  tfoot tr.discovery-mountain-gems-files-row {
+    position: relative;
+    z-index: 1;
+  }
+
+  tfoot tr.discovery-mountain-gems-files-row:hover {
+    z-index: 40;
+  }
+
+  tfoot td {
+    border-bottom: none;
+    padding-top: 10px;
+    font-size: 0.85rem;
+  }
+}
+
+body#app-theme-body:not([data-dark]) .discovery-mountain-gems-files-table {
+  th,
+  td {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  thead th {
+    background: #d8d8d8;
+    color: #111;
+    border-bottom-color: rgba(0, 0, 0, 0.12);
+  }
+
+  tbody tr.discovery-mountain-gems-files-row:hover,
+  tfoot tr.discovery-mountain-gems-files-row:hover {
+    td {
+      background: rgba(0, 0, 0, 0.03);
+    }
+  }
+}
+
+.discovery-mountain-gems-file-label,
+.discovery-mountain-gems-files-row td:first-child {
+  position: relative;
+  overflow: visible;
+}
+
+.discovery-mountain-gems-file-size-tip {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%);
+  z-index: 100;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(20, 20, 20, 0.96);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.discovery-mountain-gems-files-row:hover .discovery-mountain-gems-file-size-tip {
+  display: block;
+}
+
+body#app-theme-body:not([data-dark]) .discovery-mountain-gems-file-size-tip {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: #fff;
+  color: #222;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.discovery-mountain-gems-file-label-text {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  z-index: 1;
+}
+
+.discovery-mountain-gems-file-label-name {
+  display: block;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.discovery-mountain-gems-file-label-full {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 4px);
+  z-index: 100;
   min-width: 120px;
+  max-width: 280px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(20, 20, 20, 0.96);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
+  pointer-events: none;
+}
+
+.discovery-mountain-gems-file-label-text:hover,
+.discovery-mountain-gems-file-label-text:focus-within {
+  z-index: 101;
+}
+
+.discovery-mountain-gems-file-label-text:hover .discovery-mountain-gems-file-label-full,
+.discovery-mountain-gems-file-label-text:focus-within .discovery-mountain-gems-file-label-full {
+  display: block;
+}
+
+body#app-theme-body:not([data-dark]) .discovery-mountain-gems-file-label-full {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: #fff;
+  color: #222;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.discovery-mountain-gems-file-label-filename {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  opacity: 0.65;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.discovery-mountain-gems-file-rows {
+  position: relative;
+  overflow: visible;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.discovery-mountain-gems-file-uploaded {
+  white-space: nowrap;
+}
+
+.discovery-mountain-gems-file-actions {
+  text-align: right;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.discovery-mountain-gems-file-actions-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.discovery-mountain-gems-file-action-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.discovery-mountain-gems-file-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  line-height: 1;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+  flex: 0 0 28px;
+
+  &:hover,
+  &:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+}
+
+body#app-theme-body:not([data-dark]) .discovery-mountain-gems-file-action-btn {
+  border-color: rgba(0, 0, 0, 0.14);
+  background: rgba(0, 0, 0, 0.03);
+
+  &:hover,
+  &:focus {
+    background: rgba(0, 0, 0, 0.07);
+    border-color: rgba(0, 0, 0, 0.22);
+  }
+}
+
+.discovery-mountain-gems-file-edit-btn {
+  .lead-card-edit-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.discovery-mountain-gems-file-remove-btn {
+  color: $red;
+
+  &:hover,
+  &:focus {
+    color: darken($red, 8%);
+  }
+}
+
+.discovery-mountain-gems-file-remove-icon {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.discovery-mountain-gems-upload-form {
+  margin-top: 4px;
+  width: 100%;
+  text-align: left;
+}
+
+.discovery-mountain-gems-upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.discovery-mountain-gems-label-input {
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  flex: 0 0 130px;
+}
+
+.discovery-mountain-gems-label-filename {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.discovery-mountain-gems-label-help {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+
+.discovery-mountain-gems-label-form .foundation-modal-footer {
+  margin-top: 16px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.discovery-mountain-gems-unique-note {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.discovery-gem-sources-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto 20px;
+  text-align: left;
+}
+
+.discovery-gem-sources-title {
+  margin: 0;
+}
+
+.discovery-gem-sources-form {
+  width: 100%;
+}
+
+.discovery-gem-sources-layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+
+.discovery-gem-sources-save {
+  flex-shrink: 0;
+  min-width: 120px;
+  margin: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:hover,
+  &:focus {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.22);
+    color: inherit;
+  }
+
+  &.is-dirty {
+    @include discovery-primary-btn;
+  }
+}
+
+body#app-theme-body[data-dark] .discovery-gem-sources-save:not(.is-dirty) {
+  &:hover,
+  &:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.24);
+    color: inherit;
+  }
+}
+
+.discovery-mountain-gems-files-alert {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 5px;
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid rgba(255, 193, 7, 0.35);
+  font-size: 0.85rem;
+  color: inherit;
+}
+
+.discovery-mountain-gems-files-empty {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  color: inherit;
+}
+
+.discovery-mountain-gems-upload-input {
+  max-width: 100%;
 }
 
 .discovery-business-search-btn {

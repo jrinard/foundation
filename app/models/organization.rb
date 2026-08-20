@@ -13,6 +13,7 @@ class Organization < ApplicationRecord
   has_many :discovery_businesses, dependent: :destroy
   has_many :discovery_sources, dependent: :destroy
   has_many :discovery_runs, dependent: :destroy
+  has_many :discovery_data_axel_files, dependent: :destroy
   has_many :outreach_plans, dependent: :destroy
   has_many :outreach_campaigns, dependent: :destroy
   has_many :outreach_enrollments, dependent: :destroy
@@ -86,7 +87,11 @@ class Organization < ApplicationRecord
   end
 
   def discovery_data_axel_available?
-    discovery_data_axel_enabled? && Discovery::Sources::DataAxel::FileCatalog.csv_files.any?
+    discovery_data_axel_enabled? && discovery_data_axel_files.exists?
+  end
+
+  def discovery_data_axel_catalog
+    Discovery::Sources::DataAxel::FileCatalog.for(self)
   end
 
   def discovery_gems_available?

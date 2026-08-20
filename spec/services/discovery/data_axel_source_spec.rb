@@ -46,6 +46,7 @@ RSpec.describe Discovery::RunDataAxelSource do
 
   before do
     DiscoverySource.ensure_data_axel!(organization).update!(enabled: true)
+    create(:discovery_data_axel_file, :many_rows, organization: organization, row_total: 20)
   end
 
   it "returns a limited row window from merged CSV files" do

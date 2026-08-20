@@ -11,7 +11,7 @@ module Discovery
   # | Internal key (+DiscoveryBusiness+ constant) | Gem nickname   | Real source |
   # |---------------------------------------------|----------------|-------------|
   # | +SOURCE_WA_SOS+ (+wa_sos+)                  | River Gems     | Washington Secretary of State (WA SOS) — business filings for recently formed entities; live fetch via +RunWaSosSource+ / +FetchWaSos+ |
-  # | +SOURCE_DATA_AXEL+ (+data_axel+)            | Mountain Gems  | Data Axel (Reference Solutions) business list CSVs obtained through the library; local files under +storage/discovery/data_axel/+ (+Sources::DataAxel::FileCatalog+) |
+  # | +SOURCE_DATA_AXEL+ (+data_axel+)            | Mountain Gems  | Data Axel (Reference Solutions) business list CSVs uploaded per org in +discovery_data_axel_files+ (+DiscoveryDataAxelFile+; merged via +Sources::DataAxel::FileCatalog+) |
   # | +wa_lni+ (enrichment only)                    | Forge Gems     | Washington Labor & Industries (WA L&I) Verify a Contractor — licensed trades lookup via +WaLniVerifyLookup+ |
   #
   # Refine-step labels (+REFINE_*+) are enrichment actions on an already-captured business,
@@ -29,7 +29,7 @@ module Discovery
         gem_label: "Mountain Gems",
         internal_key: "data_axel",
         real_source: "Data Axel / Reference Solutions business list (library CSV export)",
-        detail: "Established businesses with richer contact fields. CSV files loaded from storage/discovery/data_axel/ (see Sources::DataAxel::FileCatalog). Used for collect and Refine-from-Mountain-Gems enrichment."
+        detail: "Established businesses with richer contact fields. CSV files uploaded in Settings → Discovery → Mountain Gems library (DiscoveryDataAxelFile). Merged on collect/refine via Sources::DataAxel::FileCatalog."
       }
     }.freeze
 

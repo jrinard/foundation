@@ -79,6 +79,9 @@ Rails.application.routes.draw do
   post '/settings/transfer_customers', to: 'settings#transfer_customers', as: 'process_transfer_customers'
   patch '/settings/organization_modules', to: 'settings#update_modules', as: :update_organization_modules
   patch '/settings/discovery', to: 'settings#update_discovery', as: :update_discovery_settings
+  post '/settings/discovery/data_axel_files', to: 'settings#create_discovery_data_axel_file', as: :create_discovery_data_axel_file
+  patch '/settings/discovery/data_axel_files/:id', to: 'settings#update_discovery_data_axel_file', as: :update_discovery_data_axel_file
+  delete '/settings/discovery/data_axel_files/:id', to: 'settings#destroy_discovery_data_axel_file', as: :destroy_discovery_data_axel_file
   post '/settings/toggle_customer_offerings_section', to: 'settings#toggle_customer_offerings_section', as: :settings_toggle_customer_offerings_section
   post '/settings/toggle_customer_revenue_section', to: 'settings#toggle_customer_revenue_section', as: :settings_toggle_customer_revenue_section
 

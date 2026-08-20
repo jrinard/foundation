@@ -6,24 +6,44 @@ module Discovery
   module Sources
     module DataAxel
       class FileCatalog
-        STORAGE_DIR = Rails.root.join("storage/discovery/data_axel")
-
-        def self.csv_files
-          paths = []
-          paths.concat(Dir.glob(STORAGE_DIR.join("*.csv"))) if STORAGE_DIR.directory?
-          paths.concat(Dir.glob(Rails.root.join("Summary*.csv")))
-          paths.map { |path| Pathname.new(path) }.uniq.sort_by(&:basename)
+        def self.for(organization)
+          new(organization)
         end
 
-        def self.merged_csv_body
-          files = csv_files
-          return "" if files.empty?
+        def initialize(organization)
+          @organization = organization
+        end
 
-          bodies = files.map do |path|
-            path.read.force_encoding("UTF-8").sub(/\A\uFEFF/, "")
+        def files
+          @files ||= DiscoveryDataAxelFile.where(organization_id: @organization.id).order(:id).to_a
+        end
+
+        def csv_files
+          files
+        end
+
+        def merged_csv_body
+          bodies = files.map { |file| normalize_body(file.raw_csv) }
+          self.class.merge_csv_bodies(bodies)
+        end
+
+        def file_count
+          files.size
+        end
+
+        def total_row_count
+          body = merged_csv_body
+          return 0 if body.blank?
+
+          rows = Discovery::Sources::DataAxel::CsvParser.parse(body)
+          seen = {}
+          rows.count do |row|
+            key = row["UBI#"].presence || row["Business Name"]
+            next false if key.blank? || seen[key]
+
+            seen[key] = true
+            true
           end
-
-          merge_csv_bodies(bodies)
         end
 
         def self.merge_csv_bodies(bodies)
@@ -54,23 +74,10 @@ module Discovery
           end
         end
 
-        def self.file_count
-          csv_files.size
-        end
+        private
 
-        def self.total_row_count
-          body = merged_csv_body
-          return 0 if body.blank?
-
-          rows = Discovery::Sources::DataAxel::CsvParser.parse(body)
-          seen = {}
-          rows.count do |row|
-            key = row["UBI#"].presence || row["Business Name"]
-            next false if key.blank? || seen[key]
-
-            seen[key] = true
-            true
-          end
+        def normalize_body(body)
+          body.to_s.dup.force_encoding("UTF-8").sub(/\A\uFEFF/, "")
         end
       end
     end

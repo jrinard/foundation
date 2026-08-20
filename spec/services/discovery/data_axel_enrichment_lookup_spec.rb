@@ -23,8 +23,11 @@ RSpec.describe Discovery::DataAxelEnrichmentLookup do
     )
   end
 
+  let(:catalog) { instance_double(Discovery::Sources::DataAxel::FileCatalog) }
+
   before do
-    allow(Discovery::Sources::DataAxel::FileCatalog).to receive(:merged_csv_body).and_return(csv_body)
+    allow(Discovery::Sources::DataAxel::FileCatalog).to receive(:for).with(organization).and_return(catalog)
+    allow(catalog).to receive(:merged_csv_body).and_return(csv_body)
   end
 
   describe ".search" do
@@ -48,7 +51,7 @@ RSpec.describe Discovery::DataAxelEnrichmentLookup do
     end
 
     it "returns failure when CSV data is missing" do
-      allow(Discovery::Sources::DataAxel::FileCatalog).to receive(:merged_csv_body).and_return("")
+      allow(catalog).to receive(:merged_csv_body).and_return("")
 
       result = described_class.search(discovery_business: business)
 

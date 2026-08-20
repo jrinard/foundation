@@ -1168,10 +1168,11 @@ class DiscoveryController < ApplicationController
       row_range_end: params[:row_range_end]
     )
     @axel_total_rows = axel_total_row_count
+    @axel_file_count = current_organization.discovery_data_axel_catalog.file_count
   end
 
   def axel_total_row_count
-    Discovery::Sources::DataAxel::FileCatalog.total_row_count
+    current_organization.discovery_data_axel_catalog.total_row_count
   rescue StandardError
     0
   end

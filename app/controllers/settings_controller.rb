@@ -85,6 +85,100 @@ class SettingsController < ApplicationController
     redirect_to settings_path(discovery: "discovery")
   end
 
+  def create_discovery_data_axel_file
+    authorize! :manage, :settings
+
+    result = Discovery::CreateDataAxelFile.call(
+      organization: current_organization,
+      upload: params[:csv_file],
+      user: current_user,
+      label: params[:label]
+    )
+
+    if result.success?
+      file = result.file
+      flash[:notice] = "Uploaded #{file.display_label} (#{file.human_byte_size}, #{file.row_count} rows)."
+    else
+      flash[:alert] = result.errors.to_sentence
+    end
+    redirect_to settings_path(discovery: "discovery", mountain_library: "1")
+  end
+
+  def destroy_discovery_data_axel_file
+    authorize! :manage, :settings
+
+    file = current_organization.discovery_data_axel_files.find(params[:id])
+    name = file.display_label
+    file.destroy!
+    message = "Removed #{name} from Mountain Gems."
+    respond_to do |format|
+      format.html do
+        flash[:notice] = message
+        redirect_to settings_path(discovery: "discovery")
+      end
+      format.json do
+        render json: { ok: true, message: message, display_label: name }
+      end
+    end
+  rescue ActiveRecord::RecordNotFound
+    message = "Mountain Gems file not found."
+    respond_to do |format|
+      format.html do
+        flash[:alert] = message
+        redirect_to settings_path(discovery: "discovery")
+      end
+      format.json do
+        render json: { ok: false, message: message }, status: :not_found
+      end
+    end
+  end
+
+  def update_discovery_data_axel_file
+    authorize! :manage, :settings
+
+    file = current_organization.discovery_data_axel_files.find(params[:id])
+    if file.update(label: params[:label].to_s.strip.presence)
+      respond_to do |format|
+        format.html do
+          flash[:notice] = "Saved label for #{file.display_label}."
+          redirect_to settings_path(discovery: "discovery")
+        end
+        format.json do
+          render json: {
+            ok: true,
+            message: "Saved label for #{file.display_label}.",
+            label: file.label.to_s,
+            display_label: file.display_label,
+            custom_label: file.custom_label?,
+            filename: file.filename
+          }
+        end
+      end
+    else
+      message = file.errors.full_messages.to_sentence
+      respond_to do |format|
+        format.html do
+          flash[:alert] = message
+          redirect_to settings_path(discovery: "discovery")
+        end
+        format.json do
+          render json: { ok: false, message: message }, status: :unprocessable_entity
+        end
+      end
+    end
+  rescue ActiveRecord::RecordNotFound
+    message = "Mountain Gems file not found."
+    respond_to do |format|
+      format.html do
+        flash[:alert] = message
+        redirect_to settings_path(discovery: "discovery")
+      end
+      format.json do
+        render json: { ok: false, message: message }, status: :not_found
+      end
+    end
+  end
+
   def update_outreach_sms_channel
     authorize! :manage, :settings
 

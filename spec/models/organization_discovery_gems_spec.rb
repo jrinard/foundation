@@ -13,35 +13,27 @@ RSpec.describe Organization, "discovery gem availability" do
   end
 
   describe "#discovery_data_axel_available?" do
-    context "when enabled with CSV files" do
+    context "when enabled with uploaded CSV files" do
       let(:wa_sos_enabled) { false }
       let(:data_axel_enabled) { true }
 
-      before do
-        allow(Discovery::Sources::DataAxel::FileCatalog).to receive(:csv_files).and_return([Pathname.new("sample.csv")])
-      end
+      before { create(:discovery_data_axel_file, organization: organization) }
 
       it { expect(organization.discovery_data_axel_available?).to be(true) }
     end
 
-    context "when enabled without CSV files" do
+    context "when enabled without uploaded CSV files" do
       let(:wa_sos_enabled) { false }
       let(:data_axel_enabled) { true }
-
-      before do
-        allow(Discovery::Sources::DataAxel::FileCatalog).to receive(:csv_files).and_return([])
-      end
 
       it { expect(organization.discovery_data_axel_available?).to be(false) }
     end
 
-    context "when disabled even with CSV files" do
+    context "when disabled even with uploaded CSV files" do
       let(:wa_sos_enabled) { false }
       let(:data_axel_enabled) { false }
 
-      before do
-        allow(Discovery::Sources::DataAxel::FileCatalog).to receive(:csv_files).and_return([Pathname.new("sample.csv")])
-      end
+      before { create(:discovery_data_axel_file, organization: organization) }
 
       it { expect(organization.discovery_data_axel_available?).to be(false) }
     end
@@ -58,10 +50,6 @@ RSpec.describe Organization, "discovery gem availability" do
 
     context "when no sources are usable" do
       let(:wa_sos_enabled) { false }
-
-      before do
-        allow(Discovery::Sources::DataAxel::FileCatalog).to receive(:csv_files).and_return([])
-      end
 
       it { expect(organization.discovery_gems_available?).to be(false) }
     end

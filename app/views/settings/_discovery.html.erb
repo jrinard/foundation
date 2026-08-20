@@ -5,28 +5,193 @@
 
   <% wa_sos_source = DiscoverySource.ensure_wa_sos!(current_organization) %>
   <% data_axel_source = DiscoverySource.ensure_data_axel!(current_organization) %>
+  <% data_axel_files = current_organization.discovery_data_axel_files.recent_first %>
+  <% mountain_gems_label = Discovery::GemSources.label_for(DiscoveryBusiness::SOURCE_DATA_AXEL) %>
+  <% total_uploaded_rows = data_axel_files.sum(&:row_count) %>
 
   <div class="qb-form-cont lead-card-dark theme-text discovery-gem-sources-card">
-    <h3 class="h4-black theme-text discovery-gem-sources-title">Data Gem Sources</h3>
-
-    <%= form_with url: update_discovery_settings_path, method: :patch, local: true, class: "discovery-gem-sources-form" do %>
-      <div class="discovery-gem-sources-grid">
-        <label class="org-admin-check discovery-gem-source-option">
-          <%= hidden_field_tag "discovery_sources[wa_sos][enabled]", "0" %>
-          <%= check_box_tag "discovery_sources[wa_sos][enabled]", "1", wa_sos_source.enabled?, class: "discovery-gem-source-checkbox" %>
-          <span class="discovery-gem-source-name theme-text">River Gems</span>
-          <span class="discovery-gem-source-subtext theme-text"><%= Discovery::GemSources.subtext_for(DiscoveryBusiness::SOURCE_WA_SOS) %></span>
-        </label>
-
-        <label class="org-admin-check discovery-gem-source-option">
-          <%= hidden_field_tag "discovery_sources[data_axel][enabled]", "0" %>
-          <%= check_box_tag "discovery_sources[data_axel][enabled]", "1", data_axel_source.enabled?, class: "discovery-gem-source-checkbox" %>
-          <span class="discovery-gem-source-name theme-text">Mountain Gems</span>
-          <span class="discovery-gem-source-subtext theme-text"><%= Discovery::GemSources.subtext_for(DiscoveryBusiness::SOURCE_DATA_AXEL) %></span>
-        </label>
+    <%= form_with url: update_discovery_settings_path,
+          method: :patch,
+          local: true,
+          html: {
+            id: "discovery-gem-sources-form",
+            class: "discovery-gem-sources-form",
+            data: { controller: "discovery-gem-sources-form" }
+          } do %>
+      <div class="discovery-gem-sources-header">
+        <h3 class="h4-black theme-text discovery-gem-sources-title">Data Gem Sources</h3>
+        <%= submit_tag "Save",
+              class: "btn btn-default theme-text discovery-gem-sources-save",
+              data: { discovery_gem_sources_form_target: "save" } %>
       </div>
 
-      <%= submit_tag "Save", class: "btn btn-default theme-text discovery-gem-sources-save" %>
+      <div class="discovery-gem-sources-layout">
+        <div class="discovery-gem-sources-grid">
+          <div class="discovery-gem-source-panel">
+            <label class="org-admin-check discovery-gem-source-option">
+              <%= hidden_field_tag "discovery_sources[wa_sos][enabled]", "0" %>
+              <span class="discovery-gem-source-checkbox-wrap">
+                <%= check_box_tag "discovery_sources[wa_sos][enabled]", "1", wa_sos_source.enabled?, class: "discovery-gem-source-checkbox" %>
+              </span>
+              <span class="discovery-gem-source-copy">
+                <span class="discovery-gem-source-name">River Gems</span>
+                <span class="discovery-gem-source-subtext"><%= Discovery::GemSources.subtext_for(DiscoveryBusiness::SOURCE_WA_SOS) %></span>
+              </span>
+            </label>
+
+            <div class="discovery-gem-source-panel-body">
+              <p class="discovery-gem-source-panel-lead">
+                Live fetch from Washington Secretary of State
+              </p>
+            </div>
+          </div>
+
+          <div class="discovery-gem-source-panel discovery-gem-source-panel-mountain">
+            <label class="org-admin-check discovery-gem-source-option">
+              <%= hidden_field_tag "discovery_sources[data_axel][enabled]", "0" %>
+              <span class="discovery-gem-source-checkbox-wrap">
+                <%= check_box_tag "discovery_sources[data_axel][enabled]", "1", data_axel_source.enabled?, class: "discovery-gem-source-checkbox" %>
+              </span>
+              <span class="discovery-gem-source-copy">
+                <span class="discovery-gem-source-name">Mountain Gems</span>
+                <span class="discovery-gem-source-subtext"><%= Discovery::GemSources.subtext_for(DiscoveryBusiness::SOURCE_DATA_AXEL) %></span>
+              </span>
+            </label>
     <% end %>
+
+            <%= foundation_modal_wrapper controllers: "discovery-gem-settings discovery-mountain-gems-file" do %>
+            <div class="discovery-gem-library-toggle-row">
+              <button type="button"
+                      class="discovery-gem-library-toggle-group"
+                      data-discovery-gem-settings-target="toggle"
+                      data-action="click->discovery-gem-settings#toggleLibrary"
+                      aria-expanded="false"
+                      aria-controls="mountainGemsLibrary">
+                <% if data_axel_files.any? %>
+                  <span class="discovery-gem-library-toggle-label">
+                    <%= pluralize(data_axel_files.size, "file") %> · <%= number_with_delimiter(total_uploaded_rows) %> rows
+                  </span>
+                <% else %>
+                  <span class="discovery-gem-library-toggle-label">CSV library</span>
+                <% end %>
+
+                <span class="discovery-gem-library-toggle" aria-hidden="true">
+                  <span class="discovery-gem-library-toggle-arrow">&#9660;</span>
+                </span>
+              </button>
+            </div>
+
+            <div id="mountainGemsLibrary"
+                 class="discovery-gem-source-panel-body discovery-gem-library-panel is-collapsed"
+                 data-discovery-gem-settings-target="panel">
+              <p class="discovery-gem-source-panel-lead">
+                Upload Data Axel CSV exports below. Collect and Refine merge every file in this library.
+              </p>
+
+              <% if data_axel_source.enabled? && data_axel_files.empty? %>
+                <p class="discovery-mountain-gems-files-alert">
+                  Enabled but no files yet — <strong>Collect Mountain Gems</strong> stays hidden until you upload at least one CSV.
+                </p>
+              <% end %>
+
+              <% if data_axel_files.any? %>
+                <div class="discovery-mountain-gems-files-table-wrap">
+                  <table class="discovery-mountain-gems-files-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Label</th>
+                        <th scope="col">Rows</th>
+                        <th scope="col">Uploaded</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% data_axel_files.each do |file| %>
+                        <tr class="discovery-mountain-gems-files-row">
+                          <td class="discovery-mountain-gems-file-label">
+                            <span class="discovery-mountain-gems-file-label-text">
+                              <span class="discovery-mountain-gems-file-label-name"><%= file.display_label %></span>
+                              <span class="discovery-mountain-gems-file-label-full" role="tooltip"><%= file.display_label %></span>
+                            </span>
+                            <% if file.custom_label? %>
+                              <span class="discovery-mountain-gems-file-label-filename"><%= file.filename %></span>
+                            <% end %>
+                          </td>
+                          <td class="discovery-mountain-gems-file-rows">
+                            <span class="discovery-mountain-gems-file-size-tip" role="tooltip"><%= file.human_byte_size %></span>
+                            <%= number_with_delimiter(file.row_count) %>
+                          </td>
+                          <td class="discovery-mountain-gems-file-uploaded"><%= file.created_at.to_date.strftime("%-m/%-d/%Y") %></td>
+                          <td class="discovery-mountain-gems-file-actions">
+                            <div class="discovery-mountain-gems-file-actions-group">
+                              <button type="button"
+                                      class="btn btn-default btn-sm theme-text discovery-mountain-gems-file-action-btn discovery-mountain-gems-file-edit-btn"
+                                      title="Edit label"
+                                      aria-label="Edit label"
+                                      data-action="click->discovery-mountain-gems-file#prepareEdit click->foundation-modal#open"
+                                      aria-controls="mountainGemsFileLabel"
+                                      data-label="<%= file.label.to_s %>"
+                                      data-filename="<%= file.filename %>"
+                                      data-update-url="<%= update_discovery_data_axel_file_path(file) %>">
+                                <span class="lead-card-edit-icon"
+                                      style="--lead-edit-icon: url('<%= image_path("icon-edit-black.png") %>')"
+                                      aria-hidden="true"></span>
+                              </button>
+                              <button type="button"
+                                      class="btn btn-default btn-sm theme-text discovery-mountain-gems-file-action-btn discovery-mountain-gems-file-remove-btn"
+                                      title="Remove"
+                                      aria-label="Remove <%= file.display_label %>"
+                                      data-delete-url="<%= destroy_discovery_data_axel_file_path(file) %>"
+                                      data-confirm-message="Remove &quot;<%= file.display_label %>&quot; from <%= mountain_gems_label %>?"
+                                      data-action="click->discovery-mountain-gems-file#removeFile">
+                                <span class="discovery-mountain-gems-file-remove-icon" aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                    <tfoot>
+                      <tr class="discovery-mountain-gems-files-row">
+                        <td><strong><%= pluralize(data_axel_files.size, "file") %></strong></td>
+                        <td class="discovery-mountain-gems-file-rows">
+                          <span class="discovery-mountain-gems-file-size-tip" role="tooltip"><%= number_to_human_size(data_axel_files.sum(&:byte_size)) %> total</span>
+                          <strong><%= number_with_delimiter(total_uploaded_rows) %></strong>
+                        </td>
+                        <td colspan="2">
+                          <span class="discovery-mountain-gems-unique-note">
+                            ~<%= number_with_delimiter(current_organization.discovery_data_axel_catalog.total_row_count) %> unique businesses after merge
+                          </span>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              <% else %>
+                <p class="discovery-mountain-gems-files-empty">No CSV files uploaded yet.</p>
+              <% end %>
+
+              <%= form_with url: create_discovery_data_axel_file_path,
+                    method: :post,
+                    local: true,
+                    multipart: true,
+                    class: "discovery-mountain-gems-upload-form" do %>
+                <div class="discovery-mountain-gems-upload-row">
+                  <%= text_field_tag :label,
+                        nil,
+                        class: "form-control theme-field discovery-mountain-gems-label-input",
+                        maxlength: DiscoveryDataAxelFile::MAX_LABEL_LENGTH,
+                        placeholder: "Label (optional)" %>
+                  <%= file_field_tag :csv_file, accept: ".csv,text/csv", class: "theme-field discovery-mountain-gems-upload-input", required: true %>
+                  <%= submit_tag "Upload CSV", class: "btn btn-default theme-text discovery-mountain-gems-upload-btn" %>
+                </div>
+              <% end %>
+            </div>
+
+            <%= render "mountain_gems_file_label_modal" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
   </div>
 </div>

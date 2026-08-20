@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_08_14_160000) do
+ActiveRecord::Schema[7.0].define(version: 2026_08_19_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -147,6 +147,21 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_14_160000) do
     t.index ["organization_id", "source", "external_id"], name: "index_discovery_businesses_on_org_source_external_id", unique: true
     t.index ["organization_id", "waiting"], name: "index_discovery_businesses_on_org_and_waiting"
     t.index ["organization_id"], name: "index_discovery_businesses_on_organization_id"
+  end
+
+  create_table "discovery_data_axel_files", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "uploaded_by_user_id"
+    t.string "filename", null: false
+    t.text "raw_csv", null: false
+    t.integer "byte_size", null: false
+    t.integer "row_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "label"
+    t.index ["organization_id", "created_at"], name: "index_discovery_data_axel_files_on_org_and_created_at"
+    t.index ["organization_id"], name: "index_discovery_data_axel_files_on_organization_id"
+    t.index ["uploaded_by_user_id"], name: "index_discovery_data_axel_files_on_uploaded_by_user_id"
   end
 
   create_table "discovery_runs", force: :cascade do |t|
@@ -623,6 +638,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_08_14_160000) do
   add_foreign_key "customers", "organizations"
   add_foreign_key "discovery_businesses", "customers"
   add_foreign_key "discovery_businesses", "organizations"
+  add_foreign_key "discovery_data_axel_files", "organizations"
+  add_foreign_key "discovery_data_axel_files", "users", column: "uploaded_by_user_id"
   add_foreign_key "discovery_runs", "discovery_sources"
   add_foreign_key "discovery_runs", "organizations"
   add_foreign_key "discovery_runs", "users", column: "triggered_by_user_id"

@@ -2,7 +2,7 @@ class Ability
   include CanCan::Ability
 
   CRM_MODELS = [
-    Customer, Lead, List, Contact, Note, Offering, Stats, QbInvoice, DiscoveryBusiness,
+    Customer, Lead, List, Contact, Note, Offering, Stats, QbInvoice, DiscoveryBusiness, DiscoveryDataAxelFile,
     OutreachPlan, OutreachCampaign, OutreachEnrollment, OutreachActivity, OutreachTextMessage
   ].freeze
 

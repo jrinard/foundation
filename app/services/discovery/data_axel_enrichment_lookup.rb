@@ -88,7 +88,7 @@ module Discovery
     end
 
     def load_rows
-      body = Sources::DataAxel::FileCatalog.merged_csv_body
+      body = Sources::DataAxel::FileCatalog.for(@business.organization).merged_csv_body
       return [] if body.blank?
 
       Sources::DataAxel::CsvParser.parse(body)

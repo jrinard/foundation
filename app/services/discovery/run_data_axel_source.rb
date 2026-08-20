@@ -33,7 +33,8 @@ module Discovery
 
       settings = source.data_axel_settings
       axel_query = settings.to_query(@overrides)
-      body = Sources::DataAxel::FileCatalog.merged_csv_body
+      catalog = Sources::DataAxel::FileCatalog.for(@organization)
+      body = catalog.merged_csv_body
 
       if body.blank?
         return Result.new(
@@ -55,7 +56,7 @@ module Discovery
         fetch_result: FetchResult.new(status: 200, body: body, content_type: "text/csv"),
         rows: display_rows,
         all_rows: all_rows,
-        axel_query: axel_query.merge(source_file_count: Sources::DataAxel::FileCatalog.file_count)
+        axel_query: axel_query.merge(source_file_count: catalog.file_count)
       )
     end
 

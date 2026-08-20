@@ -2,7 +2,7 @@
   <p class="discovery-modal-note theme-text">
     These settings apply to the next <strong><%= Discovery::GemSources.collect_label_for(DiscoveryBusiness::SOURCE_DATA_AXEL) %></strong> run.
     <% if @axel_total_rows.positive? %>
-      About <%= @axel_total_rows %> businesses are available across <%= Discovery::Sources::DataAxel::FileCatalog.file_count %> CSV files.
+      About <%= @axel_total_rows %> businesses are available across <%= @axel_file_count %> uploaded CSV files.
     <% end %>
   </p>
 

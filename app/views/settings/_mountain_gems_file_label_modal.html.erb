@@ -1,0 +1,28 @@
+<%= foundation_modal modal_id: "mountainGemsFileLabel", title: "Edit Mountain Gems label", size: :md do %>
+  <%= form_tag "#",
+        method: :patch,
+        class: "discovery-mountain-gems-label-form",
+        data: {
+          discovery_mountain_gems_file_target: "form",
+          action: "submit->discovery-mountain-gems-file#submitLabel"
+        } do %>
+    <div class="field">
+      <%= label_tag :label, "Label", class: "theme-text" %>
+      <%= text_field_tag :label,
+            nil,
+            class: "form-control theme-field",
+            maxlength: DiscoveryDataAxelFile::MAX_LABEL_LENGTH,
+            placeholder: "Custom name for this CSV library",
+            data: { discovery_mountain_gems_file_target: "labelInput" } %>
+      <p class="discovery-mountain-gems-label-filename theme-text" data-discovery-mountain-gems-file-target="filenameHint"></p>
+      <p class="discovery-mountain-gems-label-help theme-text">
+        Leave blank to use the filename stem as the label.
+      </p>
+    </div>
+
+    <%= foundation_modal_footer do %>
+      <%= foundation_modal_close_button "Cancel", class: "btn btn-default theme-text" %>
+      <%= submit_tag "Save label", class: "btn btn-default theme-text" %>
+    <% end %>
+  <% end %>
+<% end %>
