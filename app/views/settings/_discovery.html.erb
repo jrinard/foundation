@@ -16,13 +16,21 @@
           html: {
             id: "discovery-gem-sources-form",
             class: "discovery-gem-sources-form",
-            data: { controller: "discovery-gem-sources-form" }
+            data: {
+              controller: "discovery-gem-sources-form",
+              action: "submit->discovery-gem-sources-form#submitSave"
+            }
           } do %>
       <div class="discovery-gem-sources-header">
         <h3 class="h4-black theme-text discovery-gem-sources-title">Data Gem Sources</h3>
-        <%= submit_tag "Save",
-              class: "btn btn-default theme-text discovery-gem-sources-save",
-              data: { discovery_gem_sources_form_target: "save" } %>
+        <div class="discovery-gem-sources-header-actions">
+          <p class="discovery-gem-sources-save-status theme-text"
+             data-discovery-gem-sources-form-target="status"
+             hidden></p>
+          <%= submit_tag "Save",
+                class: "btn btn-default theme-text discovery-gem-sources-save",
+                data: { discovery_gem_sources_form_target: "save" } %>
+        </div>
       </div>
 
       <div class="discovery-gem-sources-layout">

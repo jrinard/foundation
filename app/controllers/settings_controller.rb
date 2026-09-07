@@ -78,11 +78,24 @@ class SettingsController < ApplicationController
     errors = (wa_sos.errors.full_messages + axel.errors.full_messages).uniq
 
     if ok && errors.empty?
-      flash[:notice] = "Data gem source settings saved for #{current_organization.name}."
+      message = "Data gem source settings saved for #{current_organization.name}."
+      respond_to do |format|
+        format.html do
+          flash[:notice] = message
+          redirect_to settings_path(discovery: "discovery")
+        end
+        format.json { render json: { ok: true, message: message } }
+      end
     else
-      flash[:alert] = errors.presence&.to_sentence || "Could not save discovery source settings."
+      message = errors.presence&.to_sentence || "Could not save discovery source settings."
+      respond_to do |format|
+        format.html do
+          flash[:alert] = message
+          redirect_to settings_path(discovery: "discovery")
+        end
+        format.json { render json: { ok: false, message: message }, status: :unprocessable_entity }
+      end
     end
-    redirect_to settings_path(discovery: "discovery")
   end
 
   def create_discovery_data_axel_file
